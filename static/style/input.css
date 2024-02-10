@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base{
+    h1{
+        @apply text-2xl leading-tight;
+    }
+    p{
+        @apply text-xl leading-normal;
+    }
+}
+
+.formInputBox{
+    @apply bg-gray-300 box-border px-2 py-2 w-full border-solid border border-black rounded-md text-sm;
+}
+
+input, select{
+    @apply outline-none;
+}

@@ -392,6 +392,16 @@ video {
 [hidden] {
   display: none;
 }
+    h1 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  line-height: 1.25;
+}
+    p {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  line-height: 1.5;
+}
 
 *, ::before, ::after {
   --tw-border-spacing-x: 0;
@@ -495,10 +505,93 @@ video {
 .static {
   position: static;
 }
+.m-auto {
+  margin: auto;
+}
+.box-border {
+  box-sizing: border-box;
+}
 .block {
   display: block;
 }
-.text-purple-600 {
-  --tw-text-opacity: 1;
-  color: rgb(147 51 234 / var(--tw-text-opacity));
+.flex {
+  display: flex;
+}
+.w-full {
+  width: 100%;
+}
+.appearance-none {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+}
+.flex-col {
+  flex-direction: column;
+}
+.items-center {
+  align-items: center;
+}
+.justify-center {
+  justify-content: center;
+}
+.gap-y-3 {
+  row-gap: 0.75rem;
+}
+.space-y-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
+}
+.rounded-md {
+  border-radius: 0.375rem;
+}
+.bg-gray-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(209 213 219 / var(--tw-bg-opacity));
+}
+.bg-inherit {
+  background-color: inherit;
+}
+.px-11 {
+  padding-left: 2.75rem;
+  padding-right: 2.75rem;
+}
+.px-5 {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.py-20 {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.formInputBox {
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 0.375rem;
+  border-width: 1px;
+  border-style: solid;
+  --tw-border-opacity: 1;
+  border-color: rgb(0 0 0 / var(--tw-border-opacity));
+  --tw-bg-opacity: 1;
+  background-color: rgb(209 213 219 / var(--tw-bg-opacity));
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+input, select {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
 }
