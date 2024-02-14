@@ -12,11 +12,22 @@ def index():
 
 @app.route('/register')
 def register():
-    return(render_template('register.html', roleOptions = roleOptions))
+
+    connection = connectToDB()
+    cursor = connection.cursor()
+    cursor.execute("select nomeCorso from Corso")
+
+    #Creating a variable used to store all courses from the database and pass them to the HTML template
+    courses = []
+    for course in cursor:
+        #Getting the first element of each row
+        courses.append(course[0])
+    return(render_template('register.html', roleOptions = roleOptions, courses = courses))
 
 @app.route('/request', methods = ['POST'])
 def handle_request():
     #TODO: Make async request
+    #TODO: Validate input for course as well
     if(request.form.get('role') in roleOptions):
         
         pwHasher = PasswordHasher()
@@ -58,7 +69,6 @@ def connectToDB():
     except mysql.connector.Error:
         return False
     return connection
-
 
 if __name__ == "__main__":
     app.run(debug = True)

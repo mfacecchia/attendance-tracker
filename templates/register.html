@@ -11,13 +11,18 @@ Register
         <input type = "email" name = "email" placeholder = "Email" required>
         <input type = "password" name = "password" placeholder = "Password" required>
         <select name = "role">
+            <!-- TODO: Change to --Select a role-- -->
             <option value = "">-- Select one --</option>
             {% for role in roleOptions %}
                 <option value = {{role}}>{{role}}</option>
             {% endfor %}
         </select>
-        <!-- TODO: `select`/`option` pair for each course in the DB (execute query) -->
-        <input type = "text" name = "course" placeholder = "Course">
+        <select name = "course">
+            <option value = "">--Select a course--</option>
+            {% for course in courses %}
+                <option value = "{{course}}">{{course}}</option>
+            {% endfor %}
+        </select>
 
         <button type = "submit">Register</button>
     </form>
