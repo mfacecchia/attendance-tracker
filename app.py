@@ -62,6 +62,7 @@ def check_login():
             session.permanent = True
         else:
             session.permanent = False
+        #Getting all useful user data and creating all relative session fields
         session['name'] = response[1]
         session['surname'] = response[2]
         session['role'] = response[4]
@@ -76,8 +77,6 @@ def handle_request():
     #TODO: Make async request
     if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
         
-        pwHasher = PasswordHasher()
-
         fname = request.form.get('fname')
         lname = request.form.get('lname')
         email = request.form.get('email')
@@ -85,8 +84,9 @@ def handle_request():
         role = request.form.get('role')
         course = request.form.get('course')
 
+        pHasher = PasswordHasher()
         pw = pw.encode()
-        hashedPW = pwHasher.hash(pw)
+        hashedPW = pHasher.hash(pw)
 
         connection = connectToDB()
         if(not connection):
