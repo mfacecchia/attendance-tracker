@@ -1,8 +1,10 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, session
 from argon2 import PasswordHasher, exceptions
 import mysql.connector
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'PNfxz1zt41{E2h2T=,#=&Rz4xXv-kE'
+app.config['SESSION_TYPE'] = 'filesystem'
 
 #List of roles available for the registration
 roleOptions = ['Studente', 'Insegnante']
@@ -29,6 +31,7 @@ def register():
 
 @app.route('/login')
 def login():
+    #Skip login if the user is already logged in through session
     return(render_template('login.html'))
 
 @app.route('/login/request', methods = ['POST'])
@@ -54,7 +57,13 @@ def check_login():
     except exceptions.VerifyMismatchError:
         return redirect('/login')
     else:
-        return "Password correct, welcome!"
+        #TODO: Set `session.permanent` value based on checkbox in login form
+        session.permanent = True
+        session['name'] = response[1]
+        session['surname'] = response[2]
+        session['role'] = response[4]
+        session['course'] = response[5]
+        return redirect(url_for('userScreening'))
     finally:
         connection.close()
         cursor.close()
@@ -93,6 +102,10 @@ def handle_request():
     else:
         #Redirecting back to register page if the input values are not correct
         return(redirect('/register'))
+
+@app.route('/user')
+def userScreening():
+    return render_template('userScreening.html', session = session)
 
 
 def connectToDB():
