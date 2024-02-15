@@ -57,8 +57,11 @@ def check_login():
     except exceptions.VerifyMismatchError:
         return redirect('/login')
     else:
-        #TODO: Set `session.permanent` value based on checkbox in login form
-        session.permanent = True
+        #Dinamically changing session permanent state based on form checkbox
+        if(request.form.get('remember')):
+            session.permanent = True
+        else:
+            session.permanent = False
         session['name'] = response[1]
         session['surname'] = response[2]
         session['role'] = response[4]
