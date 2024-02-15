@@ -121,5 +121,10 @@ def connectToDB():
         return False
     return connection
 
+@app.route('/user/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
 if __name__ == "__main__":
     app.run(debug = True)

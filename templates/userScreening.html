@@ -8,4 +8,5 @@ Gestione account
 <!-- TODO: Change text based on real time (ex. Good evening, Good morning, etc...) -->
 <h1>Ciao, {{ session['name'] }}!</h1>
 <p>{{ session['role'] }}</p>
+<a href = "{{ url_for('logout') }}">Logout</a>
 {% endblock %}
