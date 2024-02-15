@@ -15,7 +15,6 @@ def index():
 
 @app.route('/register')
 def register():
-
     connection = connectToDB()
     cursor = connection.cursor()
     cursor.execute("select nomeCorso from Corso")
@@ -27,6 +26,38 @@ def register():
         #Getting the first element of each row
         courses.append(course[0])
     return(render_template('register.html', roleOptions = roleOptions, courses = courses))
+
+@app.route('/login')
+def login():
+    return(render_template('login.html'))
+
+@app.route('/login/request', methods = ['POST'])
+def check_login():
+    email = request.form.get('email')
+    pw = request.form.get('password')
+    
+    connection = connectToDB()
+    cursor = connection.cursor()
+    #Getting all data from the database related to that single email (representing PRIMARY KEY)
+    cursor.execute('select * from Utente where Email = %(email)s', {'email': email})
+    
+    response = cursor.fetchone()
+    #`response == None` means that no user with the input email was found in the database
+    if(response == None):
+        return "Account not found"
+    phasher = PasswordHasher()
+    try:
+        #Verifying the hashed password gotten from the database with the user input one in the form
+        phasher.verify(response[3], pw)
+    #Non-matching passwords will throw `VerifyMismatchError`
+    #Redirecting to login page form to retry the input
+    except exceptions.VerifyMismatchError:
+        return redirect('/login')
+    else:
+        return "Password correct, welcome!"
+    finally:
+        connection.close()
+        cursor.close()
 
 @app.route('/register/request', methods = ['POST'])
 def handle_request():
