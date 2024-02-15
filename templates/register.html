@@ -10,8 +10,7 @@ Register
         <input type = "text" name = "lname" placeholder = "Surname" required>
         <input type = "email" name = "email" placeholder = "Email" required>
         <!-- TODO: JS function to check password strength -->
-        <!-- TODO: Set pattern (password no shorter than 10 characters and with numbers and alphanumeric chars) -->
-        <input type = "password" name = "password" placeholder = "Password" required>
+        <input type = "password" name = "password" placeholder = "Password" pattern = '.{10,}' required>
         <select name = "role">
             <option value = "">-- Select a role --</option>
             {% for role in roleOptions %}
