@@ -31,7 +31,9 @@ def register():
 
 @app.route('/login')
 def login():
-    #Skip login if the user is already logged in through session
+    #Redirecting to user screening page if the user is already logged in
+    if(session.get('name')):
+        return redirect(url_for('userScreening'))
     return(render_template('login.html'))
 
 @app.route('/login/request', methods = ['POST'])
