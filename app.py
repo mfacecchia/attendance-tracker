@@ -2,9 +2,12 @@ from flask import Flask, render_template, url_for, request, redirect
 from argon2 import PasswordHasher, exceptions
 import mysql.connector
 
-roleOptions = ['Student', 'Teacher']
-
 app = Flask(__name__)
+
+#List of roles available for the registration
+roleOptions = ['Studente', 'Insegnante']
+#Creating a variable used to store all available courses from the database and pass them to the HTML template
+courses = []
 
 @app.route('/')
 def index():
@@ -17,18 +20,18 @@ def register():
     cursor = connection.cursor()
     cursor.execute("select nomeCorso from Corso")
 
-    #Creating a variable used to store all courses from the database and pass them to the HTML template
+    global courses
+    #Clearing courses list in order to correctly store all available courses
     courses = []
     for course in cursor:
         #Getting the first element of each row
         courses.append(course[0])
     return(render_template('register.html', roleOptions = roleOptions, courses = courses))
 
-@app.route('/request', methods = ['POST'])
+@app.route('/register/request', methods = ['POST'])
 def handle_request():
     #TODO: Make async request
-    #TODO: Validate input for course as well
-    if(request.form.get('role') in roleOptions):
+    if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
         
         pwHasher = PasswordHasher()
 
@@ -55,10 +58,9 @@ def handle_request():
         #Closing connection
         cursor.close()
         connection.close()
-
         return "<h1>Success!</h1>"
-
     else:
+        #Redirecting back to register page if the input values are not correct
         return(redirect('/register'))
 
 
