@@ -1,0 +1,11 @@
+{% extends "index.html" %}
+
+{% block title %}
+Gestione account
+{% endblock %}
+
+{% block content %}
+<!-- TODO: Change text based on real time (ex. Good evening, Good morning, etc...) -->
+<h1>Ciao, {{ session['userName'] }}!</h1>
+<p>{{ session['role'] }}</p>
+{% endblock %}
