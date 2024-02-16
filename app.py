@@ -18,6 +18,9 @@ def index():
 @app.route('/register')
 def register():
     connection = connectToDB()
+    #Printing out an error message if the connection to database fails
+    if(not connection):
+        return "The registration service is having problems... Please try reloading the page or try again later"
     cursor = connection.cursor()
     cursor.execute("select nomeCorso from Corso")
 
@@ -42,6 +45,9 @@ def check_login():
     pw = request.form.get('password')
     
     connection = connectToDB()
+    if(not connection):
+        #TODO: Redirect back to login page with error message
+        pass
     cursor = connection.cursor()
     #Getting all data from the database related to that single email (representing PRIMARY KEY)
     cursor.execute('select * from Utente where Email = %(email)s', {'email': email})
