@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect, session
+from flask import Flask, render_template, url_for, request, redirect, session,flash, Response
 from argon2 import PasswordHasher, exceptions
 import mysql.connector
 
@@ -41,13 +41,13 @@ def login():
 
 @app.route('/login/request', methods = ['POST'])
 def check_login():
+    #FIXME: Fix error 405 trigger
     email = request.form.get('email')
     pw = request.form.get('password')
     
     connection = connectToDB()
     if(not connection):
-        #TODO: Redirect back to login page with error message
-        pass
+        return "The registration service is having problems... Please try reloading the page or try again later"
     cursor = connection.cursor()
     #Getting all data from the database related to that single email (representing PRIMARY KEY)
     cursor.execute('select * from Utente where Email = %(email)s', {'email': email})
@@ -63,6 +63,8 @@ def check_login():
     #Non-matching passwords will throw `VerifyMismatchError`
     #Redirecting to login page form to retry the input
     except exceptions.VerifyMismatchError:
+        #Sending an error message to back to the login page in order to display why the login didn't happen
+        flash('The password is incorrect, please try again.', 'error')
         return redirect('/login')
     else:
         #Dinamically changing session permanent state based on form checkbox
@@ -83,8 +85,9 @@ def check_login():
 @app.route('/register/request', methods = ['POST'])
 def handle_request():
     #TODO: Make async request
+    #FIXME: Fix error 403 trigger
     if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
-        
+
         fname = request.form.get('fname')
         lname = request.form.get('lname')
         email = request.form.get('email')
@@ -112,6 +115,7 @@ def handle_request():
         return "<h1>Success!</h1>"
     else:
         #Redirecting back to register page if the input values are not correct
+        flash('An error occured while handling your request... Please try again.', 'error')
         return(redirect('/register'))
 
 @app.route('/user')
@@ -129,7 +133,9 @@ def connectToDB():
 
 @app.route('/user/logout')
 def logout():
+    #TODO: Check for session exstence before clearing it
     session.clear()
+    flash("Successfully logged out.", 'success')
     return redirect(url_for('login'))
 
 if __name__ == "__main__":

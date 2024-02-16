@@ -5,6 +5,11 @@ Registrazione
 {% endblock %}
 
 {% block content %}
+    {% with errors = get_flashed_messages() %}
+        {% for error in errors %}
+            <b style = "color: red">{{ error }}</b>
+        {% endfor %}
+    {% endwith %}
     <form action = '{{ url_for("handle_request") }}' method = "post">
         <input type = "text" name = "fname" placeholder = "Name" autofocus required>
         <input type = "text" name = "lname" placeholder = "Surname" required>
