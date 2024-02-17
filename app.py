@@ -39,53 +39,54 @@ def login():
         return redirect(url_for('userScreening'))
     return(render_template('login.html'))
 
-@app.route('/login/request', methods = ['POST'])
+@app.route('/login/request', methods = ['GET', 'POST'])
 def check_login():
-    #FIXME: Fix error 405 trigger
-    email = request.form.get('email')
-    pw = request.form.get('password')
-    
-    connection = connectToDB()
-    if(not connection):
-        return "The registration service is having problems... Please try reloading the page or try again later"
-    cursor = connection.cursor()
-    #Getting all data from the database related to that single email (representing PRIMARY KEY)
-    cursor.execute('select * from Utente where Email = %(email)s', {'email': email})
-    
-    response = cursor.fetchone()
-    #`response == None` means that no user with the input email was found in the database
-    if(response == None):
-        return "Account not found"
-    phasher = PasswordHasher()
-    try:
-        #Verifying the hashed password gotten from the database with the user input one in the form
-        phasher.verify(response[3], pw)
-    #Non-matching passwords will throw `VerifyMismatchError`
-    #Redirecting to login page form to retry the input
-    except exceptions.VerifyMismatchError:
-        #Sending an error message to back to the login page in order to display why the login didn't happen
-        flash('The password is incorrect, please try again.', 'error')
-        return redirect('/login')
-    else:
-        #Dinamically changing session permanent state based on form checkbox
-        if(request.form.get('remember')):
-            session.permanent = True
+    if(request.form.get('email')):
+        email = request.form.get('email')
+        pw = request.form.get('password')
+        
+        connection = connectToDB()
+        if(not connection):
+            return "The registration service is having problems... Please try reloading the page or try again later"
+        cursor = connection.cursor()
+        #Getting all data from the database related to that single email (representing PRIMARY KEY)
+        cursor.execute('select * from Utente where Email = %(email)s', {'email': email})
+        
+        response = cursor.fetchone()
+        #`response == None` means that no user with the input email was found in the database
+        if(response == None):
+            return "Account not found"
+        phasher = PasswordHasher()
+        try:
+            #Verifying the hashed password gotten from the database with the user input one in the form
+            phasher.verify(response[3], pw)
+        #Non-matching passwords will throw `VerifyMismatchError`
+        #Redirecting to login page form to retry the input
+        except exceptions.VerifyMismatchError:
+            #Sending an error message to back to the login page in order to display why the login didn't happen
+            flash('The password is incorrect. Please try again.', 'error')
         else:
-            session.permanent = False
-        #Getting all useful user data and creating all relative session fields
-        session['name'] = response[1]
-        session['surname'] = response[2]
-        session['role'] = response[4]
-        session['course'] = response[5]
-        return redirect(url_for('userScreening'))
-    finally:
-        connection.close()
-        cursor.close()
+            #Dinamically changing session permanent state based on form checkbox
+            if(request.form.get('remember')):
+                session.permanent = True
+            else:
+                session.permanent = False
+            #Getting all useful user data and creating all relative session fields
+            session['name'] = response[1]
+            session['surname'] = response[2]
+            session['role'] = response[4]
+            session['course'] = response[5]
+            return redirect(url_for('userScreening'))
+        finally:
+            connection.close()
+            cursor.close()
+    else:
+        flash("An error occured while submitting the form. Please try again.", 'error')
+    return redirect('/login')
 
-@app.route('/register/request', methods = ['POST'])
+@app.route('/register/request', methods = ['GET', 'POST'])
 def handle_request():
     #TODO: Make async request
-    #FIXME: Fix error 403 trigger
     if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
 
         fname = request.form.get('fname')
