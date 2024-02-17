@@ -121,6 +121,7 @@ def handle_request():
 
 @app.route('/user')
 def userScreening():
+    #TODO: Check if session exists before rendering main page
     return render_template('userScreening.html', session = session)
 
 
@@ -134,9 +135,10 @@ def connectToDB():
 
 @app.route('/user/logout')
 def logout():
-    #TODO: Check for session exstence before clearing it
-    session.clear()
-    flash("Successfully logged out.", 'success')
+    #Checking if session exists before clearing it
+    if(session.get('name')):
+        session.clear()
+        flash("Successfully logged out.", 'success')
     return redirect(url_for('login'))
 
 if __name__ == "__main__":
