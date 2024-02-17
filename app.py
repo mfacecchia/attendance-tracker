@@ -121,8 +121,11 @@ def handle_request():
 
 @app.route('/user')
 def userScreening():
-    #TODO: Check if session exists before rendering main page
-    return render_template('userScreening.html', session = session)
+    if(session.get('name')):
+        return render_template('userScreening.html', session = session)
+    else:
+        flash('Please login', 'error')
+        return redirect(url_for('login'))
 
 
 def connectToDB():
