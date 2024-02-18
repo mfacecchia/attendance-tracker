@@ -1,10 +1,17 @@
 from flask import Flask, render_template, url_for, request, redirect, session,flash, Response
 from argon2 import PasswordHasher, exceptions
 import mysql.connector
+from flask_github import GitHub
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'PNfxz1zt41{E2h2T=,#=&Rz4xXv-kE'
 app.config['SESSION_TYPE'] = 'filesystem'
+
+#GITHUB OAuth app config data
+app.config['GITHUB_CLIENT_ID'] = 'e4114fcd0190e9c4132d'
+app.config['GITHUB_CLIENT_SECRET'] = '7d141726bbe60d55e0bcb712c505aa6ab4ccde92'
+
+githubAuth = GitHub(app)
 
 #List of roles available for the registration
 roleOptions = ['Studente', 'Insegnante']
@@ -31,6 +38,25 @@ def register():
         #Getting the first element of each row
         courses.append(course[0])
     return(render_template('register.html', roleOptions = roleOptions, courses = courses))
+
+@app.route('/register/github')
+def githubRegister():
+    return githubAuth.authorize()
+
+#Handler function for register/login with github
+@app.route('/github/callback')
+@githubAuth.authorized_handler
+def githubMethodHandler(oauth_token):
+    #`oauth_token is None` = refused connection with OAuth application
+    if(oauth_token is None):
+        flash("Authentication failed", 'error')
+        return redirect(url_for('register'))
+    #Getting user access token, if it does not exist, a new one will be created for the app
+    userData = githubAuth.get_access_token
+    if(userData is None):
+        userData = githubAuth.access_token_getter(oauth_token)
+    flash("Authentication successful!", 'success')
+    return redirect(url_for('login'))
 
 @app.route('/login')
 def login():
