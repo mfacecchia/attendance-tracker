@@ -122,6 +122,7 @@ def handle_request():
 @app.route('/user')
 def userScreening():
     if(session.get('name')):
+        #TODO: Render different page based on user type
         return render_template('userScreening.html', session = session)
     else:
         flash('Please login', 'error')
