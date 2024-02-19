@@ -88,8 +88,7 @@ def githubAuth():
     #NOTE: `_external` means that it's pointing to an external domain
     return oauth.github.authorize_redirect(url_for('authorize', _external = True))
 
-#TODO: Change URL to `auth/github/callback`
-@app.route('/github/callback')
+@app.route('auth/github/callback')
 def authorize():
     token = oauth.github.authorize_access_token()
     #TODO: Redirect if cancelled authorization
