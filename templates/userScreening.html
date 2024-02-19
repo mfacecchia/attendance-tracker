@@ -10,6 +10,9 @@ Gestione account
     <p>{{ session['role'] }}</p>
     <p>Ultima volta online: {{session['lastLogin']}}</p>
 
+    <!-- TODO: Printout flashed messages -->
+    <!-- TODO: Add link github account button -->
+
     {% if session['role'] == 'Admin' %}
         {% with messages = get_flashed_messages(with_categories = True) %}
             {% for mesageType, message in messages %}

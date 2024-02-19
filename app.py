@@ -152,18 +152,17 @@ def authorize():
     if(session.get('name')):
         #TODO: Add user's unique ID to database
         try:
+            oauth.github.authorize_access_token()
             profile = oauth.github.get('user').json()
         except OAuthError:
             flash('Link with GitHub failed', 'error')
             return redirect(url_for('login'))
-        connection = connectToDB()
-        cursor = connection.cursor()
-        #Updating table column with github user id
-        cursor.execute("update Utente set github_id = %(github_userID)s where Email = %(userEmail)s", {'github_userID': profile['id'], 'userEmail': session['email']})
-        cursor.commit()
-        cursor.close()
-        connection.close()
-        flash('Account linked successfully', 'success')
+        #Checking if user has already linked a github account, otherwise the account linking function will be called
+        if(not checkUserGithubConnection()):
+            flash('Account linked successfully', 'success')
+            linkGithubAccount(profile['id'])
+        else:
+            flash('Account already linked', 'error')
         return redirect(url_for('userScreening'))
     else:
         flash('You must login first', 'error')
@@ -184,6 +183,7 @@ def userScreening():
 @app.route('/user/create', methods = ['GET', 'POST'])
 def handle_request():
     #TODO: Make async request
+    #TODO: Check for user role to be ADMIN before processing account creation
     if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
 
         fname = request.form.get('fname')
@@ -266,6 +266,28 @@ def updateLastLoginTime():
     cursor.close()
     connection.close()
     return str(timeNow).replace(' ', ' alle ')
+
+def checkUserGithubConnection():
+    '''Checks if the user has a linked Github account'''
+    connection = connectToDB()
+    cursor = connection.cursor()
+    response = cursor.execute('select github_id from Utente where Email = %(userEmail)s', {'userEmail': session['email']})
+    print(response)
+    if(not response):
+        returnedValue = False
+    else:
+        returnedValue = True
+    connection.close()
+    return returnedValue
+    
+def linkGithubAccount(userID):
+    #TODO: Check on all DB accounts for that user id
+    connection = connectToDB()
+    cursor = connection.cursor()
+    #Updating table column with github user id
+    cursor.execute("update Utente set github_id = %(github_userID)s where Email = %(userEmail)s", {'github_userID': userID, 'userEmail': session['email']})
+    connection.commit()
+    connection.close()
 
 if __name__ == "__main__":
     app.run(debug = True)
