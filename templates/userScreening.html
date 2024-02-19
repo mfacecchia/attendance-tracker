@@ -10,7 +10,15 @@ Gestione account
     <p>{{ session['role'] }}</p>
 
     {% if session['role'] == 'Admin' %}
-        <!-- TODO: Print flashed messages -->
+        {% with messages = get_flashed_messages(with_categories = True) %}
+            {% for mesageType, message in messages %}
+                {% if messageType == 'success' %}
+                    <b style = "color: green">{{message}}</b>
+                {% else %}
+                    <b style = "color: red">{{message}}</b>
+                {% endif %}
+            {% endfor %}
+        {% endwith %}
         <h1>Crea utente</h1>
         <form action = '{{ url_for("handle_request") }}' method = "post">
             <input type = "text" name = "fname" placeholder = "Name" autofocus required>

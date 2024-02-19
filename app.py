@@ -132,14 +132,17 @@ def handle_request():
         #Creating a cursor reponsible for query executions
         cursor = connection.cursor()
 
-        #TODO: Add unique field check
-        cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, nomeCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(course)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'course': course})
-        #Sending request to DB
-        connection.commit()
+        try:
+            cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, nomeCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(course)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'course': course})
+            #Sending request to DB
+            connection.commit()
+        except mysql.connector.errors.IntegrityError:
+            flash('User with this email already exists', 'error')
+        else:
+            flash('Account created', 'success')
         #Closing connection
         cursor.close()
         connection.close()
-        flash('Account created', 'success')
         return redirect(url_for('userScreening'))
     else:
         #Redirecting back to register page if the input values are not correct
