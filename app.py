@@ -2,6 +2,7 @@ from flask import Flask, render_template, url_for, request, redirect, session,fl
 from argon2 import PasswordHasher, exceptions
 import mysql.connector
 from authlib.integrations.flask_client import OAuth
+from authlib.integrations.base_client.errors import OAuthError
 
 app = Flask(__name__)
 oauth = OAuth(app)
@@ -88,27 +89,15 @@ def githubAuth():
     #NOTE: `_external` means that it's pointing to an external domain
     return oauth.github.authorize_redirect(url_for('authorize', _external = True))
 
-@app.route('auth/github/callback')
+@app.route('/auth/github/callback')
 def authorize():
-    token = oauth.github.authorize_access_token()
-    #TODO: Redirect if cancelled authorization
-    #TODO: Ask user the role and course for DB
-    profile = oauth.github.get('user').json()
-    
-    connection = connectToDB()
-    cursor = connection.cursor()
-    #Tries to add data to database, if it raises `IntegrityError`, the data was already input so it skips this step and redirects to the user screening page
     try:
-        cursor.execute("insert into Utente(email, nome, TipologiaUtente, NomeCorso) values(%(email)s, %(username)s, %(usertype)s, %(courseName)s)", {'email': profile['id'], 'username': profile['login'], 'usertype': 'Studente', 'courseName': 'Sviluppo Software'})
-        connection.commit()
-    except mysql.connector.errors.IntegrityError:
-        pass
-    cursor.close()
-    connection.close()
-    session['name'] = profile['login']
-    session['role'] = 'Studente'
-    session['course'] = 'Sviluppo Software'
-    return redirect(url_for('userScreening'))
+        token = oauth.github.authorize_access_token()
+        profile = oauth.github.get('user').json()
+    except OAuthError:
+        flash('Link with GitHub failed', 'error')
+        return redirect(url_for('login'))
+    return profile
 
 @app.route('/user')
 def userScreening():
