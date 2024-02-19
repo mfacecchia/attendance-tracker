@@ -1,17 +1,26 @@
 from flask import Flask, render_template, url_for, request, redirect, session,flash, Response
 from argon2 import PasswordHasher, exceptions
 import mysql.connector
-from flask_github import GitHub
+from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
+oauth = OAuth(app)
 app.config['SECRET_KEY'] = 'PNfxz1zt41{E2h2T=,#=&Rz4xXv-kE'
 app.config['SESSION_TYPE'] = 'filesystem'
 
-#GITHUB OAuth app config data
+#GITHUB CONFIG DATA
 app.config['GITHUB_CLIENT_ID'] = 'e4114fcd0190e9c4132d'
 app.config['GITHUB_CLIENT_SECRET'] = '7d141726bbe60d55e0bcb712c505aa6ab4ccde92'
-
-githubAuth = GitHub(app)
+#Registering OAuth application for future requests
+oauth.register(
+    'github',
+    client_id = app.config['GITHUB_CLIENT_ID'],
+    client_secret = app.config['GITHUB_CLIENT_SECRET'],
+    access_token_url = 'https://github.com/login/oauth/access_token',
+    authorize_url = 'https://github.com/login/oauth/authorize',
+    api_base_url = 'https://api.github.com/',
+    client_kwargs = {'scope': 'user:email'}
+)
 
 #List of roles available for the registration
 roleOptions = ['Studente', 'Insegnante']
@@ -39,24 +48,32 @@ def register():
         courses.append(course[0])
     return(render_template('register.html', roleOptions = roleOptions, courses = courses))
 
-@app.route('/register/github')
-def githubRegister():
-    return githubAuth.authorize()
+@app.route('/auth/github')
+def githubAuth():
+    #NOTE: `_external` means that it's pointing to an external domain
+    return oauth.github.authorize_redirect(url_for('authorize', _external = True))
 
-#Handler function for register/login with github
 @app.route('/github/callback')
-@githubAuth.authorized_handler
-def githubMethodHandler(oauth_token):
-    #`oauth_token is None` = refused connection with OAuth application
-    if(oauth_token is None):
-        flash("Authentication failed", 'error')
-        return redirect(url_for('register'))
-    #Getting user access token, if it does not exist, a new one will be created for the app
-    userData = githubAuth.get_access_token
-    if(userData is None):
-        userData = githubAuth.access_token_getter(oauth_token)
-    flash("Authentication successful!", 'success')
-    return redirect(url_for('login'))
+def authorize():
+    token = oauth.github.authorize_access_token()
+    #TODO: Redirect if cancelled authorization
+    #TODO: Ask user the role and course for DB
+    profile = oauth.github.get('user').json()
+    
+    connection = connectToDB()
+    cursor = connection.cursor()
+    #Tries to add data to database, if it raises `IntegrityError`, the data was already input so it skips this step and redirects to the user screening page
+    try:
+        cursor.execute("insert into Utente(email, nome, TipologiaUtente, NomeCorso) values(%(email)s, %(username)s, %(usertype)s, %(courseName)s)", {'email': profile['id'], 'username': profile['login'], 'usertype': 'Studente', 'courseName': 'Sviluppo Software'})
+        connection.commit()
+    except mysql.connector.errors.IntegrityError:
+        pass
+    cursor.close()
+    connection.close()
+    session['name'] = profile['login']
+    session['role'] = 'Studente'
+    session['course'] = 'Sviluppo Software'
+    return redirect(url_for('userScreening'))
 
 @app.route('/login')
 def login():
