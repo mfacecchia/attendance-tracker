@@ -54,6 +54,7 @@ def check_login():
         cursor.execute('select * from Utente where Email = %(email)s', {'email': email})
         
         response = cursor.fetchone()
+        print(response)
         #`response == None` means that no user with the input email was found in the database
         if(response == None):
             flash("Account not found", 'error')
@@ -78,13 +79,22 @@ def check_login():
             session['surname'] = response[2]
             session['role'] = response[4]
             session['course'] = response[5]
-            return redirect(url_for('userScreening'))
+            session['lastLogin'] = response[8]
+
+            if(session['lastLogin'] == 'Mai'):
+                return redirect(url_for('updatePassword'))
+            else:
+                return redirect(url_for('userScreening'))
         finally:
             connection.close()
             cursor.close()
     else:
         flash("An error occured while submitting the form. Please try again.", 'error')
     return redirect(url_for('login'))
+
+@app.route('/user/updatepassword')
+def updatePassword():
+    return "Test"
 
 @app.route('/auth/github')
 def githubAuth():
@@ -104,6 +114,9 @@ def authorize():
 @app.route('/user')
 def userScreening():
     if(session.get('name')):
+        #Redirecting to update password page if it's the first login
+        if(session.get('lastLogin') == 'Mai'):
+            return redirect(url_for('updatePassword'))
         courses = getCourses()
         #TODO: Render different page based on user type
         return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses)
