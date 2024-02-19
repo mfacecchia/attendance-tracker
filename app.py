@@ -31,33 +31,6 @@ courses = []
 def index():
     return render_template('index.html')
 
-@app.route('/auth/github')
-def githubAuth():
-    #NOTE: `_external` means that it's pointing to an external domain
-    return oauth.github.authorize_redirect(url_for('authorize', _external = True))
-
-@app.route('/github/callback')
-def authorize():
-    token = oauth.github.authorize_access_token()
-    #TODO: Redirect if cancelled authorization
-    #TODO: Ask user the role and course for DB
-    profile = oauth.github.get('user').json()
-    
-    connection = connectToDB()
-    cursor = connection.cursor()
-    #Tries to add data to database, if it raises `IntegrityError`, the data was already input so it skips this step and redirects to the user screening page
-    try:
-        cursor.execute("insert into Utente(email, nome, TipologiaUtente, NomeCorso) values(%(email)s, %(username)s, %(usertype)s, %(courseName)s)", {'email': profile['id'], 'username': profile['login'], 'usertype': 'Studente', 'courseName': 'Sviluppo Software'})
-        connection.commit()
-    except mysql.connector.errors.IntegrityError:
-        pass
-    cursor.close()
-    connection.close()
-    session['name'] = profile['login']
-    session['role'] = 'Studente'
-    session['course'] = 'Sviluppo Software'
-    return redirect(url_for('userScreening'))
-
 @app.route('/login')
 def login():
     #Redirecting to user screening page if the user is already logged in
@@ -110,6 +83,44 @@ def check_login():
         flash("An error occured while submitting the form. Please try again.", 'error')
     return redirect('/login')
 
+@app.route('/auth/github')
+def githubAuth():
+    #NOTE: `_external` means that it's pointing to an external domain
+    return oauth.github.authorize_redirect(url_for('authorize', _external = True))
+
+#TODO: Change URL to `auth/github/callback`
+@app.route('/github/callback')
+def authorize():
+    token = oauth.github.authorize_access_token()
+    #TODO: Redirect if cancelled authorization
+    #TODO: Ask user the role and course for DB
+    profile = oauth.github.get('user').json()
+    
+    connection = connectToDB()
+    cursor = connection.cursor()
+    #Tries to add data to database, if it raises `IntegrityError`, the data was already input so it skips this step and redirects to the user screening page
+    try:
+        cursor.execute("insert into Utente(email, nome, TipologiaUtente, NomeCorso) values(%(email)s, %(username)s, %(usertype)s, %(courseName)s)", {'email': profile['id'], 'username': profile['login'], 'usertype': 'Studente', 'courseName': 'Sviluppo Software'})
+        connection.commit()
+    except mysql.connector.errors.IntegrityError:
+        pass
+    cursor.close()
+    connection.close()
+    session['name'] = profile['login']
+    session['role'] = 'Studente'
+    session['course'] = 'Sviluppo Software'
+    return redirect(url_for('userScreening'))
+
+@app.route('/user')
+def userScreening():
+    if(session.get('name')):
+        courses = getCourses()
+        #TODO: Render different page based on user type
+        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses)
+    else:
+        flash('Please login', 'error')
+        return redirect(url_for('login'))
+
 @app.route('/user/create', methods = ['GET', 'POST'])
 def handle_request():
     #TODO: Make async request
@@ -148,16 +159,6 @@ def handle_request():
         #Redirecting back to register page if the input values are not correct
         flash('An error occured while handling your request... Please try again.', 'error')
         return(redirect(url_for('userScreening')))
-
-@app.route('/user')
-def userScreening():
-    if(session.get('name')):
-        courses = getCourses()
-        #TODO: Render different page based on user type
-        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses)
-    else:
-        flash('Please login', 'error')
-        return redirect(url_for('login'))
 
 @app.route('/user/logout')
 def logout():
