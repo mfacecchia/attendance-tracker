@@ -23,30 +23,13 @@ oauth.register(
 )
 
 #List of roles available for the registration
-roleOptions = ['Studente', 'Insegnante']
+roleOptions = ['Studente', 'Insegnante', 'Admin']
 #Creating a variable used to store all available courses from the database and pass them to the HTML template
 courses = []
 
 @app.route('/')
 def index():
     return render_template('index.html')
-
-@app.route('/register')
-def register():
-    connection = connectToDB()
-    #Printing out an error message if the connection to database fails
-    if(not connection):
-        return "The registration service is having problems... Please try reloading the page or try again later"
-    cursor = connection.cursor()
-    cursor.execute("select nomeCorso from Corso")
-
-    global courses
-    #Clearing courses list in order to correctly store all available courses
-    courses = []
-    for course in cursor:
-        #Getting the first element of each row
-        courses.append(course[0])
-    return(render_template('register.html', roleOptions = roleOptions, courses = courses))
 
 @app.route('/auth/github')
 def githubAuth():
@@ -127,7 +110,7 @@ def check_login():
         flash("An error occured while submitting the form. Please try again.", 'error')
     return redirect('/login')
 
-@app.route('/register/request', methods = ['GET', 'POST'])
+@app.route('/user/create', methods = ['GET', 'POST'])
 def handle_request():
     #TODO: Make async request
     if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
@@ -149,24 +132,26 @@ def handle_request():
         #Creating a cursor reponsible for query executions
         cursor = connection.cursor()
 
-        #Add unique field check
-        cursor.execute('insert into Utente values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(course)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'course': course})
+        #TODO: Add unique field check
+        cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, nomeCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(course)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'course': course})
         #Sending request to DB
         connection.commit()
         #Closing connection
         cursor.close()
         connection.close()
-        return "<h1>Success!</h1>"
+        flash('Account created', 'success')
+        return redirect(url_for('userScreening'))
     else:
         #Redirecting back to register page if the input values are not correct
         flash('An error occured while handling your request... Please try again.', 'error')
-        return(redirect('/register'))
+        return(redirect(url_for('userScreening')))
 
 @app.route('/user')
 def userScreening():
     if(session.get('name')):
+        courses = getCourses()
         #TODO: Render different page based on user type
-        return render_template('userScreening.html', session = session)
+        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses)
     else:
         flash('Please login', 'error')
         return redirect(url_for('login'))
@@ -179,6 +164,20 @@ def connectToDB():
     except mysql.connector.Error:
         return False
     return connection
+
+def getCourses():
+    '''Gets all courses from database'''
+    global courses
+    connection = connectToDB()
+    cursor = connection.cursor()
+
+    cursor.execute("select nomeCorso from Corso")
+    #Clearing courses list in order to correctly store all available courses
+    courses = []
+    for course in cursor:
+        #Getting the first element of each row
+        courses.append(course[0])
+    return courses
 
 @app.route('/user/logout')
 def logout():

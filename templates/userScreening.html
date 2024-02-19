@@ -5,8 +5,35 @@ Gestione account
 {% endblock %}
 
 {% block content %}
-<!-- TODO: Change text based on real time (ex. Good evening, Good morning, etc...) -->
-<h1>Ciao, {{ session['name'] }}!</h1>
-<p>{{ session['role'] }}</p>
-<a href = "{{ url_for('logout') }}">Logout</a>
+    <!-- TODO: Change text based on real time (ex. Good evening, Good morning, etc...) -->
+    <h1>Ciao, {{ session['name'] }}!</h1>
+    <p>{{ session['role'] }}</p>
+
+    {% if session['role'] == 'Admin' %}
+        <!-- TODO: Print flashed messages -->
+        <h1>Crea utente</h1>
+        <form action = '{{ url_for("handle_request") }}' method = "post">
+            <input type = "text" name = "fname" placeholder = "Name" autofocus required>
+            <input type = "text" name = "lname" placeholder = "Surname" required>
+            <input type = "email" name = "email" placeholder = "Email" required>
+            <!-- TODO: JS function to check password strength -->
+            <input type = "password" name = "password" placeholder = "Password" pattern = '.{10,}' required>
+            <select name = "role">
+                <option value = "">-- Seleziona un ruolo --</option>
+                {% for role in roleOptions %}
+                    <option value = {{role}}>{{role}}</option>
+                {% endfor %}
+            </select>
+            <select name = "course">
+                <option value = "">--Seleziona un corso--</option>
+                {% for course in courses %}
+                    <option value = "{{course}}">{{course}}</option>
+                {% endfor %}
+            </select>
+    
+            <button type = "submit">Registrati</button>
+        </form>
+    {% endif %}
+
+    <a href = "{{ url_for('logout') }}">Logout</a>
 {% endblock %}
