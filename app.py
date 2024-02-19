@@ -3,7 +3,7 @@ from argon2 import PasswordHasher, exceptions
 import mysql.connector
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -86,7 +86,7 @@ def check_login():
             if(session['lastLogin'] == 'Mai'):
                 return redirect(url_for('updatePassword'))
             else:
-                #TODO: Update login time here
+                updateLastLoginTime()
                 return redirect(url_for('userScreening'))
         finally:
             connection.close()
@@ -233,7 +233,7 @@ def getCourses():
 def updateLastLoginTime():
     '''Programmatically updates user's last login time on database'''
     #TODO: Replace timedelta with GMT+1 timezone
-    timeNow = datetime.now() + timedelta(hours = 1)
+    timeNow = datetime.now()
     timeNow = timeNow.strftime('%Y-%m-%d %H:%M')
 
     connection = connectToDB()
