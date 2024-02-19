@@ -152,12 +152,19 @@ def authorize():
     if(session.get('name')):
         #TODO: Add user's unique ID to database
         try:
-            token = oauth.github.authorize_access_token()
             profile = oauth.github.get('user').json()
         except OAuthError:
             flash('Link with GitHub failed', 'error')
             return redirect(url_for('login'))
-        return profile
+        connection = connectToDB()
+        cursor = connection.cursor()
+        #Updating table column with github user id
+        cursor.execute("update Utente set github_id = %(github_userID)s where Email = %(userEmail)s", {'github_userID': profile['id'], 'userEmail': session['email']})
+        cursor.commit()
+        cursor.close()
+        connection.close()
+        flash('Account linked successfully', 'success')
+        return redirect(url_for('userScreening'))
     else:
         flash('You must login first', 'error')
         return redirect(url_for('login'))
