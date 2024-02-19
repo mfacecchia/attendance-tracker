@@ -159,6 +159,14 @@ def userScreening():
         flash('Please login', 'error')
         return redirect(url_for('login'))
 
+@app.route('/user/logout')
+def logout():
+    #Checking if session exists before clearing it
+    if(session.get('name')):
+        session.clear()
+        flash("Successfully logged out.", 'success')
+    return redirect(url_for('login'))
+
 
 def connectToDB():
     '''Starts a connection to the database with the given data'''
@@ -181,14 +189,6 @@ def getCourses():
         #Getting the first element of each row
         courses.append(course[0])
     return courses
-
-@app.route('/user/logout')
-def logout():
-    #Checking if session exists before clearing it
-    if(session.get('name')):
-        session.clear()
-        flash("Successfully logged out.", 'success')
-    return redirect(url_for('login'))
 
 if __name__ == "__main__":
     app.run(debug = True)
