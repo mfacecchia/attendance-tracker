@@ -47,7 +47,8 @@ def check_login():
         
         connection = connectToDB()
         if(not connection):
-            return "The registration service is having problems... Please try reloading the page or try again later"
+            flash("The registration service is having problems... Please try reloading the page or try again later", 'error')
+            return redirect(url_for('login'))
         cursor = connection.cursor()
         #Getting all data from the database related to that single email (representing PRIMARY KEY)
         cursor.execute('select * from Utente where Email = %(email)s', {'email': email})
@@ -55,7 +56,8 @@ def check_login():
         response = cursor.fetchone()
         #`response == None` means that no user with the input email was found in the database
         if(response == None):
-            return "Account not found"
+            flash("Account not found", 'error')
+            return redirect(url_for('login'))
         phasher = PasswordHasher()
         try:
             #Verifying the hashed password gotten from the database with the user input one in the form
@@ -82,7 +84,7 @@ def check_login():
             cursor.close()
     else:
         flash("An error occured while submitting the form. Please try again.", 'error')
-    return redirect('/login')
+    return redirect(url_for('login'))
 
 @app.route('/auth/github')
 def githubAuth():
