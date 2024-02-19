@@ -217,8 +217,8 @@ def handle_request():
 @app.route('/user/logout')
 def logout():
     #Checking if session exists before clearing it
-    #TODO: Update last login time
     if(session.get('name')):
+        updateLastLoginTime()
         session.clear()
         flash("Successfully logged out.", 'success')
     return redirect(url_for('login'))
