@@ -125,7 +125,7 @@ def verify_updated_password():
                 return redirect(url_for('updatePassword'))
             hashedPW = pHasher.hash(newPassword.encode())
             
-            updateLastLoginTime()
+            session['lastLogin'] = updateLastLoginTime()
             cursor.execute("update Utente set PW = %(newPW)s where Email = %(userEmail)s", {'newPW': hashedPW, 'userEmail': session['email']})
             connection.commit()
             cursor.close()
@@ -258,6 +258,7 @@ def updateLastLoginTime():
     connection.commit()
     cursor.close()
     connection.close()
+    return str(timeNow).replace(' ', ' alle ')
 
 if __name__ == "__main__":
     app.run(debug = True)
