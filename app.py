@@ -75,6 +75,7 @@ def check_login():
             else:
                 session.permanent = False
             #Getting all useful user data and creating all relative session fields
+            session['email'] = response[0]
             session['name'] = response[1]
             session['surname'] = response[2]
             session['role'] = response[4]
@@ -94,7 +95,25 @@ def check_login():
 
 @app.route('/user/updatepassword')
 def updatePassword():
-    return "Test"
+    return render_template('updatePassword.html')
+
+@app.route('/user/updatepassword/verify', methods = ['GET', 'POST'])
+def verify_updated_password():
+    if(request.form.get('newPassword')):
+        newPassword = request.form.get('newPassword')
+        if(newPassword == request.form.get('passwordVerify')):
+            pHasher = PasswordHasher()
+            hashedPW = pHasher.hash(newPassword.encode())
+            
+            connection = connectToDB()
+            cursor = connection.cursor()
+            cursor.execute("update Utenti set PW = %(newPW)s where Email = %(userEmail)s", {'newPW': hashedPW, 'userEmail': session['email']})
+            connection.commit()
+            #TODO: Update logOn time
+            return redirect(url_for('userScreening'))
+    else:
+        flash('Passwords not matching', 'error')
+        return redirect(url_for('updatePassword'))
 
 @app.route('/auth/github')
 def githubAuth():
