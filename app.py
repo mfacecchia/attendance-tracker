@@ -81,7 +81,7 @@ def check_login():
             session['surname'] = response[2]
             session['role'] = response[4]
             session['course'] = response[5]
-            session['lastLogin'] = response[8]
+            session['lastLogin'] = str(response[8]).replace(' ', ' alle ')
 
             if(session['lastLogin'] == 'Mai'):
                 return redirect(url_for('updatePassword'))
@@ -234,13 +234,12 @@ def updateLastLoginTime():
     '''Programmatically updates user's last login time on database'''
     #TODO: Replace timedelta with GMT+1 timezone
     timeNow = datetime.now()
-    timeNow = timeNow.strftime('%Y-%m-%d %H:%M')
+    timeNow = timeNow.strftime('%d-%m-%Y %H:%M')
 
     connection = connectToDB()
     cursor = connection.cursor()
     cursor.execute("update Utente set UltimoLogin = %(timeNow)s where Email = %(userEmail)s", {'timeNow': timeNow, 'userEmail': session['email']})
     connection.commit()
-    session['lastLogin'] = timeNow
     cursor.close()
     connection.close()
 

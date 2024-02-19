@@ -8,6 +8,7 @@ Gestione account
     <!-- TODO: Change text based on real time (ex. Good evening, Good morning, etc...) -->
     <h1>Ciao, {{ session['name'] }}!</h1>
     <p>{{ session['role'] }}</p>
+    <p>Ultima volta online: {{session['lastLogin']}}</p>
 
     {% if session['role'] == 'Admin' %}
         {% with messages = get_flashed_messages(with_categories = True) %}
