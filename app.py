@@ -140,20 +140,27 @@ def verify_updated_password():
 
 @app.route('/auth/github')
 def githubAuth():
-    #TODO: Check for session before redirecting to Auth process
-    #NOTE: `_external` means that it's pointing to an external domain
-    return oauth.github.authorize_redirect(url_for('authorize', _external = True))
+    if(session.get('name')):
+        #NOTE: `_external` means that it's pointing to an external domain
+        return oauth.github.authorize_redirect(url_for('authorize', _external = True))
+    else:
+        flash('You must login first', 'error')
+        return redirect(url_for('login'))
 
 @app.route('/auth/github/callback')
 def authorize():
-    #TODO: Add user's unique ID to database
-    try:
-        token = oauth.github.authorize_access_token()
-        profile = oauth.github.get('user').json()
-    except OAuthError:
-        flash('Link with GitHub failed', 'error')
+    if(session.get('name')):
+        #TODO: Add user's unique ID to database
+        try:
+            token = oauth.github.authorize_access_token()
+            profile = oauth.github.get('user').json()
+        except OAuthError:
+            flash('Link with GitHub failed', 'error')
+            return redirect(url_for('login'))
+        return profile
+    else:
+        flash('You must login first', 'error')
         return redirect(url_for('login'))
-    return profile
 
 @app.route('/user')
 def userScreening():
@@ -162,7 +169,6 @@ def userScreening():
         if(session.get('lastLogin') == 'Mai'):
             return redirect(url_for('updatePassword'))
         courses = getCourses()
-        #TODO: Render different page based on user type
         return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses)
     else:
         flash('Please login', 'error')
@@ -211,6 +217,7 @@ def handle_request():
 @app.route('/user/logout')
 def logout():
     #Checking if session exists before clearing it
+    #TODO: Update last login time
     if(session.get('name')):
         session.clear()
         flash("Successfully logged out.", 'success')
@@ -241,7 +248,7 @@ def getCourses():
 
 def updateLastLoginTime():
     '''Programmatically updates user's last login time on database'''
-    #TODO: Replace timedelta with GMT+1 timezone
+    #TODO: Update with GMT+1 timezone
     timeNow = datetime.now()
     timeNow = timeNow.strftime('%d-%m-%Y %H:%M')
 
