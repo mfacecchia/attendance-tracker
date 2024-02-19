@@ -3,6 +3,8 @@ from argon2 import PasswordHasher, exceptions
 import mysql.connector
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
+from datetime import datetime, timedelta
+
 
 app = Flask(__name__)
 oauth = OAuth(app)
@@ -54,7 +56,6 @@ def check_login():
         cursor.execute('select * from Utente where Email = %(email)s', {'email': email})
         
         response = cursor.fetchone()
-        print(response)
         #`response == None` means that no user with the input email was found in the database
         if(response == None):
             flash("Account not found", 'error')
@@ -85,6 +86,7 @@ def check_login():
             if(session['lastLogin'] == 'Mai'):
                 return redirect(url_for('updatePassword'))
             else:
+                #TODO: Update login time here
                 return redirect(url_for('userScreening'))
         finally:
             connection.close()
@@ -102,17 +104,32 @@ def verify_updated_password():
     if(request.form.get('newPassword')):
         newPassword = request.form.get('newPassword')
         if(newPassword == request.form.get('passwordVerify')):
-            pHasher = PasswordHasher()
-            hashedPW = pHasher.hash(newPassword.encode())
-            
             connection = connectToDB()
             cursor = connection.cursor()
-            cursor.execute("update Utenti set PW = %(newPW)s where Email = %(userEmail)s", {'newPW': hashedPW, 'userEmail': session['email']})
+            pHasher = PasswordHasher()
+            cursor.execute('select PW from Utente where Email = %(email)s', {'email': session['email']})
+            response = cursor.fetchone()
+            try:
+                pHasher.verify(str(response[0]), newPassword)
+            #New and old passwords must be different, so the error must be triggered when `verifyMismatchError` is not raised
+            except exceptions.VerifyMismatchError:
+                pass
+            else:
+                flash("Password cannot be the same as before, try again", 'error')
+                return redirect(url_for('updatePassword'))
+            hashedPW = pHasher.hash(newPassword.encode())
+            
+            updateLastLoginTime()
+            cursor.execute("update Utente set PW = %(newPW)s, UltimoLogin = %(timeNow)s where Email = %(userEmail)s", {'newPW': hashedPW, 'userEmail': session['email']})
             connection.commit()
-            #TODO: Update logOn time
+            cursor.close()
+            connection.close()
             return redirect(url_for('userScreening'))
+        else:
+            flash('Passwords not matching', 'error')
+        return redirect(url_for('updatePassword'))
     else:
-        flash('Passwords not matching', 'error')
+        flash("Please try again", 'error')
         return redirect(url_for('updatePassword'))
 
 @app.route('/auth/github')
@@ -212,6 +229,20 @@ def getCourses():
         #Getting the first element of each row
         courses.append(course[0])
     return courses
+
+def updateLastLoginTime():
+    '''Programmatically updates user's last login time on database'''
+    #TODO: Replace timedelta with GMT+1 timezone
+    timeNow = datetime.now() + timedelta(hours = 1)
+    timeNow = timeNow.strftime('%Y-%m-%d %H:%M')
+
+    connection = connectToDB()
+    cursor = connection.cursor()
+    cursor.execute("update Utente set UltimoLogin = %(timeNow)s where Email = %(userEmail)s", {'timeNow': timeNow, 'userEmail': session['email']})
+    connection.commit()
+    session['lastLogin'] = timeNow
+    cursor.close()
+    connection.close()
 
 if __name__ == "__main__":
     app.run(debug = True)
