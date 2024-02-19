@@ -81,11 +81,14 @@ def check_login():
             session['surname'] = response[2]
             session['role'] = response[4]
             session['course'] = response[5]
+            #Reformatting last login date for clean output
             session['lastLogin'] = str(response[8]).replace(' ', ' alle ')
 
+            #Default last login value in database = fresh account so a new password needs to be set. Redirecting to password creation page
             if(session['lastLogin'] == 'Mai'):
                 return redirect(url_for('updatePassword'))
             else:
+                #Updating last login time and redirecting user to screening
                 updateLastLoginTime()
                 return redirect(url_for('userScreening'))
         finally:
@@ -97,13 +100,16 @@ def check_login():
 
 @app.route('/user/updatepassword')
 def updatePassword():
+    '''Lets the user update his freshly created account's password'''
     return render_template('updatePassword.html')
 
 @app.route('/user/updatepassword/verify', methods = ['GET', 'POST'])
 def verify_updated_password():
     if(request.form.get('newPassword')):
         newPassword = request.form.get('newPassword')
+        #Checking if form's passwords match, otherwise redirecting back to correct it
         if(newPassword == request.form.get('passwordVerify')):
+            #TODO: Check for possible `False` returned value
             connection = connectToDB()
             cursor = connection.cursor()
             pHasher = PasswordHasher()
@@ -120,7 +126,7 @@ def verify_updated_password():
             hashedPW = pHasher.hash(newPassword.encode())
             
             updateLastLoginTime()
-            cursor.execute("update Utente set PW = %(newPW)s, UltimoLogin = %(timeNow)s where Email = %(userEmail)s", {'newPW': hashedPW, 'userEmail': session['email']})
+            cursor.execute("update Utente set PW = %(newPW)s where Email = %(userEmail)s", {'newPW': hashedPW, 'userEmail': session['email']})
             connection.commit()
             cursor.close()
             connection.close()
@@ -134,11 +140,13 @@ def verify_updated_password():
 
 @app.route('/auth/github')
 def githubAuth():
+    #TODO: Check for session before redirecting to Auth process
     #NOTE: `_external` means that it's pointing to an external domain
     return oauth.github.authorize_redirect(url_for('authorize', _external = True))
 
 @app.route('/auth/github/callback')
 def authorize():
+    #TODO: Add user's unique ID to database
     try:
         token = oauth.github.authorize_access_token()
         profile = oauth.github.get('user').json()
@@ -186,6 +194,7 @@ def handle_request():
             cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, nomeCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(course)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'course': course})
             #Sending request to DB
             connection.commit()
+        #`IntegrityError` means that one or more contraint rules were not met
         except mysql.connector.errors.IntegrityError:
             flash('User with this email already exists', 'error')
         else:
