@@ -138,35 +138,41 @@ def verify_updated_password():
         flash("Please try again", 'error')
         return redirect(url_for('updatePassword'))
 
-@app.route('/auth/github')
+@app.route('/auth/github', methods = ['GET'])
 def githubAuth():
-    if(session.get('name')):
-        #NOTE: `_external` means that it's pointing to an external domain
-        return oauth.github.authorize_redirect(url_for('authorize', _external = True))
+    login = request.args.get('login') or False
+    #NOTE: `_external` means that it's pointing to an external domain
+    return oauth.github.authorize_redirect(url_for('authorize', _external = True, login = [login]))
+
+@app.route('/auth/github/callback', methods = ['GET'])
+def authorize():
+    #TODO: Add comments
+    login = bool(request.args.get('login'))
+    print(login)
+    try:
+        oauth.github.authorize_access_token()
+        profile = oauth.github.get('user').json()
+    except OAuthError:
+        flash('Request failed', 'error')
+        return redirect(url_for('login'))
+    if(not login):
+        if(session.get('name')):
+            #Checking if user has already linked a github account, otherwise the account linking function will be called
+            if(not checkUserGithubConnection()):
+                linkGithubAccount(profile['id'])
+                flash('Account linked successfully', 'success')
+            else:
+                flash('Account already linked', 'error')
+            return redirect(url_for('userScreening'))
+        else:
+            flash('You must login first', 'error')
+            return redirect(url_for('login'))
     else:
-        flash('You must login first', 'error')
+        if(loginWithGithub(profile['id'])):
+            return redirect(url_for('userScreening'))
+        flash("Account not found", 'error')
         return redirect(url_for('login'))
 
-@app.route('/auth/github/callback')
-def authorize():
-    if(session.get('name')):
-        #TODO: Add user's unique ID to database
-        try:
-            oauth.github.authorize_access_token()
-            profile = oauth.github.get('user').json()
-        except OAuthError:
-            flash('Link with GitHub failed', 'error')
-            return redirect(url_for('login'))
-        #Checking if user has already linked a github account, otherwise the account linking function will be called
-        if(not checkUserGithubConnection()):
-            flash('Account linked successfully', 'success')
-            linkGithubAccount(profile['id'])
-        else:
-            flash('Account already linked', 'error')
-        return redirect(url_for('userScreening'))
-    else:
-        flash('You must login first', 'error')
-        return redirect(url_for('login'))
 
 @app.route('/user')
 def userScreening():
@@ -269,6 +275,7 @@ def updateLastLoginTime():
 
 def checkUserGithubConnection():
     '''Checks if the user has a linked Github account'''
+    #TODO: Check on all DB accounts for that user id
     connection = connectToDB()
     cursor = connection.cursor()
     response = cursor.execute('select github_id from Utente where Email = %(userEmail)s', {'userEmail': session['email']})
@@ -281,13 +288,34 @@ def checkUserGithubConnection():
     return returnedValue
     
 def linkGithubAccount(userID):
-    #TODO: Check on all DB accounts for that user id
     connection = connectToDB()
     cursor = connection.cursor()
     #Updating table column with github user id
     cursor.execute("update Utente set github_id = %(github_userID)s where Email = %(userEmail)s", {'github_userID': userID, 'userEmail': session['email']})
     connection.commit()
     connection.close()
+
+def loginWithGithub(userID):
+    '''Lets the user login with his linked github account'''
+    connection = connectToDB()
+    cursor = connection.cursor()
+    #Updating table column with github user id
+    cursor.execute("select Email, Nome, Cognome, Tipologia, github_id, nomeCorso, UltimoLogin from Utente where github_id = %(github_userID)s", {'github_userID': userID})
+    response = cursor.fetchone()
+    if(str(response[4]) == str(userID)):
+        session['email'] = response[0]
+        session['name'] = response[1]
+        session['surname'] = response[2]
+        session['role'] = response[3]
+        session['course'] = response[5]
+        #Reformatting last login date for clean output
+        session['lastLogin'] = str(response[6]).replace(' ', ' alle ')
+        accountFound = True
+    else:
+        accountFound = False
+    connection.close()
+    return accountFound
+
 
 if __name__ == "__main__":
     app.run(debug = True)

@@ -48,6 +48,8 @@ Gestione account
         </form>
     {% endif %}
 
+    <a href = "{{url_for('githubAuth', login = False)}}">Collega Account Github</a><br>
+    <!-- TODO: Add remove github connection button -->
     <!-- TODO: Add account linking with github & google button -->
 
     <a href = "{{ url_for('logout') }}">Logout</a>
