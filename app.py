@@ -194,43 +194,43 @@ def userScreening():
 @app.route('/user/create', methods = ['GET', 'POST'])
 def handle_request():
     #TODO: Make async request
-    #TODO: Check for user role to be ADMIN before processing account creation
-    if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
+    if(session.get('role') == 'Admin'):
+        if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
 
-        fname = request.form.get('fname')
-        lname = request.form.get('lname')
-        email = request.form.get('email')
-        pw = request.form.get('password')
-        role = request.form.get('role')
-        course = request.form.get('course')
+            fname = request.form.get('fname')
+            lname = request.form.get('lname')
+            email = request.form.get('email')
+            pw = request.form.get('password')
+            role = request.form.get('role')
+            course = request.form.get('course')
 
-        pHasher = PasswordHasher()
-        pw = pw.encode()
-        hashedPW = pHasher.hash(pw)
+            pHasher = PasswordHasher()
+            pw = pw.encode()
+            hashedPW = pHasher.hash(pw)
 
-        connection = connectToDB()
-        if(not connection):
-            return "<h1>Connection error</h1>"
-        #Creating a cursor reponsible for query executions
-        cursor = connection.cursor()
+            connection = connectToDB()
+            if(not connection):
+                return "<h1>Connection error</h1>"
+            #Creating a cursor reponsible for query executions
+            cursor = connection.cursor()
 
-        try:
-            cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, nomeCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(course)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'course': course})
-            #Sending request to DB
-            connection.commit()
-        #`IntegrityError` means that one or more contraint rules were not met
-        except mysql.connector.errors.IntegrityError:
-            flash('User with this email already exists', 'error')
+            try:
+                cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, nomeCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(course)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'course': course})
+                #Sending request to DB
+                connection.commit()
+            #`IntegrityError` means that one or more contraint rules were not met
+            except mysql.connector.errors.IntegrityError:
+                flash('User with this email already exists', 'error')
+            else:
+                flash('Account created', 'success')
+            #Closing connection
+            cursor.close()
+            connection.close()
         else:
-            flash('Account created', 'success')
-        #Closing connection
-        cursor.close()
-        connection.close()
-        return redirect(url_for('userScreening'))
+            flash('An error occured while processing your request... Please try again.', 'error')
     else:
-        #Redirecting back to register page if the input values are not correct
-        flash('An error occured while handling your request... Please try again.', 'error')
-        return(redirect(url_for('userScreening')))
+        flash('Cannot process your request... Please login as Administrator', 'error')
+    return(redirect(url_for('userScreening')))
 
 @app.route('/user/logout')
 def logout():
