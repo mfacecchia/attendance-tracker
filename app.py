@@ -52,7 +52,7 @@ def check_login():
             flash("The registration service is having problems... Please try reloading the page or try again later", 'error')
             return redirect(url_for('login'))
         cursor = connection.cursor()
-        #Getting all data from the database related to that single email (representing PRIMARY KEY)
+        #Getting all data from the database related to that single email (representing Unique key)
         cursor.execute('select * from Utente where Email = %(email)s', {'email': email})
         
         response = cursor.fetchone()
@@ -76,7 +76,7 @@ def check_login():
             else:
                 session.permanent = False
             #Getting all useful user data and creating all relative session fields
-            session['email'] = response[0]
+            session['uid'] = response[0]
             session['name'] = response[1]
             session['surname'] = response[2]
             session['role'] = response[4]
@@ -113,7 +113,7 @@ def verify_updated_password():
             connection = connectToDB()
             cursor = connection.cursor()
             pHasher = PasswordHasher()
-            cursor.execute('select PW from Utente where Email = %(email)s', {'email': session['email']})
+            cursor.execute('select PW from Utente where userID = %(uid)s', {'uid': session['uid']})
             response = cursor.fetchone()
             try:
                 pHasher.verify(str(response[0]), newPassword)
@@ -126,7 +126,7 @@ def verify_updated_password():
             hashedPW = pHasher.hash(newPassword.encode())
             
             session['lastLogin'] = updateLastLoginTime()
-            cursor.execute("update Utente set PW = %(newPW)s where Email = %(userEmail)s", {'newPW': hashedPW, 'userEmail': session['email']})
+            cursor.execute("update Utente set PW = %(newPW)s where userID = %(uid)s", {'newPW': hashedPW, 'uid': session['uid']})
             connection.commit()
             cursor.close()
             connection.close()
@@ -275,7 +275,7 @@ def updateLastLoginTime():
 
     connection = connectToDB()
     cursor = connection.cursor()
-    cursor.execute("update Utente set ultimoLogin = %(timeNow)s where Email = %(userEmail)s", {'timeNow': timeNow, 'userEmail': session['email']})
+    cursor.execute("update Utente set ultimoLogin = %(timeNow)s where userID = %(uid)s", {'timeNow': timeNow, 'uid': session['uid']})
     connection.commit()
     cursor.close()
     connection.close()
@@ -285,7 +285,7 @@ def checkUserGithubConnection():
     '''Checks if the user has a linked Github account'''
     connection = connectToDB()
     cursor = connection.cursor()
-    response = cursor.execute('select github_id from Utente where Email = %(userEmail)s', {'userEmail': session['email']})
+    response = cursor.execute('select github_id from Utente where userID = %(uid)s', {'uid': session['uid']})
     if(not response):
         returnedValue = False
     else:
@@ -304,7 +304,7 @@ def linkGithubAccount(userID):
         accountLinked = False
     else:
         #Updating table column with github user id
-        cursor.execute("update Utente set github_id = %(github_userID)s where Email = %(userEmail)s", {'github_userID': userID, 'userEmail': session['email']})
+        cursor.execute("update Utente set github_id = %(github_userID)s where userID = %(uid)s", {'github_userID': userID, 'uid': session['uid']})
         connection.commit()
         accountLinked = True
     connection.close()
@@ -315,11 +315,11 @@ def loginWithGithub(userID):
     connection = connectToDB()
     cursor = connection.cursor()
     #Finding between all `Utente`'s table columns for a matching github user ID and storing its relative data in a session
-    cursor.execute("select Email, Nome, Cognome, Tipologia, github_id, nomeCorso, ultimoLogin from Utente where github_id = %(github_userID)s", {'github_userID': userID})
+    cursor.execute("select userID, Nome, Cognome, Tipologia, github_id, nomeCorso, ultimoLogin from Utente where github_id = %(github_userID)s", {'github_userID': userID})
     response = cursor.fetchone()
     #Checking for `response != None` in case the Query returns no columns so returned value = None
     if(response != None and str(response[4]) == str(userID)):
-        session['email'] = response[0]
+        session['uid'] = response[0]
         session['name'] = response[1]
         session['surname'] = response[2]
         session['role'] = response[3]
