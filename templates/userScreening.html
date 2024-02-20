@@ -42,6 +42,7 @@ Gestione account
             </select>
             <select name = "course">
                 <option value = "">--Seleziona un corso--</option>
+                <!-- FIXME: Print course name and year -->
                 {% for course in courses %}
                     <option value = "{{course}}">{{course}}</option>
                 {% endfor %}

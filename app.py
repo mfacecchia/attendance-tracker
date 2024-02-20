@@ -63,7 +63,7 @@ def check_login():
         phasher = PasswordHasher()
         try:
             #Verifying the hashed password gotten from the database with the user input one in the form
-            phasher.verify(response[3], pw)
+            phasher.verify(response[7], pw)
         #Non-matching passwords will throw `VerifyMismatchError`
         #Redirecting to login page form to retry the input
         except exceptions.VerifyMismatchError:
@@ -77,10 +77,10 @@ def check_login():
                 session.permanent = False
             #Getting all useful user data and creating all relative session fields
             session['uid'] = response[0]
-            session['name'] = response[1]
-            session['surname'] = response[2]
+            session['name'] = response[2]
+            session['surname'] = response[3]
             session['role'] = response[4]
-            session['course'] = response[5]
+            session['course'] = response[9]
             #Reformatting last login date for clean output
             session['lastLogin'] = str(response[8]).replace(' ', ' alle ')
 
@@ -107,6 +107,7 @@ def updatePassword():
 def verify_updated_password():
     if(request.form.get('newPassword')):
         newPassword = request.form.get('newPassword')
+        #TODO: Check for password length (cannot be lower than 10 chars)
         #Checking if form's passwords match, otherwise redirecting back to correct it
         if(newPassword == request.form.get('passwordVerify')):
             #TODO: Check for possible `False` returned value
@@ -259,11 +260,13 @@ def getCourses():
     connection = connectToDB()
     cursor = connection.cursor()
 
-    cursor.execute("select nomeCorso from Corso")
+    cursor.execute("select nomeCorso, annoCorso from Corso")
     #Clearing courses list in order to correctly store all available courses
     courses = []
     for course in cursor:
         #Getting the first element of each row
+        #FIXME: Get course name and year
+        #NOTE: Possible fix => list of dictionaries (?)
         courses.append(course[0])
     return courses
 
