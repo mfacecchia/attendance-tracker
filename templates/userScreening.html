@@ -10,12 +10,9 @@ Gestione account
     <p>{{ session['role'] }}</p>
     <p>Ultima volta online: {{session['lastLogin']}}</p>
 
-    <!-- TODO: Printout flashed messages -->
-    <!-- TODO: Add link github account button -->
-
-    {% if session['role'] == 'Admin' %}
-        {% with messages = get_flashed_messages(with_categories = True) %}
-            {% for mesageType, message in messages %}
+    {% with messages = get_flashed_messages(with_categories = True) %}
+        {% if messages %}
+            {% for messageType, message in messages %}
                 {% if messageType == 'success' %}
                     <b style = "color: green">{{message}}</b>
                 {% else %}
@@ -23,7 +20,13 @@ Gestione account
                 {% endif %}
                 <br>
             {% endfor %}
-        {% endwith %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- TODO: Printout flashed messages -->
+    <!-- TODO: Add link github account button -->
+
+    {% if session['role'] == 'Admin' %}
         <h1>Crea utente</h1>
         <form action = '{{ url_for("handle_request") }}' method = "post">
             <input type = "text" name = "fname" placeholder = "Name" autofocus required>

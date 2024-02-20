@@ -140,15 +140,14 @@ def verify_updated_password():
 
 @app.route('/auth/github', methods = ['GET'])
 def githubAuth():
-    login = request.args.get('login') or False
+    login = request.args.get('login')
     #NOTE: `_external` means that it's pointing to an external domain
     return oauth.github.authorize_redirect(url_for('authorize', _external = True, login = [login]))
 
 @app.route('/auth/github/callback', methods = ['GET'])
 def authorize():
     #Converting the `login` request from the URL to a boolean value
-    login = bool(request.args.get('login'))
-    print(login)
+    login = True if request.args.get('login') == 'True' else False
     #Getting the user values and starting the OAuth autorization process
     try:
         oauth.github.authorize_access_token()
@@ -161,8 +160,12 @@ def authorize():
         if(session.get('name')):
             #Checking if user has already linked a github account, otherwise the account linking function will be called
             if(not checkUserGithubConnection()):
-                linkGithubAccount(profile['id'])
-                flash('Account linked successfully', 'success')
+                if(linkGithubAccount(profile['id'])):
+                    print("OK")
+                    flash('Account linked successfully', 'success')
+                else:
+                    print("ERROR")
+                    flash('This github account is already used... Please try using a different one.', 'error')
             else:
                 flash('Account already linked', 'error')
             return redirect(url_for('userScreening'))
@@ -280,11 +283,9 @@ def updateLastLoginTime():
 
 def checkUserGithubConnection():
     '''Checks if the user has a linked Github account'''
-    #TODO: Check on all DB accounts for that user id
     connection = connectToDB()
     cursor = connection.cursor()
     response = cursor.execute('select github_id from Utente where Email = %(userEmail)s', {'userEmail': session['email']})
-    print(response)
     if(not response):
         returnedValue = False
     else:
@@ -295,6 +296,7 @@ def checkUserGithubConnection():
 def linkGithubAccount(userID):
     connection = connectToDB()
     cursor = connection.cursor()
+    #TODO: Check for key before adding it
     #Updating table column with github user id
     cursor.execute("update Utente set github_id = %(github_userID)s where Email = %(userEmail)s", {'github_userID': userID, 'userEmail': session['email']})
     connection.commit()
@@ -315,6 +317,7 @@ def loginWithGithub(userID):
         session['course'] = response[5]
         #Reformatting last login date for clean output
         session['lastLogin'] = str(response[6]).replace(' ', ' alle ')
+        #TODO: Add session key for `github/google/icloud connected`
         accountFound = True
     #Returning `False` if the github user ID was not found in the table
     else:
