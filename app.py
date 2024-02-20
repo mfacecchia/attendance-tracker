@@ -275,7 +275,7 @@ def updateLastLoginTime():
 
     connection = connectToDB()
     cursor = connection.cursor()
-    cursor.execute("update Utente set UltimoLogin = %(timeNow)s where Email = %(userEmail)s", {'timeNow': timeNow, 'userEmail': session['email']})
+    cursor.execute("update Utente set ultimoLogin = %(timeNow)s where Email = %(userEmail)s", {'timeNow': timeNow, 'userEmail': session['email']})
     connection.commit()
     cursor.close()
     connection.close()
@@ -315,7 +315,7 @@ def loginWithGithub(userID):
     connection = connectToDB()
     cursor = connection.cursor()
     #Finding between all `Utente`'s table columns for a matching github user ID and storing its relative data in a session
-    cursor.execute("select Email, Nome, Cognome, Tipologia, github_id, nomeCorso, UltimoLogin from Utente where github_id = %(github_userID)s", {'github_userID': userID})
+    cursor.execute("select Email, Nome, Cognome, Tipologia, github_id, nomeCorso, ultimoLogin from Utente where github_id = %(github_userID)s", {'github_userID': userID})
     response = cursor.fetchone()
     #Checking for `response != None` in case the Query returns no columns so returned value = None
     if(response != None and str(response[4]) == str(userID)):
