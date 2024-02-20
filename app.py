@@ -296,11 +296,19 @@ def checkUserGithubConnection():
 def linkGithubAccount(userID):
     connection = connectToDB()
     cursor = connection.cursor()
-    #TODO: Check for key before adding it
-    #Updating table column with github user id
-    cursor.execute("update Utente set github_id = %(github_userID)s where Email = %(userEmail)s", {'github_userID': userID, 'userEmail': session['email']})
-    connection.commit()
+    #Checking if the github user ID is already in the database (same UID cannot be used my more than 1 person)
+    cursor.execute('select github_id from Utente where github_id = %(github_userID)s', {'github_userID': userID})
+    response = cursor.fetchone()
+    #`response = None` means no one has linked that specific account
+    if(response != None):
+        accountLinked = False
+    else:
+        #Updating table column with github user id
+        cursor.execute("update Utente set github_id = %(github_userID)s where Email = %(userEmail)s", {'github_userID': userID, 'userEmail': session['email']})
+        connection.commit()
+        accountLinked = True
     connection.close()
+    return accountLinked
 
 def loginWithGithub(userID):
     '''Lets the user login with a valid linked github account'''
@@ -309,7 +317,8 @@ def loginWithGithub(userID):
     #Finding between all `Utente`'s table columns for a matching github user ID and storing its relative data in a session
     cursor.execute("select Email, Nome, Cognome, Tipologia, github_id, nomeCorso, UltimoLogin from Utente where github_id = %(github_userID)s", {'github_userID': userID})
     response = cursor.fetchone()
-    if(str(response[4]) == str(userID)):
+    #Checking for `response != None` in case the Query returns no columns so returned value = None
+    if(response != None and str(response[4]) == str(userID)):
         session['email'] = response[0]
         session['name'] = response[1]
         session['surname'] = response[2]
