@@ -146,15 +146,17 @@ def githubAuth():
 
 @app.route('/auth/github/callback', methods = ['GET'])
 def authorize():
-    #TODO: Add comments
+    #Converting the `login` request from the URL to a boolean value
     login = bool(request.args.get('login'))
     print(login)
+    #Getting the user values and starting the OAuth autorization process
     try:
         oauth.github.authorize_access_token()
         profile = oauth.github.get('user').json()
     except OAuthError:
         flash('Request failed', 'error')
         return redirect(url_for('login'))
+    #`not login` = `False` means that the service requested is github account link
     if(not login):
         if(session.get('name')):
             #Checking if user has already linked a github account, otherwise the account linking function will be called
@@ -167,9 +169,12 @@ def authorize():
         else:
             flash('You must login first', 'error')
             return redirect(url_for('login'))
+    #Requested login with github account
     else:
+        #Account found, so redirecting to user screening page
         if(loginWithGithub(profile['id'])):
             return redirect(url_for('userScreening'))
+        #Redirecting to login page if the account was not found
         flash("Account not found", 'error')
         return redirect(url_for('login'))
 
@@ -296,10 +301,10 @@ def linkGithubAccount(userID):
     connection.close()
 
 def loginWithGithub(userID):
-    '''Lets the user login with his linked github account'''
+    '''Lets the user login with a valid linked github account'''
     connection = connectToDB()
     cursor = connection.cursor()
-    #Updating table column with github user id
+    #Finding between all `Utente`'s table columns for a matching github user ID and storing its relative data in a session
     cursor.execute("select Email, Nome, Cognome, Tipologia, github_id, nomeCorso, UltimoLogin from Utente where github_id = %(github_userID)s", {'github_userID': userID})
     response = cursor.fetchone()
     if(str(response[4]) == str(userID)):
@@ -311,6 +316,7 @@ def loginWithGithub(userID):
         #Reformatting last login date for clean output
         session['lastLogin'] = str(response[6]).replace(' ', ' alle ')
         accountFound = True
+    #Returning `False` if the github user ID was not found in the table
     else:
         accountFound = False
     connection.close()
