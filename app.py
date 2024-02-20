@@ -199,14 +199,19 @@ def userScreening():
 def handle_request():
     #TODO: Make async request
     #TODO: Check for user role to be ADMIN before processing account creation
-    if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
+    #Splitting the selected course in order to obtain its name and year
+    try:
+        courseName, courseYear = request.form.get('course').split(' - ')
+    except ValueError:
+        flash("There was an error while creating the account. Please try again", 'error')
+        return redirect(url_for('userScreening'))
+    if(request.form.get('role') in roleOptions and {courseName: courseYear} in courses):
 
         fname = request.form.get('fname')
         lname = request.form.get('lname')
         email = request.form.get('email')
         pw = request.form.get('password')
         role = request.form.get('role')
-        course = request.form.get('course')
 
         pHasher = PasswordHasher()
         pw = pw.encode()
@@ -219,7 +224,7 @@ def handle_request():
         cursor = connection.cursor()
 
         try:
-            cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, nomeCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(course)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'course': course})
+            cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, nomeCorso, annoCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(courseName)s, %(courseYear)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'courseName': courseName, 'courseYear': courseYear})
             #Sending request to DB
             connection.commit()
         #`IntegrityError` means that one or more contraint rules were not met
@@ -231,10 +236,9 @@ def handle_request():
         cursor.close()
         connection.close()
         return redirect(url_for('userScreening'))
-    else:
-        #Redirecting back to register page if the input values are not correct
-        flash('An error occured while handling your request... Please try again.', 'error')
-        return(redirect(url_for('userScreening')))
+    #Redirecting back to register page if the input values are not correct
+    flash('An error occured while handling your request... Please try again.', 'error')
+    return(redirect(url_for('userScreening')))
 
 @app.route('/user/logout')
 def logout():
@@ -265,9 +269,7 @@ def getCourses():
     courses = []
     for course in cursor:
         #Getting the first element of each row
-        #FIXME: Get course name and year
-        #NOTE: Possible fix => list of dictionaries (?)
-        courses.append(course[0])
+        courses.append({course[0]: course[1]})
     return courses
 
 def updateLastLoginTime():
