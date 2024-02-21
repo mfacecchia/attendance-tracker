@@ -10,7 +10,23 @@
         <title>Attendance Tracker - {% block title %}Benvenuto{% endblock %}</title>
     </head>
     <body>
+        <!-- NOTE: getting all messages flashed from the function (if flashed e.g. error success, information messages) and printing them -->
+        {% block messagesPrintout %}
+            {% with messages = get_flashed_messages(with_categories = True) %}
+                {% if messages %}
+                    {% for messageType, message in messages %}
+                        {% if messageType == 'success' %}
+                            <b style = "color: green">{{ message }}</b>
+                        {% else %}
+                            <b style = "color: red">{{ message }}</b>
+                        {% endif %}
+                        <br>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        {% endblock %}
         {% block content %}
+
         {% endblock %}
     </body>
 </html>
