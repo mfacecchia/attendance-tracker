@@ -43,9 +43,7 @@ Gestione account
             <select name = "course">
                 <option value = "">--Seleziona un corso--</option>
                 {% for course in courses %}
-                    {% for courseName, courseYear in course.items() %}
-                        <option value = "{{courseName}} - {{courseYear}}">{{courseName}} - {{courseYear}}</option>
-                    {% endfor %}
+                    <option value = "{{course}}">{{course}}</option>
                 {% endfor %}
             </select>
     

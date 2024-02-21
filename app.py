@@ -199,19 +199,14 @@ def userScreening():
 def handle_request():
     #TODO: Make async request
     #TODO: Check for user role to be ADMIN before processing account creation
-    #Splitting the selected course in order to obtain its name and year
-    try:
-        courseName, courseYear = request.form.get('course').split(' - ')
-    except ValueError:
-        flash("There was an error while creating the account. Please try again", 'error')
-        return redirect(url_for('userScreening'))
-    if(request.form.get('role') in roleOptions and {courseName: courseYear} in courses):
+    if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
 
-        fname = request.form.get('fname')
-        lname = request.form.get('lname')
-        email = request.form.get('email')
+        fname = request.form.get('fname').capitalize()
+        lname = request.form.get('lname').capitalize()
+        email = request.form.get('email').lower()
         pw = request.form.get('password')
         role = request.form.get('role')
+        courseName = request.form.get('course')
 
         pHasher = PasswordHasher()
         pw = pw.encode()
@@ -223,8 +218,11 @@ def handle_request():
         #Creating a cursor reponsible for query executions
         cursor = connection.cursor()
 
+        cursor.execute('select idCorso from Corso where nomeCorso = %(courseName)s', {'courseName': courseName})
+        courseID = cursor.fetchone()[0]
+
         try:
-            cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, nomeCorso, annoCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(courseName)s, %(courseYear)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'courseName': courseName, 'courseYear': courseYear})
+            cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, idCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(courseID)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'courseID': courseID})
             #Sending request to DB
             connection.commit()
         #`IntegrityError` means that one or more contraint rules were not met
@@ -264,12 +262,12 @@ def getCourses():
     connection = connectToDB()
     cursor = connection.cursor()
 
-    cursor.execute("select nomeCorso, annoCorso from Corso")
+    cursor.execute("select nomeCorso from Corso")
     #Clearing courses list in order to correctly store all available courses
     courses = []
     for course in cursor:
         #Getting the first element of each row
-        courses.append({course[0]: course[1]})
+        courses.append(course[0])
     return courses
 
 def updateLastLoginTime():
