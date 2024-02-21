@@ -43,7 +43,7 @@ def login():
 
 @app.route('/login/request', methods = ['GET', 'POST'])
 def check_login():
-    if(request.form.get('email')):
+    if(request.form.get('email') and request.form.get('password')):
         email = request.form.get('email')
         pw = request.form.get('password')
         
@@ -105,9 +105,8 @@ def updatePassword():
 
 @app.route('/user/updatepassword/verify', methods = ['GET', 'POST'])
 def verify_updated_password():
-    if(request.form.get('newPassword')):
-        newPassword = request.form.get('newPassword')
-        #TODO: Check for password length (cannot be lower than 10 chars)
+    newPassword = request.form.get('newPassword')
+    if(newPassword != None and len(newPassword) >= 10):
         #Checking if form's passwords match, otherwise redirecting back to correct it
         if(newPassword == request.form.get('passwordVerify')):
             #TODO: Check for possible `False` returned value
@@ -198,7 +197,6 @@ def userScreening():
 @app.route('/user/create', methods = ['GET', 'POST'])
 def handle_request():
     #TODO: Make async request
-    #TODO: Check for user role to be ADMIN before processing account creation
     if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
 
         fname = request.form.get('fname').capitalize()

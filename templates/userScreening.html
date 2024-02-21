@@ -23,11 +23,11 @@ Gestione account
         {% endif %}
     {% endwith %}
 
-    <!-- TODO: Printout flashed messages -->
     <!-- TODO: Add link github account button -->
 
     {% if session['role'] == 'Admin' %}
         <h1>Crea utente</h1>
+        <!-- TODO: Add max sizes to input boxes -->
         <form action = '{{ url_for("handle_request") }}' method = "post">
             <input type = "text" name = "fname" placeholder = "Name" autofocus required>
             <input type = "text" name = "lname" placeholder = "Surname" required>
