@@ -199,40 +199,44 @@ def userScreening():
 def handle_request():
     #TODO: Make async request
     if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
-
-        fname = request.form.get('fname').capitalize()
-        lname = request.form.get('lname').capitalize()
-        email = request.form.get('email').lower()
+        fname = request.form.get('fname').strip().capitalize()
+        lname = request.form.get('lname').strip().capitalize()
+        email = request.form.get('email').strip().lower()
         pw = request.form.get('password')
         role = request.form.get('role')
         courseName = request.form.get('course')
 
-        pHasher = PasswordHasher()
-        pw = pw.encode()
-        hashedPW = pHasher.hash(pw)
+        #Checking if all the form fields input are not empty and the password contains at least 10 characters before proceeding
+        if(validateFormInput(fname, lname, email, pw) and len(pw) >= 10):
+            pHasher = PasswordHasher()
+            pw = pw.encode()
+            hashedPW = pHasher.hash(pw)
 
-        connection = connectToDB()
-        if(not connection):
-            return redirect(url_for('index'))
-        #Creating a cursor reponsible for query executions
-        cursor = connection.cursor()
+            connection = connectToDB()
+            if(not connection):
+                return redirect(url_for('index'))
+            #Creating a cursor reponsible for query executions
+            cursor = connection.cursor()
 
-        cursor.execute('select idCorso from Corso where nomeCorso = %(courseName)s', {'courseName': courseName})
-        courseID = cursor.fetchone()[0]
+            cursor.execute('select idCorso from Corso where nomeCorso = %(courseName)s', {'courseName': courseName})
+            courseID = cursor.fetchone()[0]
 
-        try:
-            cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, idCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(courseID)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'courseID': courseID})
-            #Sending request to DB
-            connection.commit()
-        #`IntegrityError` means that one or more contraint rules were not met
-        except mysql.connector.errors.IntegrityError:
-            flash('User with this email already exists', 'error')
-        else:
-            flash('Account created', 'success')
-        #Closing connection
-        cursor.close()
-        connection.close()
-        return redirect(url_for('userScreening'))
+            try:
+                cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, idCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(courseID)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'courseID': courseID})
+                #Sending request to DB
+                connection.commit()
+            #`IntegrityError` means that one or more contraint rules were not met
+            except mysql.connector.errors.IntegrityError:
+                flash('User with this email already exists', 'error')
+            else:
+                flash('Account created', 'success')
+            #Closing connection
+            cursor.close()
+            connection.close()
+            return redirect(url_for('userScreening'))
+    else:
+        flash('Please select a valid role and course from the menus')
+        return(redirect(url_for('userScreening')))
     #Redirecting back to register page if the input values are not correct
     flash('An error occured while handling your request... Please try again.', 'error')
     return(redirect(url_for('userScreening')))
@@ -346,6 +350,13 @@ def loginWithGithub(userID):
         accountFound = False
     connection.close()
     return accountFound
+
+def validateFormInput(*args):
+    '''Validates form user input by checking if the input data is not an empty string'''
+    for inputValue in args:
+        if(inputValue.replace(' ', '') == ''):
+            return False
+    return True
 
 
 if __name__ == "__main__":
