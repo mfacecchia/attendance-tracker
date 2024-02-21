@@ -49,8 +49,7 @@ def check_login():
         
         connection = connectToDB()
         if(not connection):
-            flash("The registration service is having problems... Please try reloading the page or try again later", 'error')
-            return redirect(url_for('login'))
+                return redirect(url_for('index'))
         cursor = connection.cursor()
         #Getting all data from the database related to that single email (representing Unique key)
         cursor.execute('select * from Utente where Email = %(email)s', {'email': email})
@@ -111,6 +110,8 @@ def verify_updated_password():
         if(newPassword == request.form.get('passwordVerify')):
             #TODO: Check for possible `False` returned value
             connection = connectToDB()
+            if(not connection):
+                return redirect(url_for('index'))
             cursor = connection.cursor()
             pHasher = PasswordHasher()
             cursor.execute('select PW from Utente where userID = %(uid)s', {'uid': session['uid']})
@@ -212,7 +213,7 @@ def handle_request():
 
         connection = connectToDB()
         if(not connection):
-            return "<h1>Connection error</h1>"
+            return redirect(url_for('index'))
         #Creating a cursor reponsible for query executions
         cursor = connection.cursor()
 
@@ -251,6 +252,7 @@ def connectToDB():
     try:
         connection = mysql.connector.connect(user = 'root', password = '', host = 'localhost', database = 'Attendance_Tracker')
     except mysql.connector.Error:
+        flash('The service is having some problems at the moment. Please try again later', 'error')
         return False
     return connection
 
@@ -258,6 +260,8 @@ def getCourses():
     '''Gets all courses from database'''
     global courses
     connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
     cursor = connection.cursor()
 
     cursor.execute("select nomeCorso from Corso")
@@ -275,6 +279,8 @@ def updateLastLoginTime():
     timeNow = timeNow.strftime('%d-%m-%Y %H:%M')
 
     connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
     cursor = connection.cursor()
     cursor.execute("update Utente set ultimoLogin = %(timeNow)s where userID = %(uid)s", {'timeNow': timeNow, 'uid': session['uid']})
     connection.commit()
@@ -285,6 +291,8 @@ def updateLastLoginTime():
 def checkUserGithubConnection():
     '''Checks if the user has a linked Github account'''
     connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
     cursor = connection.cursor()
     response = cursor.execute('select github_id from Utente where userID = %(uid)s', {'uid': session['uid']})
     if(not response):
@@ -296,6 +304,8 @@ def checkUserGithubConnection():
     
 def linkGithubAccount(userID):
     connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
     cursor = connection.cursor()
     #Checking if the github user ID is already in the database (same UID cannot be used my more than 1 person)
     cursor.execute('select github_id from Utente where github_id = %(github_userID)s', {'github_userID': userID})
@@ -314,6 +324,8 @@ def linkGithubAccount(userID):
 def loginWithGithub(userID):
     '''Lets the user login with a valid linked github account'''
     connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
     cursor = connection.cursor()
     #Finding between all `Utente`'s table columns for a matching github user ID and storing its relative data in a session
     cursor.execute("select userID, Nome, Cognome, Tipologia, github_id, nomeCorso, ultimoLogin from Utente where github_id = %(github_userID)s", {'github_userID': userID})
