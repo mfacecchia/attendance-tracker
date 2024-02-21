@@ -245,6 +245,11 @@ def handle_request():
 def createLesson():
     return "Processing"
 
+@app.route('/user/list')
+def usersList():
+    if(session['role'] == 'Admin'):
+        pass
+
 @app.route('/user/logout')
 def logout():
     #Checking if session exists before clearing it

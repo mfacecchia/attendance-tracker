@@ -33,6 +33,8 @@ Gestione account
     
             <button type = "submit">Crea account</button>
         </form>
+
+        <a href = "{{url_for('usersList')}}">Lista utenti</a>
     {% endif %}
 
     {% if session['role'] == 'Insegnante' %}
