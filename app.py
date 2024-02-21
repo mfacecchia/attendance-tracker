@@ -241,6 +241,10 @@ def handle_request():
     flash('An error occured while handling your request... Please try again.', 'error')
     return(redirect(url_for('userScreening')))
 
+@app.route('/lesson/create', methods = ['GET', 'POST'])
+def createLesson():
+    return "Processing"
+
 @app.route('/user/logout')
 def logout():
     #Checking if session exists before clearing it
