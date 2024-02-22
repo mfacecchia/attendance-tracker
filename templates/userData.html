@@ -35,6 +35,8 @@ Modifica utente
             {% endfor %}
         </select>
 
+        <input type = "email" name = "oldEmail" value = "{{userData[0]}}" readonly hidden>
+
         <button type = "submit">Modifica</button>
     </form>
 {% endblock %}

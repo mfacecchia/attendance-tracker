@@ -231,7 +231,6 @@ def handle_request():
             else:
                 flash('Account created', 'success')
             #Closing connection
-            cursor.close()
             connection.close()
             return redirect(url_for('userScreening'))
     else:
@@ -258,13 +257,51 @@ def select_user():
         if(request.form.get('userID')):
             uid = request.form.get('userID')
             selectedUser = getUserData(uid)
+            global courses
             courses = getCourses()
             return render_template('userData.html', userData = selectedUser, courses = courses, roles = roleOptions)
     return redirect(url_for('userScreening'))
 
-@app.route('/user/update')
+@app.route('/user/update', methods = ['GET', 'POST'])
 def update_user_data():
-    pass
+    if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
+        fname = request.form.get('fname').strip().capitalize()
+        lname = request.form.get('lname').strip().capitalize()
+        email = request.form.get('email').strip().lower()
+        oldEmail = request.form.get('oldEmail')
+        role = request.form.get('role')
+        courseName = request.form.get('course')
+
+        #Checking if all the form fields input are not empty
+        if(validateFormInput(fname, lname, email)):
+
+            connection = connectToDB()
+            if(not connection):
+                return redirect(url_for('index'))
+            #Creating a cursor reponsible for query executions
+            cursor = connection.cursor()
+
+            cursor.execute('select idCorso from Corso where nomeCorso = %(courseName)s', {'courseName': courseName})
+            courseID = cursor.fetchone()[0]
+
+            try:
+                cursor.execute('update Utente set Nome = %(fname)s, Cognome = %(lname)s, Email = %(email)s, Tipologia = %(role)s, idCorso = %(courseID)s where Email = %(oldUserEmail)s', {'fname': fname, 'lname': lname, 'email': email, 'role': role, 'courseID': courseID, 'oldUserEmail': oldEmail})
+                #Sending request to DB
+                connection.commit()
+            #`IntegrityError` means that one or more contraint rules were not met
+            except mysql.connector.errors.IntegrityError:
+                flash('User with this email already exists', 'error')
+            else:
+                flash('Account updated', 'success')
+            #Closing connection
+            connection.close()
+            return(redirect(url_for('select_user')))
+    else:
+        flash('Please select a valid role and course from the menus')
+        return(redirect(url_for('select_user')))
+    #Redirecting back to register page if the input values are not correct
+    flash('An error occured while handling your request... Please try again.', 'error')
+    return(redirect(url_for('select_user')))
 
 @app.route('/user/logout')
 def logout():
