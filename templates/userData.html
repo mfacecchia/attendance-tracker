@@ -7,19 +7,19 @@ Modifica utente
 {% block content %}
     <form action = "{{url_for('update_user_data')}}" method = "post">
         <label for = "fname">Nome</label>
-        <input type = "text" name = "fname" value = "{{userData[1]}}" required>
+        <input type = "text" name = "fname" value = "{{userData[2]}}" required>
         
         <label for = "lname">Cognome</label>
-        <input type = "text" name = "lname" value = "{{userData[2]}}" required>
+        <input type = "text" name = "lname" value = "{{userData[3]}}" required>
         
         <label for = "email">Email</label>
-        <input type = "email" name = "email" value = "{{userData[0]}}" required>
+        <input type = "email" name = "email" value = "{{userData[1]}}" required>
 
         <label for = "role">Ruolo</label>
         <select name = "role">
-            <option value = "{{userData[3]}}">{{userData[3]}}</option>
+            <option value = "{{userData[4]}}">{{userData[4]}}</option>
             {% for role in roles %}
-                {% if role != userData[3] %}
+                {% if role != userData[4] %}
                     <option value = "{{role}}">{{role}}</option>
                 {% endif %}
             {% endfor %}
@@ -27,15 +27,15 @@ Modifica utente
 
         <label for = "course">Corso</label>
         <select name = "course">
-            <option value = "{{userData[4]}}">{{userData[4]}}</option>
+            <option value = "{{userData[5]}}">{{userData[5]}}</option>
             {% for course in courses %}
-                {% if course != userData[4] %}
+                {% if course != userData[5] %}
                     <option value = "{{course}}">{{course}}</option>
                 {% endif %}
             {% endfor %}
         </select>
 
-        <input type = "email" name = "oldEmail" value = "{{userData[0]}}" readonly hidden>
+        <input type = "number" name = "uid" value = "{{userData[0]}}" readonly hidden>
 
         <button type = "submit">Modifica</button>
     </form>

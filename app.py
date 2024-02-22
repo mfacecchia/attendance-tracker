@@ -253,8 +253,8 @@ def usersList():
 @app.route('/user/select', methods = ['GET', 'POST'])
 def select_user():
     if(session['role'] == 'Admin'):
-        if(request.form.get('userID')):
-            uid = request.form.get('userID')
+        if(request.values.get('userID')):
+            uid = request.values.get('userID')
             selectedUser = getUserData(uid)
             global courses
             courses = getCourses()
@@ -263,41 +263,11 @@ def select_user():
 
 @app.route('/user/update', methods = ['GET', 'POST'])
 def update_user_data():
-    if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
-        fname = request.form.get('fname').strip().capitalize()
-        lname = request.form.get('lname').strip().capitalize()
-        email = request.form.get('email').strip().lower()
-        oldEmail = request.form.get('oldEmail')
-        role = request.form.get('role')
-        courseName = request.form.get('course')
-
-        #Checking if all the form fields input are not empty
-        if(validateFormInput(fname, lname, email)):
-
-            connection = connectToDB()
-            if(not connection):
-                return redirect(url_for('index'))
-            #Creating a cursor reponsible for query executions
-            cursor = connection.cursor()
-
-            cursor.execute('select idCorso from Corso where nomeCorso = %(courseName)s', {'courseName': courseName})
-            courseID = cursor.fetchone()[0]
-
-            try:
-                cursor.execute('update Utente set Nome = %(fname)s, Cognome = %(lname)s, Email = %(email)s, Tipologia = %(role)s, idCorso = %(courseID)s where Email = %(oldUserEmail)s', {'fname': fname, 'lname': lname, 'email': email, 'role': role, 'courseID': courseID, 'oldUserEmail': oldEmail})
-                #Sending request to DB
-                connection.commit()
-            #`IntegrityError` means that one or more contraint rules were not met
-            except mysql.connector.errors.IntegrityError:
-                flash('User with this email already exists', 'error')
-            else:
-                flash('Account updated', 'success')
-            #Closing connection
-            connection.close()
-            return(redirect(url_for('usersList')))
+    if(session['role'] == 'Admin'):
+        userID = updateDataAsAdmin()
+        return redirect(url_for('select_user', userID = userID))
     else:
-        flash('Please select a valid role and course from the menus')
-        return(redirect(url_for('usersList')))
+        pass
     #Redirecting back to register page if the input values are not correct
     flash('An error occured while handling your request... Please try again.', 'error')
     return(redirect(url_for('usersList')))
@@ -441,7 +411,7 @@ def getUserData(uid):
         return redirect(url_for('index'))
     cursor = connection.cursor()
 
-    cursor.execute('select Email, Nome, Cognome, Tipologia, idCorso from Utente where userID = %(uid)s', {'uid': int(uid)})
+    cursor.execute('select userID, Email, Nome, Cognome, Tipologia, idCorso from Utente where userID = %(uid)s', {'uid': int(uid)})
     response = list(cursor.fetchone())
     response[-1] = idToCourseName(cursor, response[-1])
     connection.close()
@@ -451,6 +421,45 @@ def idToCourseName(cursor, courseID):
     '''Converts course ID to course name based on Foreign key <--> Primary key relation'''
     cursor.execute('select nomeCorso from corso where idCorso = %(courseID)s', {'courseID': int(courseID)})
     return cursor.fetchone()[0]
+
+def updateDataAsAdmin():
+    '''Shorthand function to update any user data as administrator'''
+    if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
+        fname = request.form.get('fname').strip().capitalize()
+        lname = request.form.get('lname').strip().capitalize()
+        email = request.form.get('email').strip().lower()
+        userID = request.form.get('uid')
+        role = request.form.get('role')
+        courseName = request.form.get('course')
+
+        #Checking if all the form fields input are not empty
+        if(validateFormInput(fname, lname, email)):
+
+            connection = connectToDB()
+            if(not connection):
+                return redirect(url_for('index'))
+            #Creating a cursor reponsible for query executions
+            cursor = connection.cursor()
+
+            cursor.execute('select idCorso from Corso where nomeCorso = %(courseName)s', {'courseName': courseName})
+            courseID = cursor.fetchone()[0]
+
+            try:
+                cursor.execute('update Utente set Nome = %(fname)s, Cognome = %(lname)s, Email = %(email)s, Tipologia = %(role)s, idCorso = %(courseID)s where userID = %(uid)s', {'fname': fname, 'lname': lname, 'email': email, 'role': role, 'courseID': courseID, 'uid': userID})
+                #Sending request to DB
+                connection.commit()
+            #`IntegrityError` means that one or more contraint rules were not met
+            except mysql.connector.errors.IntegrityError:
+                flash('User with this email already exists', 'error')
+            else:
+                flash('Account updated', 'success')
+            #Closing connection
+            connection.close()
+        else:
+            flash('Invalid input. Please try again.', 'error')
+    else:
+        flash('Please select a valid role and course from the menus')
+    return userID
 
 if __name__ == "__main__":
     app.run(debug = True)

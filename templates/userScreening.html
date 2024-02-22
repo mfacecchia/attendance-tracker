@@ -48,6 +48,10 @@ Gestione account
         </form>
     {% endif %}
 
+    <form action = "{{url_for('update_user_data')}}" method = "post">
+        
+    </form>
+
     <a href = "{{url_for('githubAuth', login = False)}}">Collega Account Github</a><br>
     <!-- TODO: Add remove github connection button -->
     <!-- TODO: Add account linking with github & google button -->
