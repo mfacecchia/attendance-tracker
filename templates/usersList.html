@@ -5,7 +5,7 @@ Lista utenti
 {% endblock %}
 
 {% block content %}
-    <h1>Click the button to update user's data</h1>
+    <h1>Clicca sul bottone per modificare i dati dell'utente</h1>
     {% for user in users %}
         <p>{{user[1]}} {{user[2]}}, {{user[3]}}</p>
         <form action = "{{url_for('select_user')}}" method = "post">
@@ -14,4 +14,5 @@ Lista utenti
         </form>
         <br><br>
     {% endfor %}
+    <a href = "{{url_for('userScreening')}}">Torna indietro</a>
 {% endblock %}

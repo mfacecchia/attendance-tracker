@@ -253,7 +253,6 @@ def usersList():
 @app.route('/user/select', methods = ['GET', 'POST'])
 def select_user():
     if(session['role'] == 'Admin'):
-        print(request.form.get('userID'))
         if(request.form.get('userID')):
             uid = request.form.get('userID')
             selectedUser = getUserData(uid)
