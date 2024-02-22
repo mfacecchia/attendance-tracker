@@ -5,5 +5,36 @@ Modifica utente
 {% endblock %}
 
 {% block content %}
+    <form action = "{{url_for('update_user_data')}}" method = "post">
+        <label for = "fname">Nome</label>
+        <input type = "text" name = "fname" value = "{{userData[1]}}">
+        
+        <label for = "lname">Cognome</label>
+        <input type = "text" name = "lname" value = "{{userData[2]}}">
+        
+        <label for = "email">Email</label>
+        <input type = "email" name = "email" value = "{{userData[0]}}">
 
+        <label for = "role">Ruolo</label>
+        <select name = "role">
+            <option value = "{{userData[3]}}">{{userData[3]}}</option>
+            {% for role in roles %}
+                {% if role != userData[3] %}
+                    <option value = "{{role}}">{{role}}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+
+        <label for = "course">Corso</label>
+        <select name = "course">
+            <option value = "{{userData[4]}}">{{userData[4]}}</option>
+            {% for course in courses %}
+                {% if course != userData[4] %}
+                    <option value = "{{course}}">{{course}}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+
+        <button type = "submit">Modifica</button>
+    </form>
 {% endblock %}

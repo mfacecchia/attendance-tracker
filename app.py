@@ -252,15 +252,19 @@ def usersList():
         return render_template('usersList.html', users = usersList)
 
 @app.route('/user/select', methods = ['GET', 'POST'])
-def update_user_data():
+def select_user():
     if(session['role'] == 'Admin'):
         print(request.form.get('userID'))
         if(request.form.get('userID')):
             uid = request.form.get('userID')
             selectedUser = getUserData(uid)
-            print(selectedUser)
-            return render_template('userData.html', userData = selectedUser)
+            courses = getCourses()
+            return render_template('userData.html', userData = selectedUser, courses = courses, roles = roleOptions)
     return redirect(url_for('userScreening'))
+
+@app.route('/user/update')
+def update_user_data():
+    pass
 
 @app.route('/user/logout')
 def logout():
@@ -385,6 +389,7 @@ def getUsersList():
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
+    #TODO: Get also course name
     cursor.execute("select userID, Nome, Cognome, Tipologia from Utente")
     usersList = []
     for user in cursor:

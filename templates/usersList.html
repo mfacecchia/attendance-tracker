@@ -8,7 +8,7 @@ Lista utenti
     <h1>Click the button to update user's data</h1>
     {% for user in users %}
         <p>{{user[1]}} {{user[2]}}, {{user[3]}}</p>
-        <form action = "{{url_for('update_user_data')}}" method = "post">
+        <form action = "{{url_for('select_user')}}" method = "post">
             <input type = "text" name = "userID" readonly hidden value = "{{user[0]}}">
             <button type = "submit">Modifica</button>
         </form>
