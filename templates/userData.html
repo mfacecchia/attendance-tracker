@@ -7,13 +7,13 @@ Modifica utente
 {% block content %}
     <form action = "{{url_for('update_user_data')}}" method = "post">
         <label for = "fname">Nome</label>
-        <input type = "text" name = "fname" value = "{{userData[1]}}">
+        <input type = "text" name = "fname" value = "{{userData[1]}}" required>
         
         <label for = "lname">Cognome</label>
-        <input type = "text" name = "lname" value = "{{userData[2]}}">
+        <input type = "text" name = "lname" value = "{{userData[2]}}" required>
         
         <label for = "email">Email</label>
-        <input type = "email" name = "email" value = "{{userData[0]}}">
+        <input type = "email" name = "email" value = "{{userData[0]}}" required>
 
         <label for = "role">Ruolo</label>
         <select name = "role">
