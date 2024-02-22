@@ -440,10 +440,13 @@ def getUserData(uid):
 
     cursor.execute('select Email, Nome, Cognome, Tipologia, idCorso from Utente where userID = %(uid)s', {'uid': int(uid)})
     response = list(cursor.fetchone())
-    cursor.execute('select nomeCorso from corso where idCorso = %(courseID)s', {'courseID': int(response[-1])})
-    response[-1] = cursor.fetchone()[0]
+    response[-1] = idToCourseName(cursor, response[-1])
     return response
 
+def idToCourseName(cursor, courseID):
+    '''Converts course ID to course name based on Foreign key <--> Primary key relation'''
+    cursor.execute('select nomeCorso from corso where idCorso = %(courseID)s', {'courseID': int(courseID)})
+    return cursor.fetchone()[0]
 
 if __name__ == "__main__":
     app.run(debug = True)
