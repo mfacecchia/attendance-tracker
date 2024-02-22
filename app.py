@@ -248,7 +248,19 @@ def createLesson():
 @app.route('/user/list')
 def usersList():
     if(session['role'] == 'Admin'):
-        pass
+        usersList = getUsersList()
+        return render_template('usersList.html', users = usersList)
+
+@app.route('/user/select', methods = ['GET', 'POST'])
+def update_user_data():
+    if(session['role'] == 'Admin'):
+        print(request.form.get('userID'))
+        if(request.form.get('userID')):
+            uid = request.form.get('userID')
+            selectedUser = getUserData(uid)
+            print(selectedUser)
+            return render_template('userData.html', userData = selectedUser)
+    return redirect(url_for('userScreening'))
 
 @app.route('/user/logout')
 def logout():
@@ -366,6 +378,30 @@ def validateFormInput(*args):
         if(inputValue.replace(' ', '') == ''):
             return False
     return True
+
+def getUsersList():
+    '''Obtains all users from the database and returns a matrix'''
+    connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
+    cursor = connection.cursor()
+    cursor.execute("select userID, Nome, Cognome, Tipologia from Utente")
+    usersList = []
+    for user in cursor:
+        usersList.append(user)
+    return usersList
+
+def getUserData(uid):
+    connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
+    cursor = connection.cursor()
+
+    cursor.execute('select Email, Nome, Cognome, Tipologia, idCorso from Utente where userID = %(uid)s', {'uid': int(uid)})
+    response = list(cursor.fetchone())
+    cursor.execute('select nomeCorso from corso where idCorso = %(courseID)s', {'courseID': int(response[-1])})
+    response[-1] = cursor.fetchone()[0]
+    return response
 
 
 if __name__ == "__main__":
