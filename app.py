@@ -231,7 +231,6 @@ def handle_request():
             else:
                 flash('Account created', 'success')
             #Closing connection
-            cursor.close()
             connection.close()
             return redirect(url_for('userScreening'))
     else:
@@ -240,6 +239,38 @@ def handle_request():
     #Redirecting back to register page if the input values are not correct
     flash('An error occured while handling your request... Please try again.', 'error')
     return(redirect(url_for('userScreening')))
+
+@app.route('/lesson/create', methods = ['GET', 'POST'])
+def createLesson():
+    return "Processing"
+
+@app.route('/user/list')
+def usersList():
+    if(session['role'] == 'Admin'):
+        usersList = getUsersList()
+        return render_template('usersList.html', users = usersList)
+
+@app.route('/user/select', methods = ['GET', 'POST'])
+def select_user():
+    if(session['role'] == 'Admin'):
+        if(request.values.get('userID')):
+            uid = request.values.get('userID')
+            selectedUser = getUserData(uid)
+            global courses
+            courses = getCourses()
+            return render_template('userData.html', userData = selectedUser, courses = courses, roles = roleOptions)
+    return redirect(url_for('userScreening'))
+
+@app.route('/user/update', methods = ['GET', 'POST'])
+def update_user_data():
+    if(session['role'] == 'Admin'):
+        userID = updateDataAsAdmin()
+        return redirect(url_for('select_user', userID = userID))
+    else:
+        pass
+    #Redirecting back to register page if the input values are not correct
+    flash('An error occured while handling your request... Please try again.', 'error')
+    return(redirect(url_for('usersList')))
 
 @app.route('/user/logout')
 def logout():
@@ -332,6 +363,7 @@ def loginWithGithub(userID):
         return redirect(url_for('index'))
     cursor = connection.cursor()
     #Finding between all `Utente`'s table columns for a matching github user ID and storing its relative data in a session
+    #FIXME: Update query
     cursor.execute("select userID, Nome, Cognome, Tipologia, github_id, nomeCorso, ultimoLogin from Utente where github_id = %(github_userID)s", {'github_userID': userID})
     response = cursor.fetchone()
     #Checking for `response != None` in case the Query returns no columns so returned value = None
@@ -358,6 +390,77 @@ def validateFormInput(*args):
             return False
     return True
 
+def getUsersList():
+    '''Obtains all users from the database and returns a matrix'''
+    connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
+    cursor = connection.cursor()
+    #TODO: Get also course name
+    cursor.execute("select userID, Nome, Cognome, Tipologia, idCorso from Utente")
+    usersList = []
+    for user in cursor:
+        usersList.append(list(user))
+    for user in range(len(usersList)):
+        usersList[user][-1] = idToCourseName(cursor, usersList[user][-1])
+    connection.close()
+    return usersList
+
+def getUserData(uid):
+    connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
+    cursor = connection.cursor()
+
+    cursor.execute('select userID, Email, Nome, Cognome, Tipologia, idCorso from Utente where userID = %(uid)s', {'uid': int(uid)})
+    response = list(cursor.fetchone())
+    response[-1] = idToCourseName(cursor, response[-1])
+    connection.close()
+    return response
+
+def idToCourseName(cursor, courseID):
+    '''Converts course ID to course name based on Foreign key <--> Primary key relation'''
+    cursor.execute('select nomeCorso from corso where idCorso = %(courseID)s', {'courseID': int(courseID)})
+    return cursor.fetchone()[0]
+
+def updateDataAsAdmin():
+    '''Shorthand function to update any user data as administrator'''
+    if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
+        fname = request.form.get('fname').strip().capitalize()
+        lname = request.form.get('lname').strip().capitalize()
+        email = request.form.get('email').strip().lower()
+        userID = request.form.get('uid')
+        role = request.form.get('role')
+        courseName = request.form.get('course')
+
+        #Checking if all the form fields input are not empty
+        if(validateFormInput(fname, lname, email)):
+
+            connection = connectToDB()
+            if(not connection):
+                return redirect(url_for('index'))
+            #Creating a cursor reponsible for query executions
+            cursor = connection.cursor()
+
+            cursor.execute('select idCorso from Corso where nomeCorso = %(courseName)s', {'courseName': courseName})
+            courseID = cursor.fetchone()[0]
+
+            try:
+                cursor.execute('update Utente set Nome = %(fname)s, Cognome = %(lname)s, Email = %(email)s, Tipologia = %(role)s, idCorso = %(courseID)s where userID = %(uid)s', {'fname': fname, 'lname': lname, 'email': email, 'role': role, 'courseID': courseID, 'uid': userID})
+                #Sending request to DB
+                connection.commit()
+            #`IntegrityError` means that one or more contraint rules were not met
+            except mysql.connector.errors.IntegrityError:
+                flash('User with this email already exists', 'error')
+            else:
+                flash('Account updated', 'success')
+            #Closing connection
+            connection.close()
+        else:
+            flash('Invalid input. Please try again.', 'error')
+    else:
+        flash('Please select a valid role and course from the menus')
+    return userID
 
 if __name__ == "__main__":
     app.run(debug = True)
