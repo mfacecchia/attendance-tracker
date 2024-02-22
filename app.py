@@ -294,13 +294,13 @@ def update_user_data():
                 flash('Account updated', 'success')
             #Closing connection
             connection.close()
-            return(redirect(url_for('select_user')))
+            return(redirect(url_for('usersList')))
     else:
         flash('Please select a valid role and course from the menus')
-        return(redirect(url_for('select_user')))
+        return(redirect(url_for('usersList')))
     #Redirecting back to register page if the input values are not correct
     flash('An error occured while handling your request... Please try again.', 'error')
-    return(redirect(url_for('select_user')))
+    return(redirect(url_for('usersList')))
 
 @app.route('/user/logout')
 def logout():
@@ -426,10 +426,13 @@ def getUsersList():
         return redirect(url_for('index'))
     cursor = connection.cursor()
     #TODO: Get also course name
-    cursor.execute("select userID, Nome, Cognome, Tipologia from Utente")
+    cursor.execute("select userID, Nome, Cognome, Tipologia, idCorso from Utente")
     usersList = []
     for user in cursor:
-        usersList.append(user)
+        usersList.append(list(user))
+    for user in range(len(usersList)):
+        usersList[user][-1] = idToCourseName(cursor, usersList[user][-1])
+    connection.close()
     return usersList
 
 def getUserData(uid):
@@ -441,6 +444,7 @@ def getUserData(uid):
     cursor.execute('select Email, Nome, Cognome, Tipologia, idCorso from Utente where userID = %(uid)s', {'uid': int(uid)})
     response = list(cursor.fetchone())
     response[-1] = idToCourseName(cursor, response[-1])
+    connection.close()
     return response
 
 def idToCourseName(cursor, courseID):
