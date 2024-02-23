@@ -182,6 +182,17 @@ def authorize():
         flash("Account not found", 'error')
         return redirect(url_for('login'))
 
+@app.route('/auth/github/disconnect')
+def unlinkGithubAccount():
+    if(session.get('githubConnected')):
+        connection = connectToDB()
+        if(not connection):
+            return redirect(url_for('index'))
+        cursor = connection.cursor()
+        cursor.execute('update Utente set github_id = NULL where userID = %(uid)s', {'uid': session['uid']})
+        cursor.commit()
+        flash('Github account unlinked', 'success')
+    return redirect(url_for('userScreening'))
 
 @app.route('/user')
 def userScreening():
@@ -375,7 +386,7 @@ def loginWithGithub(userID):
         session['course'] = response[5]
         #Reformatting last login date for clean output
         session['lastLogin'] = str(response[6]).replace(' ', ' alle ')
-        #TODO: Add session key for `github/google/icloud connected`
+        session['githubConnected'] = True
         accountFound = True
     #Returning `False` if the github user ID was not found in the table
     else:
