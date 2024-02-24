@@ -310,12 +310,14 @@ def getCourses():
         return redirect(url_for('index'))
     cursor = connection.cursor()
 
-    cursor.execute("select nomeCorso from Corso")
+    cursor.execute("select nomeCorso, annoCorso from Corso")
     #Clearing courses list in order to correctly store all available courses
     courses = []
-    for course in cursor:
-        #Getting the first element of each row
-        courses.append(course[0])
+    for row in cursor:
+        #Creating a dictionary for each row of the DB response
+        courses.append({})
+        for colCounter, col in enumerate(row):
+            courses[-1].setdefault(cursor.description[colCounter][0], col)
     return courses
 
 def updateLastLoginTime():
