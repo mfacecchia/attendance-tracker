@@ -296,6 +296,7 @@ def select_user():
 @app.route('/user/update', methods = ['GET', 'POST'])
 def update_user_data():
     if(session['role'] == 'Admin'):
+        #FIXME: Fix function `updateDataAsAdmin()`
         userID = updateDataAsAdmin()
         return redirect(url_for('select_user', userID = userID))
     else:
@@ -454,9 +455,13 @@ def getUserData(uid):
         return redirect(url_for('index'))
     cursor = connection.cursor()
 
-    cursor.execute('select userID, Email, Nome, Cognome, Tipologia, idCorso from Utente where userID = %(uid)s', {'uid': int(uid)})
-    response = list(cursor.fetchone())
-    response[-1] = idToCourseName(cursor, response[-1])
+    cursor.execute('select Utente.userID, Nome, Cognome, Tipologia, Email, nomeCorso, annoCorso\
+                from Utente\
+                inner join Credenziali on Utente.userID = Credenziali.userID\
+                inner join Registrazione on Registrazione.userID = Utente.userID\
+                inner join Corso on Corso.idCorso = Registrazione.idCorso\
+                where Utente.userID = %(uid)s', {'uid': int(uid)})
+    response = getValuesFromQuery(cursor)
     connection.close()
     return response
 

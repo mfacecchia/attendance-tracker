@@ -7,19 +7,19 @@ Modifica utente
 {% block content %}
     <form action = "{{url_for('update_user_data')}}" method = "post">
         <label for = "fname">Nome</label>
-        <input type = "text" name = "fname" value = "{{userData[2]}}" required>
+        <input type = "text" name = "fname" value = "{{userData[0]['Nome']}}" required>
         
         <label for = "lname">Cognome</label>
-        <input type = "text" name = "lname" value = "{{userData[3]}}" required>
+        <input type = "text" name = "lname" value = "{{userData[0]['Cognome']}}" required>
         
         <label for = "email">Email</label>
-        <input type = "email" name = "email" value = "{{userData[1]}}" required>
+        <input type = "email" name = "email" value = "{{userData[0]['Email']}}" required>
 
         <label for = "role">Ruolo</label>
         <select name = "role">
-            <option value = "{{userData[4]}}">{{userData[4]}}</option>
+            <option value = "{{userData[0]['Tipologia']}}">{{userData[0]['Tipologia']}}</option>
             {% for role in roles %}
-                {% if role != userData[4] %}
+                {% if role != userData[0]['Tipologia'] %}
                     <option value = "{{role}}">{{role}}</option>
                 {% endif %}
             {% endfor %}
@@ -27,15 +27,15 @@ Modifica utente
 
         <label for = "course">Corso</label>
         <select name = "course">
-            <option value = "{{userData[5]}}">{{userData[5]}}</option>
+            <option value = "{{userData[0]['nomeCorso']}} - {{userData[0]['annoCorso']}}">{{userData[0]['nomeCorso']}} - {{userData[0]['annoCorso']}}</option>
             {% for course in courses %}
-                {% if course != userData[5] %}
-                    <option value = "{{course}}">{{course}}</option>
+                {% if (course['nomeCorso'] + " " + course['annoCorso']) != (userData[0]['nomeCorso'] + " " + userData[0]['annoCorso']) %}
+                    <option value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">{{course['nomeCorso']}} - {{course['annoCorso']}}</option>
                 {% endif %}
             {% endfor %}
         </select>
 
-        <input type = "number" name = "uid" value = "{{userData[0]}}" readonly hidden>
+        <input type = "number" name = "uid" value = "{{userData[0]['userID']}}" readonly hidden>
 
         <button type = "submit">Modifica</button>
     </form>
