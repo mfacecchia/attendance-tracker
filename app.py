@@ -29,7 +29,7 @@ oauth.register(
 roleOptions = ['Studente', 'Insegnante', 'Admin']
 #Creating a variable used to store all available courses from the database and pass them to the HTML template
 courses = []
-#TODO: Add common error message
+commonErrorMessage = 'An error occured while handling your request... Please try again.'
 
 @app.route('/')
 def index():
@@ -98,7 +98,7 @@ def check_login():
             finally:
                 connection.close()
     else:
-        flash("An error occured while submitting the form. Please try again.", 'error')
+        flash(commonErrorMessage, 'error')
     return redirect(url_for('login'))
 
 @app.route('/user/updatepassword')
@@ -138,7 +138,7 @@ def verify_updated_password():
                 connection.close()
                 return redirect(url_for('userScreening'))
             else:
-                flash('An error occured while handling your request... Please try again.', 'error')
+                flash(commonErrorMessage, 'error')
         else:
             flash('Passwords not matching', 'error')
         return redirect(url_for('updatePassword'))
@@ -255,7 +255,7 @@ def handle_request():
         flash('Please select a valid role and course from the menus')
         return(redirect(url_for('userScreening')))
     #Redirecting back to register page if the input values are not correct
-    flash('An error occured while handling your request... Please try again.', 'error')
+    flash(commonErrorMessage, 'error')
     return(redirect(url_for('userScreening')))
 
 @app.route('/lesson/create', methods = ['GET', 'POST'])
@@ -287,7 +287,7 @@ def update_user_data():
     else:
         pass
     #Redirecting back to register page if the input values are not correct
-    flash('An error occured while handling your request... Please try again.', 'error')
+    flash(commonErrorMessage, 'error')
     return(redirect(url_for('usersList')))
 
 @app.route('/user/logout')
