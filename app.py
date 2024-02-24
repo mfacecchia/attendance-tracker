@@ -204,7 +204,7 @@ def userScreening():
         #Redirecting to update password page if it's the first login
         if(session.get('lastLogin') == 'Mai'):
             return redirect(url_for('updatePassword'))
-        courses = getCourses()
+        getCourses()
         return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses)
     else:
         flash('Please login', 'error')
@@ -239,9 +239,10 @@ def handle_request():
                     return redirect(url_for('index'))
                 #Creating a cursor reponsible for query executions
                 cursor = connection.cursor()
-                #Checking if user with the input Email already exists
-                response = cursor.execute("select Email from Credenziali where Email = %(userEmail)s", {'userEmail', email})
-                if(not response):
+                #Checking if user with the input Email does not already exist
+                cursor.execute("select Email from Credenziali where Email = %(userEmail)s", {'userEmail': email})
+                response = getValuesFromQuery(cursor)
+                if(len(response) == 0):
                     #Matrix with all the queries to execute to create the account
                     queries = [
                                 ['insert into Utente(Nome, Cognome, Tipologia) values(%(name)s, %(surname)s, %(role)s)', {'name': fname, 'surname': lname, 'role': role}],
@@ -253,7 +254,7 @@ def handle_request():
                         #Sending request to DB
                         connection.commit()
                     for x in range(len(coursesNames)):
-                        cursor.execute('insert into Registrazione(userID, idCorso) values((select max(userID) from Utente)), (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'courseName': str(coursesNames[x]), 'courseYear': str(coursesYears[x])})
+                        cursor.execute('insert into Registrazione(userID, idCorso) values((select max(userID) from Utente), (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
                         connection.commit()
                     flash('Account created', 'success')
                 else:
@@ -287,8 +288,7 @@ def select_user():
         if(request.values.get('userID')):
             uid = request.values.get('userID')
             selectedUser = getUserData(uid)
-            global courses
-            courses = getCourses()
+            getCourses()
             return render_template('userData.html', userData = selectedUser, courses = courses, roles = roleOptions)
     return redirect(url_for('userScreening'))
 
@@ -332,7 +332,6 @@ def getCourses():
     cursor.execute("select nomeCorso, annoCorso from Corso")
     #Overwriting list with newly values from DB response
     courses = getValuesFromQuery(cursor)
-    return courses
 
 def getValuesFromQuery(cursor):
     '''Returns the DB response in form of list of dictionaries\n
@@ -514,8 +513,10 @@ def validateCoursesSelection(coursesNames, coursesYears):
         return False
     cursor = connection.cursor()
     for course in range(len(coursesNames)):
-        response = cursor.execute('select count(*) from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s', {'courseName', coursesNames[course], 'courseYear', coursesYears[course]})
-        if(not response):
+        cursor.execute("select count(*)\
+                                from Corso\
+                                where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s", {'courseName': coursesNames[course], 'courseYear': coursesYears[course]})
+        if(not cursor.fetchone()):
             return False
     return True
 

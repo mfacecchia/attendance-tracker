@@ -23,11 +23,10 @@ Gestione account
                 {% for role in roleOptions %}
                     <option value = {{role}}>{{role}}</option>
                 {% endfor %}
-            </select>
-            <p>Seleziona almeno un corso</p>
+            </select><br>
             {% for course in courses %}
                 <input type = "checkbox" name = "course" value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">
-                <label for = "course">{{course['nomeCorso']}} - {{course['annoCorso']}}</label>
+                <label for = "course">{{course['nomeCorso']}} - {{course['annoCorso']}}</label><br>
             {% endfor %}
     
             <button type = "submit">Crea account</button>
