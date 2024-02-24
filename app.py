@@ -440,13 +440,11 @@ def getUsersList():
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
-    #TODO: Get also course name
-    cursor.execute("select userID, Nome, Cognome, Tipologia, idCorso from Utente")
-    usersList = []
-    for user in cursor:
-        usersList.append(list(user))
-    for user in range(len(usersList)):
-        usersList[user][-1] = idToCourseName(cursor, usersList[user][-1])
+    cursor.execute("select Utente.userID, Nome, Cognome, Tipologia, nomeCorso\
+                from Utente\
+                inner join Registrazione on Utente.userID = Registrazione.userID\
+                inner join Corso on Registrazione.idCorso = Corso.idCorso")
+    usersList = getValuesFromQuery(cursor)
     connection.close()
     return usersList
 
@@ -462,6 +460,7 @@ def getUserData(uid):
     connection.close()
     return response
 
+#TODO: Remove function (no longer useful)
 def idToCourseName(cursor, courseID):
     '''Converts course ID to course name based on Foreign key <--> Primary key relation'''
     cursor.execute('select nomeCorso from corso where idCorso = %(courseID)s', {'courseID': int(courseID)})

@@ -7,9 +7,9 @@ Lista utenti
 {% block content %}
     <h1>Clicca sul bottone per modificare i dati dell'utente</h1>
     {% for user in users %}
-        <p>{{user[1]}} {{user[2]}}, {{user[3]}} ({{user[4]}})</p>
+        <p>{{user['Nome']}} {{user['Cognome']}}, {{user['Tipologia']}} ({{user['nomeCorso']}})</p>
         <form action = "{{url_for('select_user')}}" method = "post">
-            <input type = "text" name = "userID" readonly hidden value = "{{user[0]}}">
+            <input type = "text" name = "userID" readonly hidden value = "{{user['userID']}}">
             <button type = "submit">Modifica</button>
         </form>
         <br><br>
