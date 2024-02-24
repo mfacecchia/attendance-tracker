@@ -43,57 +43,59 @@ def login():
 
 @app.route('/login/request', methods = ['GET', 'POST'])
 def check_login():
+    '''Handler for User login request'''
     if(request.form.get('email') and request.form.get('password')):
         email = request.form.get('email')
         pw = request.form.get('password')
         
         connection = connectToDB()
         if(not connection):
-                return redirect(url_for('index'))
+            return redirect(url_for('index'))
         cursor = connection.cursor()
         #Getting all data from the database related to that single email (representing Unique key)
-        cursor.execute('select * from Utente where Email = %(email)s', {'email': email})
-        
-        response = cursor.fetchone()
-        #`response == None` means that no user with the input email was found in the database
+        response = cursor.execute('select userID, Nome, Tipologia, ultimoLogin, Email, PW, github_id, google_id\
+                                from Credenziali\
+                                inner join Utente on Credenziali.userID = Utente.userID\
+                                where Email = %(email)s', {'email': email})
+        #NOTE: `response == None` means that no user with the input email was found in the database
         if(response == None):
+            connection.close()
             flash("Account not found", 'error')
             return redirect(url_for('login'))
-        phasher = PasswordHasher()
-        try:
-            #Verifying the hashed password gotten from the database with the user input one in the form
-            phasher.verify(response[7], pw)
-        #Non-matching passwords will throw `VerifyMismatchError`
-        #Redirecting to login page form to retry the input
-        except exceptions.VerifyMismatchError:
-            #Sending an error message to back to the login page in order to display why the login didn't happen
-            flash('The password is incorrect. Please try again.', 'error')
         else:
-            #Dinamically changing session permanent state based on form checkbox
-            if(request.form.get('remember')):
-                session.permanent = True
+            response = getValuesFromQuery(cursor.fetchone())
+            phasher = PasswordHasher()
+            try:
+                #Verifying the hashed password gotten from the database with the user input one in the form
+                phasher.verify(response[0]['PW'], pw)
+            #Non-matching passwords will throw `VerifyMismatchError`
+            #Redirecting to login page form to retry the input
+            except exceptions.VerifyMismatchError:
+                #Sending an error message to back to the login page in order to display why the login didn't happen
+                flash('The password is incorrect. Please try again.', 'error')
             else:
-                session.permanent = False
-            #Getting all useful user data and creating all relative session fields
-            session['uid'] = response[0]
-            session['name'] = response[2]
-            session['surname'] = response[3]
-            session['role'] = response[4]
-            session['course'] = response[9]
-            #Reformatting last login date for clean output
-            session['lastLogin'] = str(response[8]).replace(' ', ' alle ')
-            session['githubConnected'] = True if response[6] != 'NULL' else False
+                #Dinamically changing session permanent state based on form checkbox
+                if(request.form.get('remember')):
+                    session.permanent = True
+                else:
+                    session.permanent = False
+                #Getting all useful user data and creating all relative session fields
+                session['uid'] = response[0]['userID']
+                session['name'] = response[0]['Nome']
+                session['role'] = response[0]['Tipologia']
+                #Reformatting last login date for clean output
+                session['lastLogin'] = str(response[0]['ultimoLogin']).replace(' ', ' alle ')
+                session['githubConnected'] = True if response[0]['github_id'] != 'NULL' else False
 
-            #Default last login value in database = fresh account so a new password needs to be set. Redirecting to password creation page
-            if(session['lastLogin'] == 'Mai'):
-                return redirect(url_for('updatePassword'))
-            else:
-                #Updating last login time and redirecting user to screening
-                updateLastLoginTime()
-                return redirect(url_for('userScreening'))
-        finally:
-            connection.close()
-            cursor.close()
+                #Default last login value in database = fresh account so a new password needs to be set. Redirecting to password creation page
+                if(session['lastLogin'] == 'Mai'):
+                    return redirect(url_for('updatePassword'))
+                else:
+                    #Updating last login time and redirecting user to screening
+                    updateLastLoginTime()
+                    return redirect(url_for('userScreening'))
+            finally:
+                connection.close()
     else:
         flash("An error occured while submitting the form. Please try again.", 'error')
     return redirect(url_for('login'))
@@ -332,6 +334,7 @@ def updateLastLoginTime():
     '''Programmatically updates user's last login time on database'''
     #TODO: Update with GMT+1 timezone
     timeNow = datetime.now()
+    #TODO: Update format with `%d/%m/%Y %H:%M`
     timeNow = timeNow.strftime('%d-%m-%Y %H:%M')
 
     connection = connectToDB()
