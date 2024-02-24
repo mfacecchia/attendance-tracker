@@ -54,49 +54,46 @@ def check_login():
             return redirect(url_for('index'))
         cursor = connection.cursor()
         #Getting all data from the database related to that single email (representing Unique key)
-        response = cursor.execute('select userID, Nome, Tipologia, ultimoLogin, Email, PW, github_id, google_id\
-                                from Credenziali\
-                                inner join Utente on Credenziali.userID = Utente.userID\
-                                where Email = %(email)s', {'email': email})
-        #NOTE: `response == None` means that no user with the input email was found in the database
-        if(response == None):
-            connection.close()
+        cursor.execute('select Utente.userID, Nome, Tipologia, ultimoLogin, Email, PW, githubID, googleID\
+                                from Credenziali, Utente\
+                                where Credenziali.userID = Utente.userID\
+                                and Email = %(email)s', {'email': email})
+        response = getValuesFromQuery(cursor)
+        if(len(response) == 0):
             flash("Account not found", 'error')
             return redirect(url_for('login'))
+        phasher = PasswordHasher()
+        try:
+            #Verifying the hashed password gotten from the database with the user input one in the form
+            phasher.verify(response[0]['PW'], pw)
+        #Non-matching passwords will throw `VerifyMismatchError`
+        #Redirecting to login page form to retry the input
+        except exceptions.VerifyMismatchError:
+            #Sending an error message to back to the login page in order to display why the login didn't happen
+            flash('The password is incorrect. Please try again.', 'error')
         else:
-            response = getValuesFromQuery(cursor.fetchone())
-            phasher = PasswordHasher()
-            try:
-                #Verifying the hashed password gotten from the database with the user input one in the form
-                phasher.verify(response[0]['PW'], pw)
-            #Non-matching passwords will throw `VerifyMismatchError`
-            #Redirecting to login page form to retry the input
-            except exceptions.VerifyMismatchError:
-                #Sending an error message to back to the login page in order to display why the login didn't happen
-                flash('The password is incorrect. Please try again.', 'error')
+            #Dinamically changing session permanent state based on form checkbox
+            if(request.form.get('remember')):
+                session.permanent = True
             else:
-                #Dinamically changing session permanent state based on form checkbox
-                if(request.form.get('remember')):
-                    session.permanent = True
-                else:
-                    session.permanent = False
-                #Getting all useful user data and creating all relative session fields
-                session['uid'] = response[0]['userID']
-                session['name'] = response[0]['Nome']
-                session['role'] = response[0]['Tipologia']
-                #Reformatting last login date for clean output
-                session['lastLogin'] = str(response[0]['ultimoLogin']).replace(' ', ' alle ')
-                session['githubConnected'] = True if response[0]['github_id'] != 'NULL' else False
+                session.permanent = False
+            #Getting all useful user data and creating all relative session fields
+            session['uid'] = response[0]['userID']
+            session['name'] = response[0]['Nome']
+            session['role'] = response[0]['Tipologia']
+            #Reformatting last login date for clean output
+            session['lastLogin'] = str(response[0]['ultimoLogin']).replace(' ', ' alle ')
+            session['githubConnected'] = True if response[0]['githubID'] != 'NULL' else False
 
-                #Default last login value in database = fresh account so a new password needs to be set. Redirecting to password creation page
-                if(session['lastLogin'] == 'Mai'):
-                    return redirect(url_for('updatePassword'))
-                else:
-                    #Updating last login time and redirecting user to screening
-                    updateLastLoginTime()
-                    return redirect(url_for('userScreening'))
-            finally:
-                connection.close()
+            #Default last login value in database = fresh account so a new password needs to be set. Redirecting to password creation page
+            if(session['lastLogin'] == 'Mai'):
+                return redirect(url_for('updatePassword'))
+            else:
+                #Updating last login time and redirecting user to screening
+                updateLastLoginTime()
+                return redirect(url_for('userScreening'))
+        finally:
+            connection.close()
     else:
         flash(commonErrorMessage, 'error')
     return redirect(url_for('login'))
@@ -196,7 +193,7 @@ def unlinkGithubAccount():
         if(not connection):
             return redirect(url_for('index'))
         cursor = connection.cursor()
-        cursor.execute('update Credenziali set github_id = NULL\
+        cursor.execute('update Credenziali set githubID = NULL\
                     where userID = %(uid)s', {'uid': session['uid']})
         connection.commit()
         session['githubConnected'] = False
@@ -340,17 +337,15 @@ def getCourses():
     return courses
 
 def getValuesFromQuery(cursor):
-    '''Returns the DB response in form of list of dictionaries, or `False` if the cursor is `NoneType`\n
+    '''Returns the DB response in form of list of dictionaries\n
     Takes as parameter a response from `cursor.execute()`'''
-    if(cursor):
-        responseDict = []
-        for row in cursor:
-            #Creating a dictionary for each row of the DB response
-            responseDict.append({})
-            for colCounter, col in enumerate(row):
-                responseDict[-1].setdefault(cursor.description[colCounter][0], col)
-        return responseDict
-    return False
+    responseDict = []
+    for row in cursor:
+        #Creating a dictionary for each row of the DB response
+        responseDict.append({})
+        for colCounter, col in enumerate(row):
+            responseDict[-1].setdefault(cursor.description[colCounter][0], col)
+    return responseDict
 
 def updateLastLoginTime():
     '''Programmatically updates user's last login time on database'''
@@ -375,7 +370,7 @@ def checkUserGithubConnection():
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
-    response = cursor.execute('select github_id from Utente where userID = %(uid)s', {'uid': session['uid']})
+    response = cursor.execute('select githubID from Utente where userID = %(uid)s', {'uid': session['uid']})
     if(not response):
         returnedValue = False
     else:
@@ -389,14 +384,14 @@ def linkGithubAccount(userID):
         return redirect(url_for('index'))
     cursor = connection.cursor()
     #Checking if the github user ID is already in the database (same UID cannot be used my more than 1 person)
-    cursor.execute('select github_id from Utente where github_id = %(github_userID)s', {'github_userID': userID})
+    cursor.execute('select githubID from Utente where githubID = %(github_userID)s', {'github_userID': userID})
     response = cursor.fetchone()
     #`response = None` means no one has linked that specific account
     if(response != None):
         accountLinked = False
     else:
         #Updating table column with github user id
-        cursor.execute("update Utente set github_id = %(github_userID)s where userID = %(uid)s", {'github_userID': userID, 'uid': session['uid']})
+        cursor.execute("update Utente set githubID = %(github_userID)s where userID = %(uid)s", {'github_userID': userID, 'uid': session['uid']})
         connection.commit()
         session['githubConnected'] = True
         accountLinked = True
@@ -411,7 +406,7 @@ def loginWithGithub(userID):
     cursor = connection.cursor()
     #Finding between all `Utente`'s table columns for a matching github user ID and storing its relative data in a session
     #FIXME: Nonetype
-    cursor.execute("select userID, Nome, Cognome, Tipologia, github_id, idCorso, ultimoLogin from Utente where github_id = %(github_userID)s", {'github_userID': str(userID)})
+    cursor.execute("select userID, Nome, Cognome, Tipologia, githubID, idCorso, ultimoLogin from Utente where githubID = %(github_userID)s", {'github_userID': str(userID)})
     #Checking for `response != None` in case the Query returns no columns so returned value = None
     if(response != None):
         response = list(cursor.fetchone())
