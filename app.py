@@ -310,15 +310,9 @@ def getCourses():
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
-
     cursor.execute("select nomeCorso, annoCorso from Corso")
-    #Clearing courses list in order to correctly store all available courses
-    courses = []
-    for row in cursor:
-        #Creating a dictionary for each row of the DB response
-        courses.append({})
-        for colCounter, col in enumerate(row):
-            courses[-1].setdefault(cursor.description[colCounter][0], col)
+    #Overwriting list with newly values from DB response
+    courses = getValuesFromQuery(cursor)
     return courses
 
 def getValuesFromQuery(cursor):
