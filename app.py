@@ -190,13 +190,16 @@ def authorize():
 
 @app.route('/auth/github/disconnect')
 def unlinkGithubAccount():
+    #Checks if the logged user has a linked github account
     if(session.get('githubConnected')):
         connection = connectToDB()
         if(not connection):
             return redirect(url_for('index'))
         cursor = connection.cursor()
-        cursor.execute('update Utente set github_id = NULL where userID = %(uid)s', {'uid': session['uid']})
+        cursor.execute('update Credenziali set github_id = NULL\
+                    where userID = %(uid)s', {'uid': session['uid']})
         connection.commit()
+        session['githubConnected'] = False
         flash('Github account unlinked', 'success')
     return redirect(url_for('userScreening'))
 
