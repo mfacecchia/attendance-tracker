@@ -224,7 +224,7 @@ def handle_request():
         email = request.form.get('email').strip().lower()
         pw = request.form.get('password')
         role = request.form.get('role')
-        courseName = request.form.get('course')
+        courseName, courseYear = request.form.get('course').split(' ')
 
         #Checking if all the form fields input are not empty and the password contains at least 10 characters before proceeding
         if(validateFormInput(fname, lname, email, pw) and len(pw) >= 10):
@@ -237,19 +237,23 @@ def handle_request():
                 return redirect(url_for('index'))
             #Creating a cursor reponsible for query executions
             cursor = connection.cursor()
-
-            cursor.execute('select idCorso from Corso where nomeCorso = %(courseName)s', {'courseName': courseName})
-            courseID = cursor.fetchone()[0]
-
-            try:
-                cursor.execute('insert into Utente(Email, Nome, Cognome, PW, Tipologia, idCorso) values(%(email)s, %(name)s, %(surname)s, %(pw)s, %(role)s, %(courseID)s)', {'email': email, 'name': fname, 'surname': lname, 'pw': hashedPW, 'role': role, 'courseID': courseID})
-                #Sending request to DB
-                connection.commit()
-            #`IntegrityError` means that one or more contraint rules were not met
-            except mysql.connector.errors.IntegrityError:
-                flash('User with this email already exists', 'error')
-            else:
+            #Checking if user with the input Email already exists
+            response = cursor.execute("select Email from Credenziali where Email = %(userEmail)s", {'userEmail', email})
+            if(not response):
+                #Matrix with all the queries to execute to create the account
+                queries = [
+                            ['insert into Utente(Nome, Cognome, Tipologia) values(%(name)s, %(surname)s, %(role)s)', {'name': fname, 'surname': lname, 'role': role}],
+                            ['insert into Credenziali(Email, PW, userID) values(%(email)s, %(pw)s, (select max(userID) from Utente))', {'email': email, 'pw': hashedPW}],
+                            ['insert into Registrazione(userID, idCorso) values((select max(userID) from Utente)), (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'courseName': str(courseName), 'courseYear': str(courseYear)}]
+                        ]
+                #Executing all queries from the pre-created matrix
+                for query in queries:
+                    cursor.execute(query[0], query[1])
+                    #Sending request to DB
+                    connection.commit()
                 flash('Account created', 'success')
+            else:
+                flash('User with this email already exists', 'error')
             #Closing connection
             connection.close()
             return redirect(url_for('userScreening'))
