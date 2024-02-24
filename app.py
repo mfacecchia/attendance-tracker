@@ -321,6 +321,19 @@ def getCourses():
             courses[-1].setdefault(cursor.description[colCounter][0], col)
     return courses
 
+def getValuesFromQuery(cursor):
+    '''Returns the DB response in form of list of dictionaries, or `False` if the cursor is `NoneType`\n
+    Takes as parameter a response from `cursor.execute()`'''
+    if(cursor):
+        responseDict = []
+        for row in cursor:
+            #Creating a dictionary for each row of the DB response
+            responseDict.append({})
+            for colCounter, col in enumerate(row):
+                responseDict[-1].setdefault(cursor.description[colCounter][0], col)
+        return responseDict
+    return False
+
 def updateLastLoginTime():
     '''Programmatically updates user's last login time on database'''
     #TODO: Update with GMT+1 timezone
