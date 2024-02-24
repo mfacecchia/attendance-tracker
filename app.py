@@ -265,12 +265,13 @@ def handle_request():
             else:
                 flash('Wrong courses values. Please try again', 'error')
                 return(redirect(url_for('userScreening')))
-    else:
-        flash('Please select a valid role and course from the menus')
-        return(redirect(url_for('userScreening')))
     #Redirecting back to register page if the input values are not correct
-    flash(commonErrorMessage, 'error')
-    return(redirect(url_for('userScreening')))
+        else:
+            flash('Please select at least one valid course from the list', 'error')
+            return(redirect(url_for('userScreening')))
+    else:
+        flash('Please select a valid role and at least one course from the menu')
+        return(redirect(url_for('userScreening')))
 
 @app.route('/lesson/create', methods = ['GET', 'POST'])
 def createLesson():
@@ -514,9 +515,9 @@ def validateCoursesSelection(coursesNames, coursesYears):
     cursor = connection.cursor()
     for course in range(len(coursesNames)):
         cursor.execute("select count(*)\
-                                from Corso\
-                                where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s", {'courseName': coursesNames[course], 'courseYear': coursesYears[course]})
-        if(not cursor.fetchone()):
+                    from Corso\
+                    where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s", {'courseName': coursesNames[course], 'courseYear': coursesYears[course]})
+        if(cursor.fetchone()[0] == 0):
             return False
     return True
 
