@@ -4,16 +4,16 @@ import mysql.connector
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
 from datetime import datetime
-
+from os import environ
 
 app = Flask(__name__)
 oauth = OAuth(app)
-app.config['SECRET_KEY'] = 'PNfxz1zt41{E2h2T=,#=&Rz4xXv-kE'
+app.config['SECRET_KEY'] = environ['FLASK_SECRET']
 app.config['SESSION_TYPE'] = 'filesystem'
 
 #GITHUB CONFIG DATA
-app.config['GITHUB_CLIENT_ID'] = 'e4114fcd0190e9c4132d'
-app.config['GITHUB_CLIENT_SECRET'] = '7d141726bbe60d55e0bcb712c505aa6ab4ccde92'
+app.config['GITHUB_CLIENT_ID'] = environ['GITHUB_CLIENT_ID']
+app.config['GITHUB_CLIENT_SECRET'] = environ['GITHUB_CLIENT_SECRET']
 #Registering OAuth application for future requests
 oauth.register(
     'github',
@@ -318,7 +318,7 @@ def logout():
 def connectToDB():
     '''Starts a connection to the database with the given data'''
     try:
-        connection = mysql.connector.connect(user = 'root', password = '', host = 'localhost', database = 'Attendance_Tracker')
+        connection = mysql.connector.connect(user = environ['DB_USERNAME'], password = environ['DB_PWORD'], host = environ['DB_HOSTNAME'], database = environ['DB_NAME'])
     except mysql.connector.Error:
         flash('The service is having some problems at the moment. Please try again later', 'error')
         return False
