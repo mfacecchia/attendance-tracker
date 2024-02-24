@@ -115,27 +115,25 @@ def verify_updated_password():
                 return redirect(url_for('index'))
             cursor = connection.cursor()
             pHasher = PasswordHasher()
-            response = cursor.execute('select PW from Credenziali\
+            #Getting the current password from the user
+            cursor.execute('select PW from Credenziali\
                         where userID = %(uid)s', {'uid': session['uid']})
-            if(response):
-                response = getValuesFromQuery(cursor.fetchone())
-                try:
-                    pHasher.verify(str(response[0]['PW']), newPassword)
-                #New and old passwords must be different, so the error must be triggered when `verifyMismatchError` is not raised
-                except exceptions.VerifyMismatchError:
-                    pass
-                else:
-                    flash("Password cannot be the same as before, try again", 'error')
-                    return redirect(url_for('updatePassword'))
-                hashedPW = pHasher.hash(newPassword.encode())
-                session['lastLogin'] = updateLastLoginTime()
-                cursor.execute("update Credenziali set PW = %(newPW)s\
-                            where userID = %(uid)s", {'newPW': hashedPW, 'uid': session['uid']})
-                connection.commit()
-                connection.close()
-                return redirect(url_for('userScreening'))
+            response = getValuesFromQuery(cursor)
+            try:
+                pHasher.verify(str(response[0]['PW']), newPassword)
+            #New and old passwords must be different, so the error must be triggered when `verifyMismatchError` is not raised
+            except exceptions.VerifyMismatchError:
+                pass
             else:
-                flash(commonErrorMessage, 'error')
+                flash("Password cannot be the same as before, try again", 'error')
+                return redirect(url_for('updatePassword'))
+            hashedPW = pHasher.hash(newPassword.encode())
+            cursor.execute("update Credenziali set PW = %(newPW)s\
+                        where userID = %(uid)s", {'newPW': hashedPW, 'uid': session['uid']})
+            connection.commit()
+            session['lastLogin'] = updateLastLoginTime()
+            connection.close()
+            return redirect(url_for('userScreening'))
         else:
             flash('Passwords not matching', 'error')
         return redirect(url_for('updatePassword'))
