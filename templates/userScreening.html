@@ -10,19 +10,6 @@ Gestione account
     <p>{{ session['role'] }}</p>
     <p>Ultima volta online: {{session['lastLogin']}}</p>
 
-    {% with messages = get_flashed_messages(with_categories = True) %}
-        {% if messages %}
-            {% for messageType, message in messages %}
-                {% if messageType == 'success' %}
-                    <b style = "color: green">{{message}}</b>
-                {% else %}
-                    <b style = "color: red">{{message}}</b>
-                {% endif %}
-                <br>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
     {% if session['role'] == 'Admin' %}
         <h1>Crea utente</h1>
         <form action = '{{ url_for("handle_request") }}' method = "post">
