@@ -155,6 +155,7 @@ def githubAuth():
 @app.route('/auth/github/callback', methods = ['GET'])
 def authorize():
     #Converting the `login` request from the URL to a boolean value
+    #Obtaining the value from URL as a GET parameter
     login = True if request.args.get('login') == 'True' else False
     #Getting the user values and starting the OAuth autorization process
     try:
@@ -163,16 +164,14 @@ def authorize():
     except OAuthError:
         flash('Request failed', 'error')
         return redirect(url_for('login'))
-    #`not login` = `False` means that the service requested is github account link
+    #`not login` = `False` means that the service requested is github account link (account already linked)
     if(not login):
         if(session.get('name')):
             #Checking if user has already linked a github account, otherwise the account linking function will be called
             if(not checkUserGithubConnection()):
                 if(linkGithubAccount(profile['id'])):
-                    print("OK")
                     flash('Account linked successfully', 'success')
                 else:
-                    print("ERROR")
                     flash('This github account is already used... Please try using a different one.', 'error')
             else:
                 flash('Account already linked', 'error')
