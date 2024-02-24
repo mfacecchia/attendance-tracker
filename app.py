@@ -29,6 +29,7 @@ oauth.register(
 roleOptions = ['Studente', 'Insegnante', 'Admin']
 #Creating a variable used to store all available courses from the database and pass them to the HTML template
 courses = []
+#TODO: Add common error message
 
 @app.route('/')
 def index():
@@ -117,24 +118,27 @@ def verify_updated_password():
                 return redirect(url_for('index'))
             cursor = connection.cursor()
             pHasher = PasswordHasher()
-            cursor.execute('select PW from Utente where userID = %(uid)s', {'uid': session['uid']})
-            response = cursor.fetchone()
-            try:
-                pHasher.verify(str(response[0]), newPassword)
-            #New and old passwords must be different, so the error must be triggered when `verifyMismatchError` is not raised
-            except exceptions.VerifyMismatchError:
-                pass
+            response = cursor.execute('select PW from Credenziali\
+                        where userID = %(uid)s', {'uid': session['uid']})
+            if(response):
+                response = getValuesFromQuery(cursor.fetchone())
+                try:
+                    pHasher.verify(str(response[0]['PW']), newPassword)
+                #New and old passwords must be different, so the error must be triggered when `verifyMismatchError` is not raised
+                except exceptions.VerifyMismatchError:
+                    pass
+                else:
+                    flash("Password cannot be the same as before, try again", 'error')
+                    return redirect(url_for('updatePassword'))
+                hashedPW = pHasher.hash(newPassword.encode())
+                session['lastLogin'] = updateLastLoginTime()
+                cursor.execute("update Credenziali set PW = %(newPW)s\
+                            where userID = %(uid)s", {'newPW': hashedPW, 'uid': session['uid']})
+                connection.commit()
+                connection.close()
+                return redirect(url_for('userScreening'))
             else:
-                flash("Password cannot be the same as before, try again", 'error')
-                return redirect(url_for('updatePassword'))
-            hashedPW = pHasher.hash(newPassword.encode())
-            
-            session['lastLogin'] = updateLastLoginTime()
-            cursor.execute("update Utente set PW = %(newPW)s where userID = %(uid)s", {'newPW': hashedPW, 'uid': session['uid']})
-            connection.commit()
-            cursor.close()
-            connection.close()
-            return redirect(url_for('userScreening'))
+                flash('An error occured while handling your request... Please try again.', 'error')
         else:
             flash('Passwords not matching', 'error')
         return redirect(url_for('updatePassword'))
