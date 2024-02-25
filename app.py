@@ -54,8 +54,7 @@ def check_login():
             return redirect(url_for('index'))
         cursor = connection.cursor()
         #Getting all data from the database related to that single email (representing Unique key)
-        #TODO: Remove `Email` from query
-        cursor.execute('select Utente.userID, Nome, Tipologia, ultimoLogin, Email, PW, githubID, googleID\
+        cursor.execute('select Utente.userID, Nome, Tipologia, ultimoLogin, PW, githubID, googleID\
                                 from Credenziali, Utente\
                                 where Credenziali.userID = Utente.userID\
                                 and Email = %(email)s', {'email': email})
@@ -296,7 +295,6 @@ def select_user():
 @app.route('/user/update', methods = ['GET', 'POST'])
 def update_user_data():
     if(session['role'] == 'Admin'):
-        #FIXME: Fix function `updateDataAsAdmin()`
         userID = updateDataAsAdmin()
         return redirect(url_for('select_user', userID = userID))
     else:
