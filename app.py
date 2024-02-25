@@ -54,6 +54,7 @@ def check_login():
             return redirect(url_for('index'))
         cursor = connection.cursor()
         #Getting all data from the database related to that single email (representing Unique key)
+        #TODO: Remove `Email` from query
         cursor.execute('select Utente.userID, Nome, Tipologia, ultimoLogin, Email, PW, githubID, googleID\
                                 from Credenziali, Utente\
                                 where Credenziali.userID = Utente.userID\
@@ -82,8 +83,8 @@ def check_login():
             session['name'] = response[0]['Nome']
             session['role'] = response[0]['Tipologia']
             #Reformatting last login date for clean output
-            session['lastLogin'] = str(response[0]['ultimoLogin']).replace(' ', ' alle ')
-            session['githubConnected'] = True if response[0]['githubID'] != 'NULL' else False
+            session['lastLogin'] = response[0]['ultimoLogin'].replace(' ', ' alle ')
+            session['githubConnected'] = bool(response[0]['githubID'])
 
             #Default last login value in database = fresh account so a new password needs to be set. Redirecting to password creation page
             if(session['lastLogin'] == 'Mai'):
@@ -166,7 +167,7 @@ def authorize():
                 if(linkGithubAccount(profile['id'])):
                     flash('Account linked successfully', 'success')
                 else:
-                    flash('This github account is already used... Please try using a different one.', 'error')
+                    flash('This github account is already linked to a different user... Please try using a different one.', 'error')
             else:
                 flash('Account already linked', 'error')
             return redirect(url_for('userScreening'))
@@ -368,11 +369,8 @@ def checkUserGithubConnection():
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
-    response = cursor.execute('select githubID from Utente where userID = %(uid)s', {'uid': session['uid']})
-    if(not response):
-        returnedValue = False
-    else:
-        returnedValue = True
+    response = cursor.execute('select githubID from Credenziali where userID = %(uid)s', {'uid': session['uid']})
+    returnedValue = bool(response)
     connection.close()
     return returnedValue
     
@@ -382,45 +380,42 @@ def linkGithubAccount(userID):
         return redirect(url_for('index'))
     cursor = connection.cursor()
     #Checking if the github user ID is already in the database (same UID cannot be used my more than 1 person)
-    cursor.execute('select githubID from Utente where githubID = %(github_userID)s', {'github_userID': userID})
+    cursor.execute('select githubID from Credenziali where githubID = %(github_userID)s', {'github_userID': userID})
     response = cursor.fetchone()
     #`response = None` means no one has linked that specific account
     if(response != None):
         accountLinked = False
     else:
         #Updating table column with github user id
-        cursor.execute("update Utente set githubID = %(github_userID)s where userID = %(uid)s", {'github_userID': userID, 'uid': session['uid']})
+        cursor.execute("update Credenziali set githubID = %(github_userID)s where userID = %(uid)s", {'github_userID': userID, 'uid': session['uid']})
         connection.commit()
         session['githubConnected'] = True
         accountLinked = True
     connection.close()
     return accountLinked
 
-def loginWithGithub(userID):
+def loginWithGithub(githubUserID):
     '''Lets the user login with a valid linked github account'''
     connection = connectToDB()
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
     #Finding between all `Utente`'s table columns for a matching github user ID and storing its relative data in a session
-    #FIXME: Nonetype
-    cursor.execute("select userID, Nome, Cognome, Tipologia, githubID, idCorso, ultimoLogin from Utente where githubID = %(github_userID)s", {'github_userID': str(userID)})
-    #Checking for `response != None` in case the Query returns no columns so returned value = None
-    if(response != None):
-        response = list(cursor.fetchone())
-        if(str(response[4]) == str(userID)):
-            response[5] = idToCourseName(cursor, response[5])
-            session['uid'] = response[0]
-            session['name'] = response[1]
-            session['surname'] = response[2]
-            session['role'] = response[3]
-            session['course'] = response[5]
-            #Reformatting last login date for clean output
-            session['lastLogin'] = str(response[6]).replace(' ', ' alle ')
-            session['githubConnected'] = True
-            accountFound = True
-        else:
-            accountFound = False
+    cursor.execute("select Utente.userID, Nome, Cognome, Tipologia, ultimoLogin, Credenziali.githubID\
+                from Utente\
+                inner join Credenziali on Utente.userID = Credenziali.userID\
+                where githubID = %(github_userID)s", {'github_userID': str(githubUserID)})
+    response = getValuesFromQuery(cursor)
+    #Checking for `response` var content in case the Query returns no columns so returned value = empty list
+    if(response and response[0]['githubID'] == str(githubUserID)):
+        session['uid'] = response[0]['userID']
+        session['name'] = response[0]['Nome']
+        session['surname'] = response[0]['Cognome']
+        session['role'] = response[0]['Tipologia']
+        #Reformatting last login date for clean output
+        session['lastLogin'] = response[0]['ultimoLogin'].replace(' ', ' alle ')
+        session['githubConnected'] = True
+        accountFound = True
     #Returning `False` if the github user ID was not found in the table
     else:
         accountFound = False
