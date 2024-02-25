@@ -478,39 +478,65 @@ def idToCourseName(cursor, courseID):
 
 def updateDataAsAdmin():
     '''Shorthand function to update any user data as administrator'''
-    if(request.form.get('role') in roleOptions and request.form.get('course') in courses):
+    userID = request.form.get('uid')
+    if(request.form.get('role') in roleOptions and len(request.form.getlist('course')) > 0):
         fname = request.form.get('fname').strip().capitalize()
         lname = request.form.get('lname').strip().capitalize()
         email = request.form.get('email').strip().lower()
-        userID = request.form.get('uid')
+        pw = request.form.get('password')
+        pwVerify = request.form.get('password_verify')
+        hashedPW = ''
         role = request.form.get('role')
-        courseName = request.form.get('course')
+        chosenCourses = request.form.getlist('course')
 
-        #Checking if all the form fields input are not empty
-        if(validateFormInput(fname, lname, email)):
-
-            connection = connectToDB()
-            if(not connection):
-                return redirect(url_for('index'))
-            #Creating a cursor reponsible for query executions
-            cursor = connection.cursor()
-
-            cursor.execute('select idCorso from Corso where nomeCorso = %(courseName)s', {'courseName': courseName})
-            courseID = cursor.fetchone()[0]
-
-            try:
-                cursor.execute('update Utente set Nome = %(fname)s, Cognome = %(lname)s, Email = %(email)s, Tipologia = %(role)s, idCorso = %(courseID)s where userID = %(uid)s', {'fname': fname, 'lname': lname, 'email': email, 'role': role, 'courseID': courseID, 'uid': userID})
-                #Sending request to DB
-                connection.commit()
-            #`IntegrityError` means that one or more contraint rules were not met
-            except mysql.connector.errors.IntegrityError:
-                flash('User with this email already exists', 'error')
+        coursesNames = []
+        coursesYears = []
+        for course in chosenCourses:
+            coursesNames.append(course.split(" - ")[0])
+            coursesYears.append(course.split(" - ")[1])
+        if(validateCoursesSelection(coursesNames, coursesYears)):
+            #Checking if all the form fields input are not empty
+            if(validateFormInput(fname, lname, email)):
+                if(pw != ''):
+                    if(len(pw) >= 10 and pw == pwVerify):
+                        phasher = PasswordHasher()
+                        hashedPW = phasher.hash(pw.encode())
+                    else:
+                        flash('Passwords not matching or password shorter than 10 characters.', 'error')
+                        return userID
+                connection = connectToDB()
+                if(not connection):
+                    return redirect(url_for('index'))
+                #Creating a cursor reponsible for query executions
+                cursor = connection.cursor()
+                cursor.execute('select count(*)\
+                            from Credenziali\
+                            where Email = %(newEmail)s and userID != %(userID)s', {'newEmail': email, 'userID': userID})
+                response = cursor.fetchone()
+                if(response[0] == 0):
+                    queries = [
+                                ['update Utente set Nome = %(name)s, Cognome = %(surname)s, Tipologia = %(role)s where userID = %(uid)s', {'name': fname, 'surname': lname, 'role': role, 'uid': userID}],
+                                ['delete from Registrazione where userID = %(uid)s', {'uid': userID}],
+                                ['update Credenziali set Email = %(email)s where userID = %(uid)s', {'email': email, 'uid': userID}]
+                            ]
+                    #Update password only if it has been hashed (valid password input)
+                    if(hashedPW):
+                        queries.append(['update Credenziali set PW = %(pw)s where userID = %(uid)s', {'pw': hashedPW, 'uid': userID}])
+                    for query in queries:
+                        cursor.execute(query[0], query[1])
+                        connection.commit()
+                    for x in range(len(coursesNames)):
+                        cursor.execute('insert into Registrazione(userID, idCorso) values(%(uid)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'uid': userID, 'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
+                        connection.commit()
+                    flash('Account updated', 'success')
+                else:
+                    flash('Email already associated with a different account... Cannot proceed', 'error')
+                #Closing connection
+                connection.close()
             else:
-                flash('Account updated', 'success')
-            #Closing connection
-            connection.close()
+                flash('Invalid input. Please try again.', 'error')
         else:
-            flash('Invalid input. Please try again.', 'error')
+            flash('Please select a valid role and course from the menus')
     else:
         flash('Please select a valid role and course from the menus')
     return userID
