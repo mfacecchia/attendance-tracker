@@ -17,7 +17,7 @@ Gestione account
             <input type = "text" name = "lname" placeholder = "Surname" required maxlength = "20">
             <input type = "email" name = "email" placeholder = "Email" required maxlength = "40">
             <!-- TODO: JS function to check password strength -->
-            <input type = "password" name = "password" placeholder = "Password" pattern = '.{10,255}' required>
+            <input type = "password" name = "password" placeholder = "Password" minlength = "10" maxlength = "255" required>
             <select name = "role">
                 <option value = "">-- Seleziona un ruolo --</option>
                 {% for role in roleOptions %}
