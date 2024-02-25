@@ -204,7 +204,7 @@ def userScreening():
         if(session.get('lastLogin') == 'Mai'):
             return redirect(url_for('updatePassword'))
         getCourses()
-        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses)
+        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses, helloMessage = getCustomMessage())
     else:
         flash('Please login', 'error')
         return redirect(url_for('login'))
@@ -346,10 +346,9 @@ def getValuesFromQuery(cursor):
 
 def updateLastLoginTime():
     '''Programmatically updates user's last login time on database'''
-    #TODO: Update with GMT+1 timezone
     timeNow = datetime.now()
     #TODO: Update format with `%d/%m/%Y %H:%M`
-    timeNow = timeNow.strftime('%d-%m-%Y %H:%M')
+    timeNow = timeNow.strftime('%d/%m/%Y %H:%M')
 
     connection = connectToDB()
     if(not connection):
@@ -548,6 +547,15 @@ def validateCoursesSelection(coursesNames, coursesYears):
             return False
     return True
 
+def getCustomMessage():
+    '''Returns a custom message based on the system clock time to be printed out in the user screening page'''
+    #Matrix with all the times ranges and the relative printout message
+    timesRange = [[0,5, '🌙 Buona notte'],[6,12, '👨‍🏫 Buon giorno'],[13,18, '📚 Buon pomeriggio'],[19,24, '☕️ Buona sera']]
+    currentTime = int(datetime.now().strftime('%H'))
+    #Iterating through all the list elements and checking the current time range location to obtain the right message
+    for timeRange in timesRange:
+        if(currentTime >= timeRange[0] and currentTime <= timeRange[1]):
+            return timeRange[2]
 
 if __name__ == "__main__":
     app.run(debug = True)
