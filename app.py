@@ -462,8 +462,13 @@ def getUserData(uid):
                 inner join Corso on Corso.idCorso = Registrazione.idCorso\
                 where Utente.userID = %(uid)s', {'uid': int(uid)})
     response = getValuesFromQuery(cursor)
+    
+    #Getting all courses from the query and creating a single list with all the obtained ones
+    response[0]['nomeCorso'] = [response[0]['nomeCorso']]
+    for course in response[1:]:
+        response[0]['nomeCorso'].append(course['nomeCorso'])
     connection.close()
-    return response
+    return response[0]
 
 #TODO: Remove function (no longer useful)
 def idToCourseName(cursor, courseID):
