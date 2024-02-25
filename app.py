@@ -461,12 +461,6 @@ def getUserData(uid):
     connection.close()
     return response[0]
 
-#TODO: Remove function (no longer useful)
-def idToCourseName(cursor, courseID):
-    '''Converts course ID to course name based on Foreign key <--> Primary key relation'''
-    cursor.execute('select nomeCorso from corso where idCorso = %(courseID)s', {'courseID': int(courseID)})
-    return cursor.fetchone()[0]
-
 def updateDataAsAdmin():
     '''Shorthand function to update any user data as administrator'''
     userID = request.form.get('uid')
