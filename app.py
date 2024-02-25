@@ -399,7 +399,7 @@ def loginWithGithub(githubUserID):
         return redirect(url_for('index'))
     cursor = connection.cursor()
     #Finding between all `Utente`'s table columns for a matching github user ID and storing its relative data in a session
-    cursor.execute("select Utente.userID, Nome, Cognome, Tipologia, ultimoLogin, Credenziali.githubID\
+    cursor.execute("select Utente.userID, Nome, Tipologia, ultimoLogin, Credenziali.githubID\
                 from Utente\
                 inner join Credenziali on Utente.userID = Credenziali.userID\
                 where githubID = %(github_userID)s", {'github_userID': str(githubUserID)})
@@ -408,7 +408,6 @@ def loginWithGithub(githubUserID):
     if(response and response[0]['githubID'] == str(githubUserID)):
         session['uid'] = response[0]['userID']
         session['name'] = response[0]['Nome']
-        session['surname'] = response[0]['Cognome']
         session['role'] = response[0]['Tipologia']
         #Reformatting last login date for clean output
         session['lastLogin'] = response[0]['ultimoLogin'].replace(' ', ' alle ')
