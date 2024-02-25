@@ -109,7 +109,6 @@ def verify_updated_password():
     if(newPassword != None and len(newPassword) >= 10):
         #Checking if form's passwords match, otherwise redirecting back to correct it
         if(newPassword == request.form.get('passwordVerify')):
-            #TODO: Check for possible `False` returned value
             connection = connectToDB()
             if(not connection):
                 return redirect(url_for('index'))
@@ -444,7 +443,8 @@ def getUsersList():
     cursor.execute("select Utente.userID, Nome, Cognome, Tipologia, nomeCorso\
                 from Utente\
                 inner join Registrazione on Utente.userID = Registrazione.userID\
-                inner join Corso on Registrazione.idCorso = Corso.idCorso")
+                inner join Corso on Registrazione.idCorso = Corso.idCorso\
+                group by(userID)")
     usersList = getValuesFromQuery(cursor)
     connection.close()
     return usersList
