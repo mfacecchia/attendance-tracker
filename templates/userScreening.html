@@ -35,12 +35,19 @@ Gestione account
         <a href = "{{url_for('usersList')}}">Lista utenti</a>
     {% endif %}
 
-    {% if session['role'] == 'Insegnante' %}
+    {% if session['role'] in ['Insegnante', 'Admin'] %}
         <h1>Crea una lezione</h1>
         <form action = "{{url_for('createLesson')}}" method = "post">
             <input type = "text" name = "Subject" placeholder = "Materia" required autofocus maxlength = "30">
+            <input type = "text" name = "Description" placeholder = "Descrizione (Opzionale)" maxlength = "100">
             <input type = "date" name = "lessonDate" placeholder = "Data lezione" required>
-            <input type = "text" name = "room" placeholder = "Aula" required pattern = "[a-zA-Z][0-9]+" maxlength = "4">
+            <input type = "text" name = "room" placeholder = "Aula (ex. A001)" required pattern = "[a-zA-Z][0-9]+" minlength = "4" maxlength = "4">
+            <select name = "lessonType">
+                <option>-- Seleziona una tipologia --</option>
+                {% for lesson in lessonTypes %}
+                    <option value = "{{lesson}}">{{ lesson }}</option>
+                {% endfor %}
+            </select>
             
             <button type = "submit">Crea lezione</button>
         </form>

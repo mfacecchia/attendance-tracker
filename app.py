@@ -29,6 +29,7 @@ oauth.register(
 roleOptions = ['Studente', 'Insegnante', 'Admin']
 #Creating a variable used to store all available courses from the database and pass them to the HTML template
 courses = []
+lessonTypes = ['Lezione', 'Seminario', 'Laboratorio']
 commonErrorMessage = 'An error occured while handling your request... Please try again.'
 
 @app.route('/')
@@ -204,7 +205,7 @@ def userScreening():
         if(session.get('lastLogin') == 'Mai'):
             return redirect(url_for('updatePassword'))
         getCourses()
-        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses, helloMessage = getCustomMessage())
+        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses, lessonTypes = lessonTypes, helloMessage = getCustomMessage())
     else:
         flash('Please login', 'error')
         return redirect(url_for('login'))
