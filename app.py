@@ -290,9 +290,9 @@ def createLesson():
     if(session.get('role') in ['Insegnante', 'Admin']):
         if(request.form.get('lessonType') in lessonTypes and len(request.form.get('room')) == 4):
             subject = request.form.get('subject').strip().capitalize()
-            description = request.form.get('description').strip().capitalize()
+            description = request.form.get('description').strip()
             lessonDate = request.form.get('lessonDate')
-            lessonRoom = request.form.get('room')
+            lessonRoom = request.form.get('room').upper()
             lessonType = request.form.get('lessonType')
             chosenCourseName, chosenCourseYear = request.form.get('course').split(' - ')
             if(validateCoursesSelection([chosenCourseName], [chosenCourseYear])):
