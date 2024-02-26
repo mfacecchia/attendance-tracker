@@ -216,7 +216,6 @@ def userScreening():
                         inner join Utente on Registrazione.userID = Utente.userID\
                         where Utente.userID = %(uid)s', {'uid': session['uid']})
             response = getValuesFromQuery(cursor)
-            print(response)
         return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses if not response else response, lessonTypes = lessonTypes, helloMessage = getCustomMessage())
     else:
         flash('Please login', 'error')
@@ -309,7 +308,6 @@ def createLesson():
                 else:
                     flash('Wrong input values. Please try again.', 'error')
             else:
-                print(chosenCourseName, chosenCourseYear)
                 flash('Course not found. Please try again.', 'error')
         else:
             flash('Please select a valid lesson type and course from the menus', 'error')
@@ -344,9 +342,12 @@ def update_user_data():
     if(session.get('role') == 'Admin'):
         userID = updateDataAsAdmin()
         return redirect(url_for('select_user', userID = userID))
-    #Redirecting back to register page if the input values are not correct
-    flash(commonErrorMessage, 'error')
-    return(redirect(url_for('usersList')))
+    elif(session.get('role') in ['Studente', 'Insegnante']):
+        if(updateDataAsUser()):
+            flash('Data updated', 'success')
+    else:
+        flash(commonErrorMessage, 'error')
+    return(redirect(url_for('userScreening')))
 
 @app.route('/user/logout')
 def logout():
@@ -566,6 +567,43 @@ def updateDataAsAdmin():
     else:
         flash('Please select a valid role and course from the menus')
     return userID
+
+def updateDataAsUser():
+    email = request.form.get('email').strip().lower()
+    pw = request.form.get('password')
+    pwVerify = request.form.get('password_verify')
+    hashedPW = ''
+    queries = []
+    
+    connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
+    cursor = connection.cursor()
+    if(validateFormInput(email)):
+        cursor.execute('select count(*)\
+                    from Credenziali\
+                    where Email = %(newEmail)s', {'newEmail': email})
+        response = cursor.fetchone()
+        if(response[0] > 0):
+            flash('Email already associated with an account... Cannot proceed', 'error')
+            return False
+        queries.append(['update Credenziali set Email = %(newEmail)s where userID = %(uid)s', {'newEmail': email, 'uid': session['uid']}])
+    if(pw != ''):
+        if(len(pw) >= 10 and pw == pwVerify):
+            phasher = PasswordHasher()
+            hashedPW = phasher.hash(pw.encode())
+            queries.append(['update Credenziali set PW = %(updatedHashedPW)s where userID = %(userID)s', {'updatedHashedPW': hashedPW, 'userID': session['uid']}])
+        else:
+            flash('Passwords not matching or password shorter than 10 characters.', 'error')
+            return False
+    if(not queries):
+        flash('No data provided for updating user.', 'error')
+        return False
+    for query in queries:
+        cursor.execute(query[0], query[1])
+        connection.commit()
+    connection.close()
+    return True
 
 def validateCoursesSelection(coursesNames, coursesYears):
     '''Gets all courses names and relative years as parameters and executes a query for each item to check if the actual selection exists\n

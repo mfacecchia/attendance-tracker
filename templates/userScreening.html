@@ -62,6 +62,7 @@ Gestione account
     <form action = "{{url_for('update_user_data')}}" method = "post">
         <h1>Modifica dati utente</h1>
         <input type = "email" name = "email" placeholder = "Email">
+        <!-- TODO: Set minlength to 10 chars -->
         <input type = "password" name = "password" placeholder = "Password">
         <input type = "password" name = "password_verify" placeholder = "Verifica password">
         
