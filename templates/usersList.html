@@ -10,7 +10,8 @@ Lista utenti
         <p>{{user['Nome']}} {{user['Cognome']}}, {{user['Tipologia']}} ({{user['nomeCorso']}})</p>
         <form action = "{{url_for('select_user')}}" method = "post">
             <input type = "text" name = "userID" readonly hidden value = "{{user['userID']}}">
-            <button type = "submit">Modifica</button>
+            <button type = "submit" name = "submitButton" value = "Edit">Modifica</button>
+            <button type = "submit" name = "submitButton" value = "Remove">Elimina Utente</button>
         </form>
         <br><br>
     {% endfor %}

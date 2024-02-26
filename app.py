@@ -327,11 +327,16 @@ def usersList():
 @app.route('/user/select', methods = ['GET', 'POST'])
 def select_user():
     if(session['role'] == 'Admin'):
-        if(request.values.get('userID')):
-            uid = request.values.get('userID')
-            selectedUser = getUserData(uid)
-            getCourses()
-            return render_template('userData.html', userData = selectedUser, courses = courses, roles = roleOptions)
+        uid = request.values.get('userID')
+        if(request.form.get('submitButton') == 'Edit'):
+            if(request.values.get('userID')):
+                selectedUser = getUserData(uid)
+                getCourses()
+                return render_template('userData.html', userData = selectedUser, courses = courses, roles = roleOptions)
+        else:
+            deleteUser(uid)
+            flash('User removed!', 'success')
+            return redirect(url_for('usersList'))
     return redirect(url_for('userScreening'))
 
 @app.route('/user/update', methods = ['GET', 'POST'])
@@ -593,6 +598,14 @@ def getUserCourses(response):
     for course in response[1:]:
         response[0]['nomeCorso'].append(course['nomeCorso'])
     return response[0]['nomeCorso']
+
+def deleteUser(uid):
+    '''Removes a defined user from the database'''
+    connection = connectToDB()
+    cursor = connection.cursor()
+    cursor.execute('delete from Utente where userID = %(uid)s', {'uid': uid})
+    connection.commit()
+    connection.close()
 
 if __name__ == "__main__":
     app.run(debug = True)
