@@ -452,10 +452,7 @@ def getUserData(uid):
                 where Utente.userID = %(uid)s', {'uid': int(uid)})
     response = getValuesFromQuery(cursor)
     
-    #Getting all courses from the query and creating a single list with all the obtained ones
-    response[0]['nomeCorso'] = [response[0]['nomeCorso']]
-    for course in response[1:]:
-        response[0]['nomeCorso'].append(course['nomeCorso'])
+    response[0]['nomeCorso'] = getUserCourses(response)
     connection.close()
     return response[0]
 
@@ -548,6 +545,13 @@ def getCustomMessage():
     for timeRange in timesRange:
         if(currentTime >= timeRange[0] and currentTime <= timeRange[1]):
             return timeRange[2]
+        
+def getUserCourses(response):
+    '''Getting all courses from the query and creating a single list with all the obtained ones'''
+    response[0]['nomeCorso'] = [response[0]['nomeCorso']]
+    for course in response[1:]:
+        response[0]['nomeCorso'].append(course['nomeCorso'])
+    return response[0]['nomeCorso']
 
 if __name__ == "__main__":
     app.run(debug = True)
