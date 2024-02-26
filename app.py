@@ -242,37 +242,41 @@ def handle_request():
             if(validateCoursesSelection(coursesNames, coursesYears)):
                 #Checking if all the form fields input are not empty and the password contains at least 10 characters before proceeding
                 if(validateFormInput(fname, lname, email, pw) and len(pw) >= 10):
-                    pHasher = PasswordHasher()
-                    pw = pw.encode()
-                    hashedPW = pHasher.hash(pw)
+                    #Checking for actual values length to avoid DB values limits
+                    if(len(fname) <= 20 and len(lname) <= 20 and len(email) <= 40):
+                        pHasher = PasswordHasher()
+                        pw = pw.encode()
+                        hashedPW = pHasher.hash(pw)
 
-                    connection = connectToDB()
-                    if(not connection):
-                        return redirect(url_for('index'))
-                    #Creating a cursor reponsible for query executions
-                    cursor = connection.cursor()
-                    #Checking if user with the input Email does not already exist
-                    cursor.execute("select Email from Credenziali where Email = %(userEmail)s", {'userEmail': email})
-                    response = getValuesFromQuery(cursor)
-                    if(len(response) == 0):
-                        #Matrix with all the queries to execute to create the account
-                        queries = [
-                                    ['insert into Utente(Nome, Cognome, Tipologia) values(%(name)s, %(surname)s, %(role)s)', {'name': fname, 'surname': lname, 'role': role}],
-                                    ['insert into Credenziali(Email, PW, userID) values(%(email)s, %(pw)s, (select max(userID) from Utente))', {'email': email, 'pw': hashedPW}],
-                                ]
-                        #Executing all queries from the pre-created matrix
-                        for query in queries:
-                            cursor.execute(query[0], query[1])
-                            #Sending request to DB
-                            connection.commit()
-                        for x in range(len(coursesNames)):
-                            cursor.execute('insert into Registrazione(userID, idCorso) values((select max(userID) from Utente), (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
-                            connection.commit()
-                        flash('Account created', 'success')
+                        connection = connectToDB()
+                        if(not connection):
+                            return redirect(url_for('index'))
+                        #Creating a cursor reponsible for query executions
+                        cursor = connection.cursor()
+                        #Checking if user with the input Email does not already exist
+                        cursor.execute("select Email from Credenziali where Email = %(userEmail)s", {'userEmail': email})
+                        response = getValuesFromQuery(cursor)
+                        if(len(response) == 0):
+                            #Matrix with all the queries to execute to create the account
+                            queries = [
+                                        ['insert into Utente(Nome, Cognome, Tipologia) values(%(name)s, %(surname)s, %(role)s)', {'name': fname, 'surname': lname, 'role': role}],
+                                        ['insert into Credenziali(Email, PW, userID) values(%(email)s, %(pw)s, (select max(userID) from Utente))', {'email': email, 'pw': hashedPW}],
+                                    ]
+                            #Executing all queries from the pre-created matrix
+                            for query in queries:
+                                cursor.execute(query[0], query[1])
+                                #Sending request to DB
+                                connection.commit()
+                            for x in range(len(coursesNames)):
+                                cursor.execute('insert into Registrazione(userID, idCorso) values((select max(userID) from Utente), (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
+                                connection.commit()
+                            flash('Account created', 'success')
+                        else:
+                            flash('User with this email already exists', 'error')
+                        #Closing connection
+                        connection.close()
                     else:
-                        flash('User with this email already exists', 'error')
-                    #Closing connection
-                    connection.close()
+                        flash('Wrong input values. Please try again', 'error')
                 else:
                     flash('Wrong input values. Please try again', 'error')
         #Redirecting back to register page if the input values are not correct
@@ -579,7 +583,7 @@ def updateDataAsUser():
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
-    if(validateFormInput(email)):
+    if(validateFormInput(email) and len(email) <= 40):
         cursor.execute('select count(*)\
                     from Credenziali\
                     where Email = %(newEmail)s', {'newEmail': email})
