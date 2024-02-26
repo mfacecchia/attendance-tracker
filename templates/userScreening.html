@@ -17,7 +17,7 @@ Gestione account
             <input type = "text" name = "lname" placeholder = "Surname" required maxlength = "20">
             <input type = "email" name = "email" placeholder = "Email" required maxlength = "40">
             <!-- TODO: JS function to check password strength -->
-            <input type = "password" name = "password" placeholder = "Password" minlength = "10" maxlength = "255" required>
+            <input type = "password" name = "password" placeholder = "Password" minlength = "10" required>
             <select name = "role">
                 <option value = "">-- Seleziona un ruolo --</option>
                 {% for role in roleOptions %}
@@ -61,9 +61,8 @@ Gestione account
 
     <form action = "{{url_for('update_user_data')}}" method = "post">
         <h1>Modifica dati utente</h1>
-        <input type = "email" name = "email" placeholder = "Email">
-        <!-- TODO: Set minlength to 10 chars -->
-        <input type = "password" name = "password" placeholder = "Password">
+        <input type = "email" name = "email" placeholder = "Email" maxlength = "40">
+        <input type = "password" name = "password" placeholder = "Password" minlength = "10">
         <input type = "password" name = "password_verify" placeholder = "Verifica password">
         
         <button type = "submit">Modifica</button>
