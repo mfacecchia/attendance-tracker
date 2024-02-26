@@ -60,7 +60,13 @@ Gestione account
     {% endif %}
 
     <form action = "{{url_for('update_user_data')}}" method = "post">
+        <h1>Modifica dati utente</h1>
+        <input type = "email" name = "email" placeholder = "Email">
+        <input type = "password" name = "password" placeholder = "Password">
+        <input type = "password" name = "password_verify" placeholder = "Verifica password">
         
+        <button type = "submit">Modifica</button>
+        <button type = "reset">Cancella</button>
     </form>
 
     {% if session['githubConnected'] %}
