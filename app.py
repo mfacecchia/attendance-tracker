@@ -320,13 +320,13 @@ def createLesson():
 
 @app.route('/user/list')
 def usersList():
-    if(session['role'] == 'Admin'):
+    if(session.get('role') == 'Admin'):
         usersList = getUsersList()
         return render_template('usersList.html', users = usersList)
 
 @app.route('/user/select', methods = ['GET', 'POST'])
 def select_user():
-    if(session['role'] == 'Admin'):
+    if(session.get('role') == 'Admin'):
         uid = request.values.get('userID')
         if(request.form.get('submitButton') == 'Edit'):
             if(request.values.get('userID')):
@@ -341,7 +341,7 @@ def select_user():
 
 @app.route('/user/update', methods = ['GET', 'POST'])
 def update_user_data():
-    if(session['role'] == 'Admin'):
+    if(session.get('role') == 'Admin'):
         userID = updateDataAsAdmin()
         return redirect(url_for('select_user', userID = userID))
     #Redirecting back to register page if the input values are not correct
