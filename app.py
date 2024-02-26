@@ -297,8 +297,6 @@ def update_user_data():
     if(session['role'] == 'Admin'):
         userID = updateDataAsAdmin()
         return redirect(url_for('select_user', userID = userID))
-    else:
-        pass
     #Redirecting back to register page if the input values are not correct
     flash(commonErrorMessage, 'error')
     return(redirect(url_for('usersList')))
@@ -347,7 +345,6 @@ def getValuesFromQuery(cursor):
 def updateLastLoginTime():
     '''Programmatically updates user's last login time on database'''
     timeNow = datetime.now()
-    #TODO: Update format with `%d/%m/%Y %H:%M`
     timeNow = timeNow.strftime('%d/%m/%Y %H:%M')
 
     connection = connectToDB()
