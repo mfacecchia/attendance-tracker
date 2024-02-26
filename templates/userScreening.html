@@ -39,7 +39,7 @@ Gestione account
         <h1>Crea una lezione</h1>
         <form action = "{{url_for('createLesson')}}" method = "post">
             <input type = "text" name = "subject" placeholder = "Materia" required autofocus maxlength = "30">
-            <input type = "text" name = "description" placeholder = "Descrizione (Opzionale)" maxlength = "100">
+            <textarea name = "description" placeholder = "Descrizione (Opzionale)" maxlength = "1000"></textarea>
             <input type = "date" name = "lessonDate" required>
             <input type = "text" name = "room" placeholder = "Aula (ex. A001)" required pattern = "[a-zA-Z][0-9]+" minlength = "4" maxlength = "4">
             <select name = "lessonType">
