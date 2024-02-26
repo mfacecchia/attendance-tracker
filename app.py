@@ -205,7 +205,19 @@ def userScreening():
         if(session.get('lastLogin') == 'Mai'):
             return redirect(url_for('updatePassword'))
         getCourses()
-        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses, lessonTypes = lessonTypes, helloMessage = getCustomMessage())
+        response = []
+        #Getting teacher's courses to display in the lesson creation section
+        if(session.get('role') == 'Insegnante'):
+            connection = connectToDB()
+            cursor = connection.cursor()
+            cursor.execute('select nomeCorso, annoCorso\
+                        from Corso\
+                        inner join Registrazione on Corso.idCorso = Registrazione.idCorso\
+                        inner join Utente on Registrazione.userID = Utente.userID\
+                        where Utente.userID = %(uid)s', {'uid': session['uid']})
+            response = getValuesFromQuery(cursor)
+            print(response)
+        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses if not response else response, lessonTypes = lessonTypes, helloMessage = getCustomMessage())
     else:
         flash('Please login', 'error')
         return redirect(url_for('login'))
