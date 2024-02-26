@@ -225,67 +225,65 @@ def userScreening():
 @app.route('/user/create', methods = ['GET', 'POST'])
 def handle_request():
     #TODO: Make async request
-    #TODO: Add check for session role as well
-    if(request.form.get('role') in roleOptions and len(request.form.getlist('course')) > 0):
-        fname = request.form.get('fname').strip().capitalize()
-        lname = request.form.get('lname').strip().capitalize()
-        email = request.form.get('email').strip().lower()
-        pw = request.form.get('password')
-        role = request.form.get('role')
-        chosenCourses = request.form.getlist('course')
+    if(session.get('role') == 'Admin'):
+        if(request.form.get('role') in roleOptions and len(request.form.getlist('course')) > 0):
+            fname = request.form.get('fname').strip().capitalize()
+            lname = request.form.get('lname').strip().capitalize()
+            email = request.form.get('email').strip().lower()
+            pw = request.form.get('password')
+            role = request.form.get('role')
+            chosenCourses = request.form.getlist('course')
 
-        coursesNames = []
-        coursesYears = []
-        for course in chosenCourses:
-            coursesNames.append(course.split(" - ")[0])
-            coursesYears.append(course.split(" - ")[1])
-        #Validating the chosen courses
-        if(validateCoursesSelection(coursesNames, coursesYears)):
-            #Checking if all the form fields input are not empty and the password contains at least 10 characters before proceeding
-            if(validateFormInput(fname, lname, email, pw) and len(pw) >= 10):
-                pHasher = PasswordHasher()
-                pw = pw.encode()
-                hashedPW = pHasher.hash(pw)
+            coursesNames = []
+            coursesYears = []
+            for course in chosenCourses:
+                coursesNames.append(course.split(" - ")[0])
+                coursesYears.append(course.split(" - ")[1])
+            #Validating the chosen courses
+            if(validateCoursesSelection(coursesNames, coursesYears)):
+                #Checking if all the form fields input are not empty and the password contains at least 10 characters before proceeding
+                if(validateFormInput(fname, lname, email, pw) and len(pw) >= 10):
+                    pHasher = PasswordHasher()
+                    pw = pw.encode()
+                    hashedPW = pHasher.hash(pw)
 
-                connection = connectToDB()
-                if(not connection):
-                    return redirect(url_for('index'))
-                #Creating a cursor reponsible for query executions
-                cursor = connection.cursor()
-                #Checking if user with the input Email does not already exist
-                cursor.execute("select Email from Credenziali where Email = %(userEmail)s", {'userEmail': email})
-                response = getValuesFromQuery(cursor)
-                if(len(response) == 0):
-                    #Matrix with all the queries to execute to create the account
-                    queries = [
-                                ['insert into Utente(Nome, Cognome, Tipologia) values(%(name)s, %(surname)s, %(role)s)', {'name': fname, 'surname': lname, 'role': role}],
-                                ['insert into Credenziali(Email, PW, userID) values(%(email)s, %(pw)s, (select max(userID) from Utente))', {'email': email, 'pw': hashedPW}],
-                            ]
-                    #Executing all queries from the pre-created matrix
-                    for query in queries:
-                        cursor.execute(query[0], query[1])
-                        #Sending request to DB
-                        connection.commit()
-                    for x in range(len(coursesNames)):
-                        cursor.execute('insert into Registrazione(userID, idCorso) values((select max(userID) from Utente), (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
-                        connection.commit()
-                    flash('Account created', 'success')
+                    connection = connectToDB()
+                    if(not connection):
+                        return redirect(url_for('index'))
+                    #Creating a cursor reponsible for query executions
+                    cursor = connection.cursor()
+                    #Checking if user with the input Email does not already exist
+                    cursor.execute("select Email from Credenziali where Email = %(userEmail)s", {'userEmail': email})
+                    response = getValuesFromQuery(cursor)
+                    if(len(response) == 0):
+                        #Matrix with all the queries to execute to create the account
+                        queries = [
+                                    ['insert into Utente(Nome, Cognome, Tipologia) values(%(name)s, %(surname)s, %(role)s)', {'name': fname, 'surname': lname, 'role': role}],
+                                    ['insert into Credenziali(Email, PW, userID) values(%(email)s, %(pw)s, (select max(userID) from Utente))', {'email': email, 'pw': hashedPW}],
+                                ]
+                        #Executing all queries from the pre-created matrix
+                        for query in queries:
+                            cursor.execute(query[0], query[1])
+                            #Sending request to DB
+                            connection.commit()
+                        for x in range(len(coursesNames)):
+                            cursor.execute('insert into Registrazione(userID, idCorso) values((select max(userID) from Utente), (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
+                            connection.commit()
+                        flash('Account created', 'success')
+                    else:
+                        flash('User with this email already exists', 'error')
+                    #Closing connection
+                    connection.close()
                 else:
-                    flash('User with this email already exists', 'error')
-                #Closing connection
-                connection.close()
-                return redirect(url_for('userScreening'))
-            #TODO: Change output message
+                    flash('Wrong input values. Please try again', 'error')
+        #Redirecting back to register page if the input values are not correct
             else:
-                flash('Wrong courses values. Please try again', 'error')
-                return(redirect(url_for('userScreening')))
-    #Redirecting back to register page if the input values are not correct
+                flash('Please select at least one valid course from the list', 'error')
         else:
-            flash('Please select at least one valid course from the list', 'error')
-            return(redirect(url_for('userScreening')))
+            flash('Please select a valid role and at least one course from the menu')
     else:
-        flash('Please select a valid role and at least one course from the menu')
-        return(redirect(url_for('userScreening')))
+        flash(commonErrorMessage, 'error')
+    return(redirect(url_for('userScreening')))
 
 @app.route('/lesson/create', methods = ['GET', 'POST'])
 def createLesson():
