@@ -225,6 +225,7 @@ def userScreening():
 @app.route('/user/create', methods = ['GET', 'POST'])
 def handle_request():
     #TODO: Make async request
+    #TODO: Add check for session role as well
     if(request.form.get('role') in roleOptions and len(request.form.getlist('course')) > 0):
         fname = request.form.get('fname').strip().capitalize()
         lname = request.form.get('lname').strip().capitalize()
@@ -274,6 +275,7 @@ def handle_request():
                 #Closing connection
                 connection.close()
                 return redirect(url_for('userScreening'))
+            #TODO: Change output message
             else:
                 flash('Wrong courses values. Please try again', 'error')
                 return(redirect(url_for('userScreening')))
@@ -287,7 +289,36 @@ def handle_request():
 
 @app.route('/lesson/create', methods = ['GET', 'POST'])
 def createLesson():
-    return "Processing"
+    if(session.get('role') in ['Insegnante', 'Admin']):
+        if(request.form.get('lessonType') in lessonTypes and len(request.form.get('room')) == 4):
+            subject = request.form.get('subject').strip().capitalize()
+            description = request.form.get('description').strip().capitalize()
+            lessonDate = request.form.get('lessonDate')
+            lessonRoom = request.form.get('room')
+            lessonType = request.form.get('lessonType')
+            chosenCourseName, chosenCourseYear = request.form.get('course').split(' - ')
+            if(validateCoursesSelection([chosenCourseName], [chosenCourseYear])):
+                if(validateFormInput(subject, lessonDate, lessonRoom)):
+                    #Parsing the lesson date in database's supported format
+                    lessonDate = datetime.strptime(lessonDate, '%Y-%m-%d').strftime('%d/%m/%Y')
+                    connection = connectToDB()
+                    cursor = connection.cursor()
+                    cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso) values\
+                                (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'subjectName': subject, 'description': description, 'lessonDate': lessonDate, 'lessonRoom': lessonRoom, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear})
+                    connection.commit()
+                    connection.close()
+                    flash('Lesson created', 'success')
+                else:
+                    flash('Wrong input values. Please try again.', 'error')
+            else:
+                print(chosenCourseName, chosenCourseYear)
+                flash('Course not found. Please try again.', 'error')
+        else:
+            flash('Please select a valid lesson type and course from the menus', 'error')
+    else:
+        flash(commonErrorMessage, 'error')
+    return redirect(url_for('login'))
+    
 
 @app.route('/user/list')
 def usersList():
