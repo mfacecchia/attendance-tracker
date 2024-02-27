@@ -315,7 +315,28 @@ def createLesson():
     else:
         flash(commonErrorMessage, 'error')
     return redirect(url_for('login'))
-    
+
+@app.route('/course/create', methods = ['GET', 'POST'])
+def create_course():
+    if(session.get('role') == 'Admin'):
+        courseName = request.form.get('courseName').capitalize()
+        courseYear = request.form.get('courseYear')
+        #TODO: Add regex check for course year
+        if(validateFormInput(courseName, courseYear)):
+            if(not validateCoursesSelection(courseName, courseYear) == False):
+                connection = connectToDB()
+                cursor = connection.cursor()
+                cursor.execute('insert into Corso(nomeCorso, annoCorso) values(%(courseName)s, %(courseYear)s)', {'courseName': courseName, 'courseYear': courseYear})
+                connection.commit()
+                connection.close()
+                flash('Course added', 'success')
+            else:
+                flash('This course already exists. Please try again.', 'error')
+        else:
+            flash('Invalid input. Please try again.', 'error')
+    else:
+        flash(commonErrorMessage, 'error')
+    return redirect(url_for('userScreening'))
 
 @app.route('/user/list')
 def usersList():

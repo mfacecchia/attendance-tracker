@@ -60,7 +60,7 @@ Gestione account
     {% endif %}
 
     {% if session['role'] == 'Admin' %}
-        <form action = "{{url_for(create_course)}}" method = "post">
+        <form action = "{{url_for('create_course')}}" method = "post">
             <h1>Crea corso</h1>
             <input type = "text" name = "courseName" placeholder = "Nome corso" maxlength = "30" required>
             <!-- TODO: Add course year default value as the current year -->
