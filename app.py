@@ -323,7 +323,7 @@ def create_course():
         courseYear = request.form.get('courseYear')
         #TODO: Add regex check for course year
         if(validateFormInput(courseName, courseYear)):
-            if(not validateCoursesSelection(courseName, courseYear) == False):
+            if(not validateCoursesSelection([courseName], [courseYear])):
                 connection = connectToDB()
                 cursor = connection.cursor()
                 cursor.execute('insert into Corso(nomeCorso, annoCorso) values(%(courseName)s, %(courseYear)s)', {'courseName': courseName, 'courseYear': courseYear})
