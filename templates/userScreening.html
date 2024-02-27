@@ -35,6 +35,27 @@ Gestione account
         <a href = "{{url_for('usersList')}}">Lista utenti</a>
     {% endif %}
 
+    {% if session['role'] in ['Studente', 'Insegnante'] %}
+        <h1>Lezioni programmate</h1>
+        <table style = "border: 1px solid gray">
+            <tr>
+                <th style = "border: 1px solid gray">Materia</th>
+                <th style = "border: 1px solid gray">Descrizione</th>
+                <th style = "border: 1px solid gray">Data Lezione</th>
+                <th style = "border: 1px solid gray">Aula</th>
+                <th style = "border: 1px solid gray">Tipologia</th>
+                <th style = "border: 1px solid gray">Corso</th>
+            </tr>
+            {% for lesson in scheduledLessons %}
+                <tr>
+                    {% for lessonCol in lesson.values() %}
+                        <td style = "border: 1px solid gray">{{lessonCol}}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
     {% if session['role'] in ['Insegnante', 'Admin'] %}
         <h1>Crea una lezione</h1>
         <form action = "{{url_for('createLesson')}}" method = "post">

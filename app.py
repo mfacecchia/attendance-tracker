@@ -187,6 +187,7 @@ def unlinkGithubAccount():
         connection = connectToDB()
         if(not connection):
             return redirect(url_for('index'))
+        #TODO: Close connection
         cursor = connection.cursor()
         cursor.execute('update Credenziali set githubID = NULL\
                     where userID = %(uid)s', {'uid': session['uid']})
@@ -203,7 +204,9 @@ def userScreening():
             return redirect(url_for('updatePassword'))
         getCourses()
         response = []
+        scheduledLessons = []
         #Getting teacher's courses to display in the lesson creation section
+        #TODO: Close connection
         if(session.get('role') == 'Insegnante'):
             connection = connectToDB()
             cursor = connection.cursor()
@@ -213,7 +216,11 @@ def userScreening():
                         inner join Utente on Registrazione.userID = Utente.userID\
                         where Utente.userID = %(uid)s', {'uid': session['uid']})
             response = getValuesFromQuery(cursor)
-        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses if not response else response, lessonTypes = lessonTypes, helloMessage = getCustomMessage(), currentYear = int(datetime.now().strftime('%Y')))
+        if(session.get('role') in ['Studente', 'Insegnante']):
+            scheduledLessons = getLessonsList()
+            if(not scheduledLessons):
+                return redirect(url_for('index'))
+        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses if not response else response, lessonTypes = lessonTypes, helloMessage = getCustomMessage(), currentYear = int(datetime.now().strftime('%Y')), scheduledLessons = scheduledLessons)
     else:
         flash('Please login', 'error')
         return redirect(url_for('login'))
@@ -321,9 +328,9 @@ def create_course():
     if(session.get('role') == 'Admin'):
         courseName = request.form.get('courseName').capitalize()
         courseYear = request.form.get('courseYear')
-        #TODO: Add regex check for course year
         if(validateFormInput(courseName, courseYear)):
             if(not validateCoursesSelection([courseName], [courseYear])):
+                #TODO: Add condition for connection failed
                 connection = connectToDB()
                 cursor = connection.cursor()
                 cursor.execute('insert into Corso(nomeCorso, annoCorso) values(%(courseName)s, %(courseYear)s)', {'courseName': courseName, 'courseYear': courseYear})
@@ -666,6 +673,18 @@ def deleteUser(uid):
     cursor.execute('delete from Utente where userID = %(uid)s', {'uid': uid})
     connection.commit()
     connection.close()
+
+def getLessonsList():
+    connection = connectToDB()
+    if(not connection):
+        return False
+    cursor = connection.cursor()
+    cursor.execute('select Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso\
+                from Lezione\
+                inner join Corso on Corso.idCorso = Lezione.idCorso')
+    response = getValuesFromQuery(cursor)
+    connection.close()
+    return response
 
 if __name__ == "__main__":
     app.run(debug = True)
