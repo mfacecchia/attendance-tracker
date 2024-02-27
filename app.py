@@ -187,11 +187,11 @@ def unlinkGithubAccount():
         connection = connectToDB()
         if(not connection):
             return redirect(url_for('index'))
-        #TODO: Close connection
         cursor = connection.cursor()
         cursor.execute('update Credenziali set githubID = NULL\
                     where userID = %(uid)s', {'uid': session['uid']})
         connection.commit()
+        connection.close()
         session['githubConnected'] = False
         flash('Github account unlinked', 'success')
     return redirect(url_for('userScreening'))
@@ -206,7 +206,6 @@ def userScreening():
         response = []
         scheduledLessons = []
         #Getting teacher's courses to display in the lesson creation section
-        #TODO: Close connection
         if(session.get('role') == 'Insegnante'):
             connection = connectToDB()
             cursor = connection.cursor()
@@ -216,6 +215,7 @@ def userScreening():
                         inner join Utente on Registrazione.userID = Utente.userID\
                         where Utente.userID = %(uid)s', {'uid': session['uid']})
             response = getValuesFromQuery(cursor)
+            connection.close()
         if(session.get('role') in ['Studente', 'Insegnante']):
             scheduledLessons = getLessonsList()
             if(not scheduledLessons):
@@ -330,8 +330,9 @@ def create_course():
         courseYear = request.form.get('courseYear')
         if(validateFormInput(courseName, courseYear)):
             if(not validateCoursesSelection([courseName], [courseYear])):
-                #TODO: Add condition for connection failed
                 connection = connectToDB()
+                if(not connection):
+                    return redirect(url_for('index'))
                 cursor = connection.cursor()
                 cursor.execute('insert into Corso(nomeCorso, annoCorso) values(%(courseName)s, %(courseYear)s)', {'courseName': courseName, 'courseYear': courseYear})
                 connection.commit()
@@ -675,6 +676,7 @@ def deleteUser(uid):
     connection.close()
 
 def getLessonsList():
+    #FIXME: Printing all lessons (also on date before the current)
     connection = connectToDB()
     if(not connection):
         return False
