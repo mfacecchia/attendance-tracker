@@ -213,7 +213,7 @@ def userScreening():
                         inner join Utente on Registrazione.userID = Utente.userID\
                         where Utente.userID = %(uid)s', {'uid': session['uid']})
             response = getValuesFromQuery(cursor)
-        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses if not response else response, lessonTypes = lessonTypes, helloMessage = getCustomMessage())
+        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses if not response else response, lessonTypes = lessonTypes, helloMessage = getCustomMessage(), currentYear = int(datetime.now().strftime('%Y')))
     else:
         flash('Please login', 'error')
         return redirect(url_for('login'))
