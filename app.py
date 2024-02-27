@@ -11,14 +11,11 @@ oauth = OAuth(app)
 app.config['SECRET_KEY'] = environ['FLASK_SECRET']
 app.config['SESSION_TYPE'] = 'filesystem'
 
-#GITHUB CONFIG DATA
-app.config['GITHUB_CLIENT_ID'] = environ['GITHUB_CLIENT_ID']
-app.config['GITHUB_CLIENT_SECRET'] = environ['GITHUB_CLIENT_SECRET']
 #Registering OAuth application for future requests
 oauth.register(
     'github',
-    client_id = app.config['GITHUB_CLIENT_ID'],
-    client_secret = app.config['GITHUB_CLIENT_SECRET'],
+    client_id = environ['GITHUB_CLIENT_ID'],
+    client_secret = environ['GITHUB_CLIENT_SECRET'],
     access_token_url = 'https://github.com/login/oauth/access_token',
     authorize_url = 'https://github.com/login/oauth/authorize',
     api_base_url = 'https://api.github.com/',
