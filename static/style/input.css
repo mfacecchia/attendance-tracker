@@ -4,10 +4,10 @@
 
 @layer base{
     h1{
-        @apply text-2xl leading-tight;
+        @apply text-xl leading-tight;
     }
     p{
-        @apply text-xl leading-normal;
+        @apply text-base leading-normal;
     }
 }
 
@@ -17,4 +17,8 @@
 
 input, select{
     @apply outline-none;
+}
+
+nav img{
+    @apply h-8 drop-shadow-2xl;
 }
