@@ -220,7 +220,16 @@ def userScreening():
             scheduledLessons = getLessonsList()
             if(not scheduledLessons):
                 return redirect(url_for('index'))
-        return render_template('userScreening.html', session = session, roleOptions = roleOptions, courses = courses if not response else response, lessonTypes = lessonTypes, helloMessage = getCustomMessage(), currentYear = int(datetime.now().strftime('%Y')), scheduledLessons = scheduledLessons)
+        return render_template('userScreening.html',
+                            session = session,
+                            roleOptions = roleOptions,
+                            courses = courses if not response else response,
+                            lessonTypes = lessonTypes,
+                            helloMessage = getCustomMessage(),
+                            currentYear = int(datetime.now().strftime('%Y')),
+                            scheduledLessons = scheduledLessons,
+                            today = date.today()
+                        )
     else:
         flash('Please login', 'error')
         return redirect(url_for('login'))
