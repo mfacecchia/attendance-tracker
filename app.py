@@ -226,7 +226,7 @@ def userScreening():
         return redirect(url_for('login'))
 
 @app.route('/user/create', methods = ['GET', 'POST'])
-def handle_request():
+def createUser():
     #TODO: Make async request
     if(session.get('role') == 'Admin'):
         if(request.form.get('role') in roleOptions and len(request.form.getlist('course')) > 0):

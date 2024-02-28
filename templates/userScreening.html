@@ -12,7 +12,7 @@ Gestione account
 
     {% if session['role'] == 'Admin' %}
         <h1>Crea utente</h1>
-        <form action = '{{ url_for("handle_request") }}' method = "post">
+        <form action = '{{ url_for("createUser") }}' method = "post">
             <input type = "text" name = "fname" placeholder = "Name" autofocus required maxlength = "20">
             <input type = "text" name = "lname" placeholder = "Surname" required maxlength = "20">
             <input type = "email" name = "email" placeholder = "Email" required maxlength = "40">
@@ -61,7 +61,6 @@ Gestione account
         <form action = "{{url_for('createLesson')}}" method = "post">
             <input type = "text" name = "subject" placeholder = "Materia" required autofocus maxlength = "30">
             <textarea name = "description" placeholder = "Descrizione (Opzionale)" maxlength = "1000"></textarea>
-            <!-- TODO: Add default today's date value for input  -->
             <input type = "date" name = "lessonDate" required>
             <input type = "text" name = "room" placeholder = "Aula (ex. A001)" required pattern = "[a-zA-Z][0-9]+" minlength = "4" maxlength = "4">
             <select name = "lessonType">
