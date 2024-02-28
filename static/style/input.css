@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base{
+
+    body{
+        @apply min-h-[100vh] flex flex-col
+    }
+
     h1{
         @apply text-xl leading-tight;
     }
@@ -11,8 +16,32 @@
     }
 }
 
+@layer components{
+    form img{
+        @apply h-7;
+    }
+    form button{
+        @apply rounded-md px-5 py-2 text-white;
+    }
+    .blue{
+        @apply bg-blue-500;
+    }
+}
+
 .formInputBox{
     @apply bg-gray-300 box-border px-2 py-2 w-full border-solid border border-black rounded-md text-sm;
+}
+
+.formInputBox input{
+    @apply bg-transparent;
+}
+
+.formInputBox input::placeholder{
+    @apply text-gray-500;
+}
+
+.formInputBox p{
+    @apply text-xs;
 }
 
 input, select{
