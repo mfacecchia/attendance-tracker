@@ -681,8 +681,12 @@ def getLessonsList():
     cursor.execute('select Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso\
                 from Lezione\
                 inner join Corso on Corso.idCorso = Lezione.idCorso\
-                where dataLezione >= %(today)s', {'today': date.today()})
+                where dataLezione >= %(today)s\
+                order by dataLezione, Materia asc', {'today': date.today()})
     response = getValuesFromQuery(cursor)
+    #Converting all gotten dates to a more user friendly format
+    for lessonDate in response:
+        lessonDate['dataLezione'] = lessonDate['dataLezione'].strftime('%d/%m/%Y')
     connection.close()
     return response
 
