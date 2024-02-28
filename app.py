@@ -3,7 +3,7 @@ from argon2 import PasswordHasher, exceptions
 import mysql.connector
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
-from datetime import datetime
+from datetime import datetime, date
 from os import environ
 
 app = Flask(__name__)
@@ -304,8 +304,6 @@ def createLesson():
             chosenCourseName, chosenCourseYear = request.form.get('course').split(' - ')
             if(validateCoursesSelection([chosenCourseName], [chosenCourseYear])):
                 if(validateFormInput(subject, lessonDate, lessonRoom)):
-                    #Parsing the lesson date in database's supported format
-                    lessonDate = datetime.strptime(lessonDate, '%Y-%m-%d').strftime('%d/%m/%Y')
                     connection = connectToDB()
                     cursor = connection.cursor()
                     cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso) values\
@@ -676,14 +674,14 @@ def deleteUser(uid):
     connection.close()
 
 def getLessonsList():
-    #FIXME: Printing all lessons (also on date before the current)
     connection = connectToDB()
     if(not connection):
         return False
     cursor = connection.cursor()
     cursor.execute('select Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso\
                 from Lezione\
-                inner join Corso on Corso.idCorso = Lezione.idCorso')
+                inner join Corso on Corso.idCorso = Lezione.idCorso\
+                where dataLezione >= %(today)s', {'today': date.today()})
     response = getValuesFromQuery(cursor)
     connection.close()
     return response
