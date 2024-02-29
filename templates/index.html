@@ -11,16 +11,12 @@
     </head>
     <body>
         {% block messagesPrintout %}
-            {% with messages = get_flashed_messages(with_categories = True) %}
-                {% if messages %}
-                    {% for messageType, message in messages %}
-                        {% if messageType == 'success' %}
-                            <b style = "color: green">{{ message }}</b>
-                        {% else %}
-                            <b style = "color: red">{{ message }}</b>
-                        {% endif %}
-                        <br>
-                    {% endfor %}
+            {% with message = get_flashed_messages(with_categories = True) %}
+                {% if message %}
+                    <div class = "messages">
+                        <b>{% if message[-1][0] == 'success' %}Successo{% else %}Errore{% endif %}</b>
+                        <p>{{message[-1][1]}}</p>
+                    </div>
                 {% endif %}
             {% endwith %}
         {% endblock %}

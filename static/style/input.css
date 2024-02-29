@@ -26,6 +26,12 @@
     footer a, footer span{
         @apply text-sm;
     }
+    .messages{
+        @apply fixed bottom-5 right-5 rounded-md p-5 bg-blue-300 backdrop-blur-lg z-50 flex flex-col gap-y-2 justify-center items-end text-sm animate-hide;
+    }
+    .messages p{
+        @apply text-sm;
+    }
 }
 
 @layer components{
