@@ -22,8 +22,13 @@
         {% endblock %}
         {% block nav %}
             <nav>
-                <img src = "{{url_for('static', filename = 'assets/favicon.png')}}">
-                <h1>Attendance Tracker</h1>
+                <div class = "flex items-center gap-x-2">
+                    <img src = "{{url_for('static', filename = 'assets/favicon.png')}}">
+                    <h1>Attendance Tracker</h1>
+                </div>
+                {% block loginLink %}
+                    <a href = "{{url_for('login')}}">Login</a>
+                {% endblock %}
             </nav>
         {% endblock %}
         {% block content %}
