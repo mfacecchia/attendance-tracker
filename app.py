@@ -395,6 +395,22 @@ def logout():
         flash("Successfully logged out.", 'success')
     return redirect(url_for('login'))
 
+@app.route('/info')
+def informationPage():
+    return "Information Page"
+
+@app.route('/support')
+def supportPage():
+    return "Support Page"
+
+@app.route('/terms-and-conditions')
+def termsPage():
+    return "Terms and conditions page"
+
+@app.route('/privacy')
+def privacyPage():
+    return "Privacy page"
+
 
 def connectToDB():
     '''Starts a connection to the database with the given data'''

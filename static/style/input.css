@@ -5,7 +5,7 @@
 @layer base{
 
     body{
-        @apply min-h-[100vh] flex flex-col
+        @apply min-h-screen relative;
     }
 
     h1{
@@ -13,6 +13,18 @@
     }
     p{
         @apply text-base leading-normal;
+    }
+    nav{
+        @apply w-full box-border px-7 py-3 bg-slate-100 backdrop-blur-md flex justify-center items-center gap-x-3;
+    }
+    footer{
+        @apply w-full box-border py-3 bg-slate-100 flex flex-col items-center gap-y-5 text-slate-400 absolute bottom-0;
+    }
+    footer a, footer p{
+        @apply text-slate-600;
+    }
+    footer a, footer span{
+        @apply text-sm;
     }
 }
 

@@ -25,13 +25,31 @@
             {% endwith %}
         {% endblock %}
         {% block nav %}
-            <nav class = "w-full px-7 py-3 bg-gray-100 flex justify-center items-center gap-x-3">
+            <nav>
                 <img src = "{{url_for('static', filename = 'assets/favicon.png')}}">
                 <h1>Attendance Tracker</h1>
             </nav>
         {% endblock %}
         {% block content %}
 
+        {% endblock %}
+        {% block footer %}
+            <footer>
+                <div class = "w-1/2 flex justify-center items-center flex-wrap gap-x-1">
+                    <a href = "/info">Informazioni</a>
+                    <span> | </span>
+                    <a href = "/support">Supporto</a>
+                    <span> | </span>
+                    <a href = "/terms-and-conditions">Termini e condizioni</a>
+                    <span> | </span>
+                    <a href = "/privacy">Privacy</a>
+                    <span> | </span>
+                    <a href = "https://github.com/mfacecchia/attendance-tracker" target = "*_blank">Docs</a>
+                    <span> | </span>
+                    <a href = "https://feiswebsitefm.000webhostapp.com" target = "*_blank">About</a>
+                </div>
+                <p class = "text-xs text-center">Copyright @ 2024 Feis Inc. Tutti i diritti riservati</p>
+            </footer>
         {% endblock %}
     </body>
 </html>
