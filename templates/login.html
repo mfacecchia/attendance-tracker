@@ -4,6 +4,12 @@
 Login
 {% endblock %}
 
+{% block nav %}
+    {{super()}}
+    {% block loginLink %}
+    {% endblock %}
+{% endblock %}
+
 {% block content %}
     <form action = '{{ url_for("check_login") }}' method = "post" class = "m-auto min-w-64 max-w-5/6 flex flex-col justify-center items-center gap-y-3 bg-blue-300 rounded-md px-5 py-11">
         <div class = "text-center mb-5">

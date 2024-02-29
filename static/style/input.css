@@ -15,7 +15,7 @@
         @apply text-base leading-normal;
     }
     nav{
-        @apply w-full box-border p-3 accent-slate-100/95 backdrop-blur-2xl flex justify-between items-center gap-x-3 fixed top-0 left-0;
+        @apply w-full box-border p-3 bg-slate-100/50 backdrop-blur-2xl flex justify-between items-center gap-x-3 fixed top-0 left-0;
     }
     nav img{
         @apply h-6 drop-shadow-2xl;
