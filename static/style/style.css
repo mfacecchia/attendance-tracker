@@ -399,10 +399,9 @@ video {
   min-height: 100vh;
   flex-direction: column;
 }
-
     h1 {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
   line-height: 1.25;
 }
     p {
@@ -612,11 +611,47 @@ form button {
   --tw-bg-opacity: 1;
   background-color: rgb(59 130 246 / var(--tw-bg-opacity));
 }
+.formInputBox {
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 0.375rem;
+  border-width: 1px;
+  border-style: solid;
+  --tw-border-opacity: 1;
+  border-color: rgb(71 85 105 / var(--tw-border-opacity));
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+.formInputBox:focus {
+  border-width: 2px;
+  --tw-border-opacity: 1;
+  border-color: rgb(59 130 246 / var(--tw-border-opacity));
+}
+input.formInputBox::-moz-placeholder {
+  --tw-text-opacity: 1;
+  color: rgb(71 85 105 / var(--tw-text-opacity));
+}
+input.formInputBox::placeholder {
+  --tw-text-opacity: 1;
+  color: rgb(71 85 105 / var(--tw-text-opacity));
+}
+input, select {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
 .static {
   position: static;
 }
 .m-auto {
   margin: auto;
+}
+.my-20 {
+  margin-top: 5rem;
+  margin-bottom: 5rem;
 }
 .mb-0 {
   margin-bottom: 0px;
@@ -648,8 +683,11 @@ form button {
 .w-1\/2 {
   width: 50%;
 }
-.min-w-64 {
-  min-width: 16rem;
+.w-3\/4 {
+  width: 75%;
+}
+.max-w-\[500px\] {
+  max-width: 500px;
 }
 .flex-col {
   flex-direction: column;
@@ -680,10 +718,6 @@ form button {
 .border {
   border-width: 1px;
 }
-.bg-blue-300 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(147 197 253 / var(--tw-bg-opacity));
-}
 .px-5 {
   padding-left: 1.25rem;
   padding-right: 1.25rem;
@@ -695,49 +729,14 @@ form button {
 .text-center {
   text-align: center;
 }
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
 }
-
-.formInputBox {
-  box-sizing: border-box;
-  width: 100%;
-  border-radius: 0.375rem;
-  border-width: 1px;
-  border-style: solid;
-  --tw-border-opacity: 1;
-  border-color: rgb(0 0 0 / var(--tw-border-opacity));
-  --tw-bg-opacity: 1;
-  background-color: rgb(209 213 219 / var(--tw-bg-opacity));
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-}
-
-.formInputBox input {
-  background-color: transparent;
-}
-
-.formInputBox input::-moz-placeholder {
-  --tw-text-opacity: 1;
-  color: rgb(107 114 128 / var(--tw-text-opacity));
-}
-
-.formInputBox input::placeholder {
-  --tw-text-opacity: 1;
-  color: rgb(107 114 128 / var(--tw-text-opacity));
-}
-
-.formInputBox p {
-  font-size: 0.75rem;
-  line-height: 1rem;
-}
-
-input, select {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
+.font-bold {
+  font-weight: 700;
 }
