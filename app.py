@@ -96,6 +96,10 @@ def check_login():
         flash(commonErrorMessage, 'error')
     return redirect(url_for('login'))
 
+@app.route('/forgot-password')
+def forgotPassword():
+    return "Forgot password"
+
 @app.route('/user/updatepassword')
 def updatePassword():
     '''Lets the user update his freshly created account's password'''
