@@ -1,4 +1,5 @@
 from flask import Flask, render_template, url_for, request, redirect, session,flash, Response
+from flask_mail import Mail, Message
 from argon2 import PasswordHasher, exceptions
 import mysql.connector
 from authlib.integrations.flask_client import OAuth
@@ -8,8 +9,15 @@ from os import environ
 
 app = Flask(__name__)
 oauth = OAuth(app)
+mailer = Mail(app)
 app.config['SECRET_KEY'] = environ['FLASK_SECRET']
 app.config['SESSION_TYPE'] = 'filesystem'
+
+app.config['MAIL_SERVER'] = environ['MAIL_SERVER']
+app.config['MAIL_PORT'] = environ['MAIL_PORT']
+app.config['MAIL_USERNAME'] = environ['MAIL_USERNAME']
+app.config['MAIL_PASSWORD'] = environ['MAIL_PASSWORD']
+app.config['MAIL_USE_TLS'] = True
 
 #Registering OAuth application for future requests
 oauth.register(
