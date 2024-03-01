@@ -11,6 +11,7 @@ Gestione account
             <h1>{{ helloMessage }}, {{ session['name'] }}!</h1>
             <p>{{ session['role'] }}</p>
             <p>Ultima volta online: {{session['lastLogin']}}</p>
+            <a href = "{{url_for('update_user_data')}}">Informazioni utente</a>
         </div>
         <div class = "container grid grid-cols-3 grid-rows-3 gap-3 justify-center">
             {% if session['role'] == 'Admin' %}

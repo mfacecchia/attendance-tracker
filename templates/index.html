@@ -29,7 +29,11 @@
                     <h1 class = "text-xl">Attendance Tracker</h1>
                 </div>
                 {% block loginLink %}
-                    <a href = "{{url_for('login')}}">Login</a>
+                    {% if session['name'] %}
+                        <a href = "{{url_for('logout')}}">Logout</a>
+                    {% else %}
+                        <a href = "{{url_for('login')}}">Login</a>
+                    {% endif %}
                 {% endblock %}
             </nav>
         {% endblock %}
