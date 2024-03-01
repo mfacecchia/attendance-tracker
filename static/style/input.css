@@ -66,13 +66,13 @@
         @apply size-14;
     }
     .action{
-        @apply rounded-md bg-slate-50 w-full aspect-square flex flex-col justify-center items-center gap-2 box-border p-2 shadow-lg transition-transform duration-100 ease-in-out;
+        @apply aspect-square !mt-0 bg-slate-50 rounded-md flex flex-col justify-center items-center gap-2 box-border p-2 shadow-lg transition-transform duration-100 ease-in-out;
         @apply hover:scale-105
     }
     .action img{
-        @apply size-6
+        @apply size-6 rounded-full;
     }
     .action p{
-        @apply text-sm text-center;
+        @apply text-xs text-center;
     }
 }

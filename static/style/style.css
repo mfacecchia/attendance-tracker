@@ -706,10 +706,10 @@ input, select {
   height: 3.5rem;
 }
 .action {
+  margin-top: 0px !important;
   box-sizing: border-box;
   display: flex;
   aspect-ratio: 1 / 1;
-  width: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -733,14 +733,18 @@ input, select {
 .action img {
   width: 1.5rem;
   height: 1.5rem;
+  border-radius: 9999px;
 }
 .action p {
   text-align: center;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
 }
 .static {
   position: static;
+}
+.relative {
+  position: relative;
 }
 .m-auto {
   margin: auto;
@@ -779,6 +783,9 @@ input, select {
 .hidden {
   display: none;
 }
+.min-h-screen {
+  min-height: 100vh;
+}
 .w-1\/2 {
   width: 50%;
 }
@@ -790,6 +797,9 @@ input, select {
 }
 .max-w-\[500px\] {
   max-width: 500px;
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .grid-rows-3 {
   grid-template-rows: repeat(3, minmax(0, 1fr));
@@ -805,6 +815,9 @@ input, select {
 }
 .justify-center {
   justify-content: center;
+}
+.gap-3 {
+  gap: 0.75rem;
 }
 .gap-5 {
   gap: 1.25rem;
@@ -828,6 +841,9 @@ input, select {
 }
 .bg-cover {
   background-size: cover;
+}
+.bg-fixed {
+  background-attachment: fixed;
 }
 .bg-center {
   background-position: center;

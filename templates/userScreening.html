@@ -5,18 +5,36 @@ Gestione account
 {% endblock %}
 
 {% block content %}
-    <section class = "bg-screening-mobile bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center gap-5 box-border px-3 py-20">
+    <section class = "relative min-h-screen bg-screening-mobile bg-cover bg-fixed bg-center bg-no-repeat flex flex-wrap items-center justify-center gap-5 box-border px-3 py-20">
         <div class = "container">
             <img src = "{{url_for('static', filename = 'assets/user_icon.png')}}">
             <h1>{{ helloMessage }}, {{ session['name'] }}!</h1>
             <p>{{ session['role'] }}</p>
             <p>Ultima volta online: {{session['lastLogin']}}</p>
         </div>
-        <div class = "container grid grid-rows-3 justify-center">
+        <div class = "container grid grid-cols-3 grid-rows-3 gap-3 justify-center">
+            {% if session['role'] == 'Admin' %}
+                <a href = "{{url_for('createUser')}}" class = "action">
+                    <img src = "{{url_for('static', filename = 'assets/user_icon.png')}}">
+                    <p>Crea utente</p>
+                </a>
+                <a href = "{{url_for('usersList')}}" class = "action">
+                    <img src = "{{url_for('static', filename = 'assets/users_management.png')}}">
+                    <p>Gestisci utenti</p>
+                </a>
+            {% endif %}
+                
+            {% if session['role'] in ['Admin', 'Insegnante'] %}
+                <a href = "{{url_for('createLesson')}}" class = "action">
+                    <img src = "{{url_for('static', filename = 'assets/create_lesson.png')}}">
+                    <p>Gestisci utenti</p>
+                </a>
+            {% endif %}
+
             {% if session['githubConnected'] %}
                 <a href = "{{url_for('unlinkGithubAccount')}}" class = "action">
                     <img src = "{{url_for('static', filename = 'assets/github.png')}}">
-                    <p>Connetti Github</p>
+                    <p>Disconnetti Github</p>
                 </a>
             {% else %}
                 <a href = "{{url_for('githubAuth', login = False)}}" class = "action">
