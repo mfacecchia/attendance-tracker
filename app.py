@@ -106,20 +106,30 @@ def check_login():
         flash(commonErrorMessage, 'error')
     return redirect(url_for('login'))
 
-@app.route('/forgot-password')
+@app.route('/forgot-password', methods = ['GET', 'POST'])
 def forgotPassword():
-    message = Message(subject = 'Recupera Password',
-                    recipients = ['marco.facecchia03@gmail.com'],
-                    html = render_template('recoverPasswordTemplate.html', userMail = str(b64_encode('paolobrosio@pb.com')), userID = str(b64_encode('2'))),
-                    sender = ('Attendance Tracker Mailing System', environ['MAIL_USERNAME'])
-                    )
-    try:
-        mailer.send(message)
-    #Avoiding HTTP Header injections
-    except BadHeaderError:
-        flash('THere was an error while sending the email. Please try again', 'error')
+    email = request.form.get('email')
+    #If the form has not been submitted, the first redirect will be to the form for inputting the user's email, otherwise proceeding with user verification
+    if(email):
+        #Checking if the user exist by getting its relative userID from the database
+        uid = verifyUserExistence(email)
+        flash('You will shortly receive a reset password email if it\'s registered', 'success')
+        if(uid):
+            #Getting the dictionary's `userID` key's value and parsing it to string
+            uid = str(uid['userID'])
+            message = Message(subject = 'Recupera Password',
+                            recipients = [email],
+                            html = render_template('recoverPasswordTemplate.html', userMail = str(b64_encode(email)), userID = str(b64_encode(uid))),
+                            sender = ('Attendance Tracker Mailing System', environ['MAIL_USERNAME'])
+                            )
+            try:
+                mailer.send(message)
+            #Avoiding HTTP Header injections
+            except BadHeaderError:
+                flash('There was an error while sending the email. Please try again', 'error')
         return redirect(url_for('login'))
-    return "Forgot password"
+    else:
+        return render_template('reset-password-form.html')
 
 @app.route('/user/updatepassword', methods = ['GET'])
 def updatePassword():
@@ -723,6 +733,18 @@ def getLessonsList():
         lessonDate['dataLezione'] = lessonDate['dataLezione'].strftime('%d/%m/%Y')
     connection.close()
     return response
+
+def verifyUserExistence(userEmail):
+    '''Verifies if the user exists before sending the recover password email.\n
+    Returns its relative `userID` if the query returns a value, otherwise `False`'''
+    connection = connectToDB()
+    cursor = connection.cursor()
+    cursor.execute('select userID from Credenziali where Email = %(userEmail)s', {'userEmail': userEmail})
+    response = getValuesFromQuery(cursor)
+    connection.close()
+    if not response:
+        return False
+    return response[0]
 
 def b64_encode(string:str):
     '''Takes a string as input parameter and returns its relative base64 encoded value'''
