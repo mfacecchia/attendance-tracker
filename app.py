@@ -401,7 +401,7 @@ def manageLesson():
             return redirect(url_for('userScreening'))
         connection = connectToDB()
         cursor = connection.cursor()
-        cursor.execute('select Utente.userID, Nome, Cognome, Materia, dataLezione\
+        cursor.execute('select Utente.userID, Nome, Cognome, Materia, dataLezione, Lezione.idLezione\
                     from Utente\
                     inner join Partecipazione on Utente.userID = Partecipazione.userID\
                     inner join Lezione on Partecipazione.idLezione = Lezione.idLezione\
@@ -423,10 +423,12 @@ def manageLesson():
 @app.route('/lesson/register-attendance', methods = ['GET', 'POST'])
 def registerAttendances():
     if(session.get('role') in ['Admin', 'Insegnante']):
-        #TODO: Add remove attendance function (check for `checked` property of each checkbox)
         attendances = request.form.getlist('attendanceCheck')
         connection = connectToDB()
         cursor = connection.cursor()
+        #Resetting the the attendance flag from every user in the DB to set the correct values
+        cursor.execute('update Partecipazione set Presenza = 0 where idLezione = %(lessonID)s', {'lessonID': request.form.get('registerAttendance')})
+        connection.commit()
         for attendance in attendances:
             cursor.execute('update Partecipazione set Presenza = 1 where userID = %(uid)s', {'uid': attendance})
             connection.commit()
