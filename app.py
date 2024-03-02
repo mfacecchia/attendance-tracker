@@ -372,6 +372,14 @@ def createLesson():
                     cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso) values\
                                 (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'subjectName': subject, 'description': description, 'lessonDate': lessonDate, 'lessonRoom': lessonRoom, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear})
                     connection.commit()
+                    #Getting all users attending the lesson's course and adding them all to the `Partecipazione` table with default `Presenza` value (`0` or `False`)
+                    usersList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
+                    cursor.execute('select max(idLezione) from Lezione')
+                    latestLesson = cursor.fetchone()[0]
+                    #TODO: Make async request
+                    for user in usersList:
+                        cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(latestLessonID)s)', {'uid': user['userID'], 'latestLessonID': latestLesson})
+                        connection.commit()
                     connection.close()
                     flash('Lesson created', 'success')
                 else:
@@ -779,6 +787,20 @@ def b64_encode_decode(string:str, encode = True):
         #Excepting any type of error while decoding base64 to string
         except conversionError:
             return False
+
+def selectUsersFromCourse(courseName, courseYear):
+    '''Executes a query and returns the count of students attending a defined course\
+        Returns a list of dictionaries'''
+    connection = connectToDB()
+    cursor = connection.cursor()
+    cursor.execute('select Utente.userID\
+                from Corso\
+                inner join Registrazione on Registrazione.idCorso = Corso.idCorso\
+                inner join Utente on Utente.userID = Registrazione.userID\
+                where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s', {'courseName': courseName, 'courseYear': courseYear})
+    response = getValuesFromQuery(cursor)
+    connection.close()
+    return response
 
 if __name__ == "__main__":
     app.run(debug = True)
