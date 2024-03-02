@@ -3,7 +3,7 @@
 {% block content %}
 <h1>Lezione di {{lessonInfo[0]['Materia']}} del {{lessonInfo[0]['dataLezione']}}</h1>
 <h1>Lista studenti</h1>
-<form action = "registerAttendance" method = "post">
+<form action = "{{url_for('registerAttendances')}}" method = "post">
     <table>
         <tr>
             <th>Nome</th>
@@ -14,9 +14,11 @@
             <tr>
                 <td>{{student['Nome']}}</td>
                 <td>{{student['Cognome']}}</td>
-                <td><input type = "checkbox" name = "attendanceCheck"></td>
+                <!-- TODO: Dynamic `checked` property based on query `Presenza` from `Partecipazione` table -->
+                <td><input type = "checkbox" name = "attendanceCheck" value = "{{student['userID']}}"></td>
             </tr>
         {% endfor %}
     </table>
+    <button type = "submit" name = "registerAttendance" value = "{{lessonInfo[0]['idLezione']}}">Registra lezioni</button>
 </form>
 {% endblock %}

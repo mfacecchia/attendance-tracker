@@ -415,10 +415,24 @@ def manageLesson():
         for lessonDate in response:
             lessonDate['dataLezione'] = lessonDate['dataLezione'].strftime('%d/%m/%Y')
         connection.close()
-        print(response)
+        #TODO: Dynamic `checked` property based on query `Presenza` from `Partecipazione` table
         return render_template('manageLesson.html', lessonInfo = response)
     else:
         return redirect(url_for('userScreening'))
+
+@app.route('/lesson/register-attendance', methods = ['GET', 'POST'])
+def registerAttendances():
+    if(session.get('role') in ['Admin', 'Insegnante']):
+        #TODO: Add remove attendance function (check for `checked` property of each checkbox)
+        attendances = request.form.getlist('attendanceCheck')
+        connection = connectToDB()
+        cursor = connection.cursor()
+        for attendance in attendances:
+            cursor.execute('update Partecipazione set Presenza = 1 where userID = %(uid)s', {'uid': attendance})
+            connection.commit()
+        connection.close()
+        flash('Attendances saved', 'success')
+    return redirect(url_for('userScreening'))
 
 @app.route('/course/create', methods = ['GET', 'POST'])
 def create_course():
