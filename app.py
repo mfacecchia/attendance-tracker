@@ -1,15 +1,16 @@
 from flask import Flask, render_template, url_for, request, redirect, session,flash, Response
-from flask_mail import Mail, Message
+from flask_mail import Mail, Message, BadHeaderError
 from argon2 import PasswordHasher, exceptions
 import mysql.connector
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
 from datetime import datetime, date
+from base64 import urlsafe_b64encode
 from os import environ
 
 app = Flask(__name__)
 oauth = OAuth(app)
-mailer = Mail(app)
+
 app.config['SECRET_KEY'] = environ['FLASK_SECRET']
 app.config['SESSION_TYPE'] = 'filesystem'
 
@@ -18,6 +19,7 @@ app.config['MAIL_PORT'] = environ['MAIL_PORT']
 app.config['MAIL_USERNAME'] = environ['MAIL_USERNAME']
 app.config['MAIL_PASSWORD'] = environ['MAIL_PASSWORD']
 app.config['MAIL_USE_TLS'] = True
+mailer = Mail(app)
 
 #Registering OAuth application for future requests
 oauth.register(
@@ -106,9 +108,20 @@ def check_login():
 
 @app.route('/forgot-password')
 def forgotPassword():
+    message = Message(subject = 'Recupera Password',
+                    recipients = ['marco.facecchia03@gmail.com'],
+                    html = render_template('recoverPasswordTemplate.html', userMail = str(b64_encode('paolobrosio@pb.com')), userID = str(b64_encode('2'))),
+                    sender = ('Attendance Tracker Mailing System', environ['MAIL_USERNAME'])
+                    )
+    try:
+        mailer.send(message)
+    #Avoiding HTTP Header injections
+    except BadHeaderError:
+        flash('THere was an error while sending the email. Please try again', 'error')
+        return redirect(url_for('login'))
     return "Forgot password"
 
-@app.route('/user/updatepassword')
+@app.route('/user/updatepassword', methods = ['GET'])
 def updatePassword():
     '''Lets the user update his freshly created account's password'''
     return render_template('updatePassword.html')
@@ -710,6 +723,10 @@ def getLessonsList():
         lessonDate['dataLezione'] = lessonDate['dataLezione'].strftime('%d/%m/%Y')
     connection.close()
     return response
+
+def b64_encode(string:str):
+    '''Takes a string as input parameter and returns its relative base64 encoded value'''
+    return urlsafe_b64encode(string.encode())
 
 if __name__ == "__main__":
     app.run(debug = True)
