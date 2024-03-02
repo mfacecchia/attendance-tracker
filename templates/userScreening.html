@@ -45,12 +45,16 @@ Gestione account
                 <th style = "border: 1px solid gray">Aula</th>
                 <th style = "border: 1px solid gray">Tipologia</th>
                 <th style = "border: 1px solid gray">Corso</th>
+                <th style = "border: 1px solid gray">Gestione</th>
             </tr>
             {% for lesson in scheduledLessons %}
                 <tr>
                     {% for lessonCol in lesson.values() %}
-                        <td style = "border: 1px solid gray">{{lessonCol}}</td>
+                        {% if loop.index != 1 %}
+                            <td style = "border: 1px solid gray">{{lessonCol}}</td>
+                        {% endif %}
                     {% endfor %}
+                    <td><a href = "{{url_for('manageLesson', id = lesson['idLezione'])}}">Apri Lezione</a></td>
                 </tr>
             {% endfor %}
         </table>

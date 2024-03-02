@@ -392,6 +392,11 @@ def createLesson():
         flash(commonErrorMessage, 'error')
     return redirect(url_for('login'))
 
+@app.route('/lesson', methods = ['GET'])
+def manageLesson():
+    lessonID = request.args.get('id')
+    return lessonID
+
 @app.route('/course/create', methods = ['GET', 'POST'])
 def create_course():
     if(session.get('role') == 'Admin'):
@@ -749,7 +754,7 @@ def getLessonsList():
     if(not connection):
         return False
     cursor = connection.cursor()
-    cursor.execute('select Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso\
+    cursor.execute('select idLezione, Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso\
                 from Lezione\
                 inner join Corso on Corso.idCorso = Lezione.idCorso\
                 where dataLezione >= %(today)s\
