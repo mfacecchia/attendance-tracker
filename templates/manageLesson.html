@@ -1,0 +1,22 @@
+{% extends "index.html" %}
+
+{% block content %}
+<h1>Lezione di {{lessonInfo[0]['Materia']}} del {{lessonInfo[0]['dataLezione']}}</h1>
+<h1>Lista studenti</h1>
+<form action = "registerAttendance" method = "post">
+    <table>
+        <tr>
+            <th>Nome</th>
+            <th>Cognome</th>
+            <th>Presente</th>
+        </tr>
+        {% for student in lessonInfo %}
+            <tr>
+                <td>{{student['Nome']}}</td>
+                <td>{{student['Cognome']}}</td>
+                <td><input type = "checkbox" name = "attendanceCheck"></td>
+            </tr>
+        {% endfor %}
+    </table>
+</form>
+{% endblock %}

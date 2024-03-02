@@ -394,8 +394,31 @@ def createLesson():
 
 @app.route('/lesson', methods = ['GET'])
 def manageLesson():
-    lessonID = request.args.get('id')
-    return lessonID
+    if(session.get('role') in ['Admin', 'Insegnante']):
+        try:
+            lessonID = int(request.args.get('id'))
+        except ValueError:
+            return redirect(url_for('userScreening'))
+        connection = connectToDB()
+        cursor = connection.cursor()
+        cursor.execute('select Utente.userID, Nome, Cognome, Materia, dataLezione\
+                    from Utente\
+                    inner join Partecipazione on Utente.userID = Partecipazione.userID\
+                    inner join Lezione on Partecipazione.idLezione = Lezione.idLezione\
+                    where Utente.Tipologia = "Studente"\
+                    and Lezione.idLezione = %(lessonID)s', {'lessonID': lessonID})
+        response = getValuesFromQuery(cursor)
+        if(not response):
+            flash('No entries found for the selected lesson', 'error')
+            return redirect(url_for('userScreening'))
+        #Converting all gotten dates to a more user friendly format
+        for lessonDate in response:
+            lessonDate['dataLezione'] = lessonDate['dataLezione'].strftime('%d/%m/%Y')
+        connection.close()
+        print(response)
+        return render_template('manageLesson.html', lessonInfo = response)
+    else:
+        return redirect(url_for('userScreening'))
 
 @app.route('/course/create', methods = ['GET', 'POST'])
 def create_course():
