@@ -5,7 +5,8 @@ import mysql.connector
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
 from datetime import datetime, date
-from base64 import urlsafe_b64encode
+from base64 import urlsafe_b64encode, urlsafe_b64decode
+from binascii import Error as conversionError
 from os import environ
 
 app = Flask(__name__)
@@ -108,6 +109,7 @@ def check_login():
 
 @app.route('/forgot-password', methods = ['GET', 'POST'])
 def forgotPassword():
+    #TODO: Add db field in `Credenziali` called = `passwordDimenticata` with `False` as default value
     email = request.form.get('email')
     #If the form has not been submitted, the first redirect will be to the form for inputting the user's email, otherwise proceeding with user verification
     if(email):
@@ -119,7 +121,7 @@ def forgotPassword():
             uid = str(uid['userID'])
             message = Message(subject = 'Recupera Password',
                             recipients = [email],
-                            html = render_template('recoverPasswordTemplate.html', userMail = str(b64_encode(email)), userID = str(b64_encode(uid))),
+                            html = render_template('recoverPasswordTemplate.html', userMail = b64_encode_decode(email).decode(), userID = b64_encode_decode(uid).decode()),
                             sender = ('Attendance Tracker Mailing System', environ['MAIL_USERNAME'])
                             )
             try:
@@ -134,6 +136,22 @@ def forgotPassword():
 @app.route('/user/updatepassword', methods = ['GET'])
 def updatePassword():
     '''Lets the user update his freshly created account's password'''
+    userEmail = request.args.get('mail')
+    userID = request.args.get('uid')
+    if(userEmail and userID):
+        userEmail = b64_encode_decode(userEmail, False)
+        userID = b64_encode_decode(userID, False)
+        #Managing conversion error with redirect to login page if `b64_encode_decode` function returns `False`
+        if(not userEmail or not userID):
+            flash('An error occured. Please try again', 'error')
+            return redirect(url_for('login'))
+        #Query `count` result = 1 means account found so redirecting to update password
+        if(verifyUserExistence(userEmail, userID)['result'] == 1):
+            session['uid'] = userID
+            return render_template('updatePassword.html')
+        else:
+            flash('This user does not exist.', 'error')
+            return redirect(url_for('login'))
     return render_template('updatePassword.html')
 
 @app.route('/user/updatepassword/verify', methods = ['GET', 'POST'])
@@ -165,7 +183,8 @@ def verify_updated_password():
             connection.commit()
             session['lastLogin'] = updateLastLoginTime()
             connection.close()
-            return redirect(url_for('userScreening'))
+            flash('Password updated!', 'success')
+            return redirect(url_for('login'))
         else:
             flash('Passwords not matching', 'error')
         return redirect(url_for('updatePassword'))
@@ -734,21 +753,32 @@ def getLessonsList():
     connection.close()
     return response
 
-def verifyUserExistence(userEmail):
+def verifyUserExistence(userEmail, userID = None):
     '''Verifies if the user exists before sending the recover password email.\n
     Returns its relative `userID` if the query returns a value, otherwise `False`'''
     connection = connectToDB()
     cursor = connection.cursor()
-    cursor.execute('select userID from Credenziali where Email = %(userEmail)s', {'userEmail': userEmail})
+    if(userID):
+        cursor.execute('select count(*) as result from Credenziali where Email = %(userEmail)s and userID = %(uid)s', {'userEmail': userEmail, 'uid': userID})
+    else:
+        cursor.execute('select userID from Credenziali where Email = %(userEmail)s', {'userEmail': userEmail})
     response = getValuesFromQuery(cursor)
     connection.close()
     if not response:
         return False
     return response[0]
 
-def b64_encode(string:str):
-    '''Takes a string as input parameter and returns its relative base64 encoded value'''
-    return urlsafe_b64encode(string.encode())
+def b64_encode_decode(string:str, encode = True):
+    '''Takes a string as input parameter and returns its relative base64 encoded/decoded value'''
+    if encode:
+        return urlsafe_b64encode(string.encode())
+    else:
+        try:
+            #Decoding to `utf-8` to remove the `b` prefix from string
+            return urlsafe_b64decode(string).decode('utf-8')
+        #Excepting any type of error while decoding base64 to string
+        except conversionError:
+            return False
 
 if __name__ == "__main__":
     app.run(debug = True)
