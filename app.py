@@ -439,6 +439,19 @@ def registerAttendances():
         flash('Attendances saved', 'success')
     return redirect(url_for('manageLesson', id = selectedLessonID))
 
+@app.route('/lesson/attendances', methods = ['GET'])
+def getAttendancesCount():
+    '''API that returns the list of all attended courses attendances count'''
+    if(session.get('role') in ['Admin', 'Insegnante']):
+        print(request.args.get('range'))
+        try:
+            return getLessonsAttendancesCount(int(request.args.get('range')))
+        except ValueError:
+            return getLessonsAttendancesCount()
+    else:
+        return []
+
+
 @app.route('/course/create', methods = ['GET', 'POST'])
 def create_course():
     if(session.get('role') == 'Admin'):
@@ -856,6 +869,7 @@ def getLessonsAttendancesCount(range = 7):
     dateNow = date.today()
     #Getting the analysis start range by subtracting days from today
     dateRange = dateNow - timedelta(days = range)
+    #FIXME: Returns attendances from all courses (even the not subscribed to ones)
     cursor.execute('select count(*) as "conteggioPresenze", dataLezione, nomeCorso, annoCorso\
                 from Partecipazione\
                 inner join Lezione on Lezione.idLezione = Partecipazione.idLezione\
