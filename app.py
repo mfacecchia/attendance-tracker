@@ -1,10 +1,10 @@
-from flask import Flask, render_template, url_for, request, redirect, session,flash, Response
+from flask import Flask, render_template, url_for, request, redirect, session,flash, jsonify
 from flask_mail import Mail, Message, BadHeaderError
 from argon2 import PasswordHasher, exceptions
 import mysql.connector
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from binascii import Error as conversionError
 from os import environ
@@ -848,6 +848,48 @@ def selectUsersFromCourse(courseName, courseYear):
     response = getValuesFromQuery(cursor)
     connection.close()
     return response
+
+def getLessonsAttendancesCount(range = 7):
+    '''Executes a query and returns in form of JSON the count of attendances subdivided per lesson date and course id'''
+    connection = connectToDB()
+    cursor = connection.cursor()
+    dateNow = date.today()
+    #Getting the analysis start range by subtracting days from today
+    dateRange = dateNow - timedelta(days = range)
+    cursor.execute('select count(*) as "conteggioPresenze", dataLezione, nomeCorso, annoCorso\
+                from Partecipazione\
+                inner join Lezione on Lezione.idLezione = Partecipazione.idLezione\
+                inner join Corso on Corso.idCorso = Lezione.idCorso\
+                where dataLezione between %(dateRange)s and %(dateToday)s\
+                and Presenza = 1\
+                group by dataLezione\
+                order by dataLezione', {'dateRange': dateRange, 'dateToday': '2024-03-07'})
+    #TODO: IMPORTANT => change lesson date range with today's date
+    jsonResponse = reformatResponse(getValuesFromQuery(cursor))
+    return jsonify(jsonResponse)
+
+def reformatResponse(response):
+    '''Gets a list and orders it based on course name and year'''
+    orderedResponse = []
+    for col in response:
+        #Flag variable used to check if the query resulting column's course name and year combination is already in the list
+        found = False
+        for orderedResponseCol in orderedResponse:
+            #Checking if the course's name and year combination is already in the ordered list
+            if(f"{col['nomeCorso']} - {col['annoCorso']}" == orderedResponseCol['nomeCorso']):
+                found = True
+                #Appending related course lesson's date and attendances count
+                orderedResponseCol['dataLezione'].append(col['dataLezione'].strftime('%d/%m/%Y'))
+                orderedResponseCol['conteggioPresenze'].append(col['conteggioPresenze'])
+                break
+        #Appending a new whole dictionary if the course does not exist in the list
+        if(not found):
+            orderedResponse.append({
+                'nomeCorso': f"{col['nomeCorso']} - {col['annoCorso']}",
+                'dataLezione': [col['dataLezione'].strftime('%d/%m/%Y')],
+                'conteggioPresenze': [col['conteggioPresenze']]
+            })
+    return orderedResponse
 
 if __name__ == "__main__":
     app.run(debug = True)
