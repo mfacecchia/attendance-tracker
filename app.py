@@ -121,6 +121,7 @@ def forgotPassword():
             uid = str(uid['userID'])
             message = Message(subject = 'Recupera Password',
                             recipients = [email],
+                            #TODO: Decode after email is sent, not before
                             html = render_template('recoverPasswordTemplate.html', userMail = b64_encode_decode(email).decode(), userID = b64_encode_decode(uid).decode()),
                             sender = ('Attendance Tracker Mailing System', environ['MAIL_USERNAME'])
                             )
@@ -271,6 +272,7 @@ def userScreening():
             response = getValuesFromQuery(cursor)
             connection.close()
         if(session.get('role') in ['Studente', 'Insegnante']):
+            #FIXME: Lessons list not filtered for user attended courses
             scheduledLessons = getLessonsList()
             if(not scheduledLessons):
                 return redirect(url_for('index'))
@@ -325,6 +327,7 @@ def createUser():
                         response = getValuesFromQuery(cursor)
                         if(len(response) == 0):
                             #Matrix with all the queries to execute to create the account
+                            #TODO: Add default lesson attendance column in `Partecipazione` table for lessons after the current date
                             queries = [
                                         ['insert into Utente(Nome, Cognome, Tipologia) values(%(name)s, %(surname)s, %(role)s)', {'name': fname, 'surname': lname, 'role': role}],
                                         ['insert into Credenziali(Email, PW, userID) values(%(email)s, %(pw)s, (select max(userID) from Utente))', {'email': email, 'pw': hashedPW}],

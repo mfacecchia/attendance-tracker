@@ -110,10 +110,13 @@ Gestione account
         <a href = "{{url_for('githubAuth', login = False)}}">Collega Account Github</a><br>
     {% endif %}
 
+    <canvas id = "attendanceStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
+    <button id = "addDataset">Add dataset</button>
+
     <a href = "{{ url_for('logout') }}">Logout</a>
 
     <!-- NOTE: Script declaration -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js" integrity="sha512-L0Shl7nXXzIlBSUUPpxrokqq4ojqgZFQczTYlGjzONGTDAcLremjwaWv5A+EDLnxhQzY5xUZPWLOLqYRkY0Cbw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         
     </script>
