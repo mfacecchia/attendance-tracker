@@ -14,8 +14,11 @@
             <tr>
                 <td>{{student['Nome']}}</td>
                 <td>{{student['Cognome']}}</td>
-                <!-- TODO: Dynamic `checked` property based on query `Presenza` from `Partecipazione` table -->
-                <td><input type = "checkbox" name = "attendanceCheck" value = "{{student['userID']}}"></td>
+                {% if student['Presenza'] %}
+                    <td><input type = "checkbox" name = "attendanceCheck" value = "{{student['userID']}}" checked></td>
+                {% else %}
+                    <td><input type = "checkbox" name = "attendanceCheck" value = "{{student['userID']}}"></td>
+                {% endif %}
             </tr>
         {% endfor %}
     </table>

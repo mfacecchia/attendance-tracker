@@ -401,7 +401,7 @@ def manageLesson():
             return redirect(url_for('userScreening'))
         connection = connectToDB()
         cursor = connection.cursor()
-        cursor.execute('select Utente.userID, Nome, Cognome, Materia, dataLezione, Lezione.idLezione\
+        cursor.execute('select Utente.userID, Nome, Cognome, Materia, dataLezione, Lezione.idLezione, Presenza\
                     from Utente\
                     inner join Partecipazione on Utente.userID = Partecipazione.userID\
                     inner join Lezione on Partecipazione.idLezione = Lezione.idLezione\
@@ -415,7 +415,6 @@ def manageLesson():
         for lessonDate in response:
             lessonDate['dataLezione'] = lessonDate['dataLezione'].strftime('%d/%m/%Y')
         connection.close()
-        #TODO: Dynamic `checked` property based on query `Presenza` from `Partecipazione` table
         return render_template('manageLesson.html', lessonInfo = response)
     else:
         return redirect(url_for('userScreening'))
@@ -423,18 +422,19 @@ def manageLesson():
 @app.route('/lesson/register-attendance', methods = ['GET', 'POST'])
 def registerAttendances():
     if(session.get('role') in ['Admin', 'Insegnante']):
+        selectedLessonID = request.form.get('registerAttendance')
         attendances = request.form.getlist('attendanceCheck')
         connection = connectToDB()
         cursor = connection.cursor()
         #Resetting the the attendance flag from every user in the DB to set the correct values
-        cursor.execute('update Partecipazione set Presenza = 0 where idLezione = %(lessonID)s', {'lessonID': request.form.get('registerAttendance')})
+        cursor.execute('update Partecipazione set Presenza = 0 where idLezione = %(lessonID)s', {'lessonID': selectedLessonID})
         connection.commit()
         for attendance in attendances:
             cursor.execute('update Partecipazione set Presenza = 1 where userID = %(uid)s', {'uid': attendance})
             connection.commit()
         connection.close()
         flash('Attendances saved', 'success')
-    return redirect(url_for('userScreening'))
+    return redirect(url_for('manageLesson', id = selectedLessonID))
 
 @app.route('/course/create', methods = ['GET', 'POST'])
 def create_course():
