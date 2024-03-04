@@ -443,7 +443,6 @@ def registerAttendances():
 def getAttendancesCount():
     '''API that returns the list of all attended courses attendances count'''
     if(session.get('role') in ['Admin', 'Insegnante']):
-        print(request.args.get('range'))
         try:
             return getLessonsAttendancesCount(int(request.args.get('range')))
         except ValueError:

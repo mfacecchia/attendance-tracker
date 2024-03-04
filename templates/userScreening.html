@@ -111,24 +111,26 @@ Gestione account
     {% endif %}
 
     <canvas id = "attendanceStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
-    <button id = "addDataset">Add dataset</button>
+    <button id = "7dRange">7 Giorni</button>
+    <button id = "30dRange">1 Mese</button>
+    <button id = "1yRange">1 Anno</button>
 
     <a href = "{{ url_for('logout') }}">Logout</a>
 
     <!-- NOTE: Script declaration -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src = "{{url_for('static', filename = 'script/chart.js')}}"></script>
     <script>
         $.ajax({
+            async: false,
             url: '/lesson/attendances',
             type: 'GET',
             contentType: 'application/json',
             data: {'range': 7},
             success: function(response){
-                responseValues = response;
+                updateChart(response)
             },
         });
-
-        //TODO: Create Chart based on `responseValues` object
     </script>
 {% endblock %}
