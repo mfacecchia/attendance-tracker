@@ -1,4 +1,5 @@
 from flask import Flask, render_template, url_for, request, redirect, session,flash, Response
+from werkzeug import exceptions as flaskExceptions
 from flask_mail import Mail, Message, BadHeaderError
 from argon2 import PasswordHasher, exceptions
 import mysql.connector
@@ -39,6 +40,11 @@ roleOptions = ['Studente', 'Insegnante', 'Admin']
 courses = []
 lessonTypes = ['Lezione', 'Seminario', 'Laboratorio']
 commonErrorMessage = 'An error occured while handling your request... Please try again.'
+
+#Handler for `Error 404 Not Found`
+@app.errorhandler(flaskExceptions.NotFound)
+def pageNotFound(error):
+    return redirect(url_for('index'))
 
 @app.route('/')
 def index():
