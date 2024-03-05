@@ -110,6 +110,7 @@ Gestione account
         <a href = "{{url_for('githubAuth', login = False)}}">Collega Account Github</a><br>
     {% endif %}
 
+    <h1 id = "chartTitle">Presenze studenti negli ultimi 7 giorni</h1>
     <canvas id = "attendanceStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
     <button id = "7dRange">7 Giorni</button>
     <button id = "30dRange">1 Mese</button>
@@ -129,7 +130,8 @@ Gestione account
             contentType: 'application/json',
             data: {'range': 7},
             success: function(response){
-                updateChart(response)
+                updateChart(response);
+                document.querySelector('#chartTitle').textContent = 'Presenze studenti negli ultimi 7 giorni';
             },
         });
     </script>

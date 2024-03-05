@@ -12,7 +12,6 @@ const config = {
                 },
             }
         }
-        //TODO: Add graph title
     }
 }
 var chart = new Chart(canvas, config);
