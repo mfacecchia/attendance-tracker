@@ -875,7 +875,7 @@ def getLessonsAttendancesCount(range = 7):
                 inner join Corso on Corso.idCorso = Lezione.idCorso\
                 where dataLezione between %(dateRange)s and %(dateToday)s\
                 and Presenza = 1\
-                group by dataLezione\
+                group by Materia\
                 order by dataLezione', {'dateRange': dateRange, 'dateToday': '2024-03-07'})
     #TODO: IMPORTANT => change lesson date range with today's date
     jsonResponse = reformatResponse(getValuesFromQuery(cursor))
@@ -884,6 +884,7 @@ def getLessonsAttendancesCount(range = 7):
 def reformatResponse(response):
     '''Gets a list and orders it based on course name and year'''
     orderedResponse = []
+
     for col in response:
         #Flag variable used to check if the query resulting column's course name and year combination is already in the list
         found = False

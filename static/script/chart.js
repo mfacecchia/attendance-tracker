@@ -12,6 +12,7 @@ const config = {
                 },
             }
         }
+        //TODO: Add graph title
     }
 }
 var chart = new Chart(canvas, config);
@@ -21,30 +22,16 @@ function updateChart(apiData){
     let newChartLabels = [];
 
     apiData.forEach(course => {
-        newChartLabels.push(...course['dataLezione'])
-        var orderedLessonAttendancesCount = []
-
-        //Updating lessons to place attendances count in the right chart's label
-        newChartLabels.forEach((element, index) => {
-            //Checking if course's array position exists, it it doesn't the last element is selected for each iteration
-            if(course['dataLezione'][index] == undefined){
-                if(element != course['dataLezione'][course['dataLezione'].length - 1]){
-                    //Adding a null placeholder value if the lesson date does not match with the course's current array value
-                    orderedLessonAttendancesCount.push(null);
-                }
-                else{
-                    orderedLessonAttendancesCount.push(course['conteggioPresenze'][course['conteggioPresenze'].length - 1])
-                }
+        //Array used to store the ordered lessons based on chart labels dates (gets cleaned up on every loop execution)
+        var orderedLessonAttendancesCount = [];
+        course['dataLezione'].forEach((courseDate, index) => {
+            //Checking if the label with the defined date is already in the array, otherwise adding it
+            if(newChartLabels.indexOf(courseDate) == -1){
+                newChartLabels.push(courseDate);
             }
-            else{
-                if(element != course['dataLezione'][index]){
-                    orderedLessonAttendancesCount.push(null);
-                }
-                else{
-                    orderedLessonAttendancesCount.push(course['conteggioPresenze'][index])
-                }
-            }
-        })
+            //Appending at the defined label's index the relative attendances count
+            orderedLessonAttendancesCount[newChartLabels.indexOf(courseDate)] = course['conteggioPresenze'][index];
+        });
         newChartDataset.push(
             {
                 //Dataset label
