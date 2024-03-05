@@ -17,30 +17,46 @@ const config = {
 var chart = new Chart(canvas, config);
 
 function updateChart(apiData){
-    let newChartDataset = [];
-    let newChartLabels = [];
+
+    //All courses names obtained from the API Response
+    var coursesNames = [];
+    //All courses dates obtained from the API Response
+    var coursesDates = [];
+    //NOTE: Matrix subdivided per course name
+    var attendancesCount = [];
+    var chartDatasets = [];
 
     apiData.forEach(course => {
-        //Array used to store the ordered lessons based on chart labels dates (gets cleaned up on every loop execution)
-        var orderedLessonAttendancesCount = [];
-        course['dataLezione'].forEach((courseDate, index) => {
-            //Checking if the label with the defined date is already in the array, otherwise adding it
-            if(newChartLabels.indexOf(courseDate) == -1){
-                newChartLabels.push(courseDate);
+        //Checking if the courses names and lessons dates are already in the `coursesNames` and `coursesDates` arrays, otherwise the values will be added at the end of them
+        if(coursesDates.indexOf(course.dataLezione) == -1){
+            coursesDates.push(course.dataLezione)
+        }
+        if(coursesNames.indexOf(course.nomeCorso) == -1){
+            coursesNames.push(course.nomeCorso)
+        }
+        //Looping through each obtained lesson date to add the relative attendances count based on course name
+        coursesDates.forEach((date, dateIndex) => {
+            if(date == course.dataLezione){
+                //Getting the course position in the array
+                courseIndex = coursesNames.indexOf(course.nomeCorso);
+                if(!Array.isArray(attendancesCount[courseIndex])){
+                    attendancesCount[courseIndex] = []
+                }
+                //Adding the lesson attendances count at the relative course `coursesNames` index and `dateIndex` value in order to place it in the correct date position
+                attendancesCount[courseIndex][dateIndex] = course.conteggioPresenze;
             }
-            //Appending at the defined label's index the relative attendances count
-            orderedLessonAttendancesCount[newChartLabels.indexOf(courseDate)] = course['conteggioPresenze'][index];
-        });
-        newChartDataset.push(
-            {
-                //Dataset label
-                label: course['nomeCorso'],
-                data: orderedLessonAttendancesCount
-            }
-        );
+        })
     });
-    chart.data.datasets = newChartDataset;
-    //Lessons dates (X axis value)
-    chart.data.labels = newChartLabels;
-    chart.update()
+    //Adding all datasets in an array and then to the chart itself
+    coursesNames.forEach((courseName, index) => {
+        chartDatasets.push({
+            //NOTE: `label` represents the dataset "title"
+            label: courseName,
+            data: attendancesCount[index]
+        })
+    })
+    //NOTE: `chart.data.labels` represent all the X axis labels
+    chart.data.labels = [...coursesDates];
+    chart.data.datasets = chartDatasets;
+    chart.update();
 }

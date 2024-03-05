@@ -113,9 +113,9 @@ Gestione account
 
     <h1 id = "chartTitle">Presenze studenti negli ultimi 7 giorni</h1>
     <canvas id = "attendanceStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
-    <button id = "7dRange">7 Giorni</button>
-    <button id = "30dRange">1 Mese</button>
-    <button id = "1yRange">1 Anno</button>
+    <button class = "updateRange" value = '7'>7 Giorni</button>
+    <button class = "updateRange" value = '14'>14 Giorni</button>
+    <button class = "updateRange" value = '30'>1 Mese</button>
 
     <a href = "{{ url_for('logout') }}">Logout</a>
 
@@ -124,16 +124,27 @@ Gestione account
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src = "{{url_for('static', filename = 'script/chart.js')}}"></script>
     <script>
-        $.ajax({
-            async: false,
-            url: '/lesson/attendances',
-            type: 'GET',
-            contentType: 'application/json',
-            data: {'range': 7},
-            success: function(response){
-                updateChart(response);
-                document.querySelector('#chartTitle').textContent = 'Presenze studenti negli ultimi 7 giorni';
-            },
+        updateChartRange()
+
+        let rangeButtons = document.querySelectorAll('.updateRange');
+        rangeButtons.forEach((element) => {
+            element.onclick = (() => {
+                updateChartRange(element.value)
+            })
         });
+
+        function updateChartRange(range = 7){
+            $.ajax({
+                async: false,
+                url: '/lesson/attendances',
+                type: 'GET',
+                contentType: 'application/json',
+                data: {'range': range},
+                success: function(response){
+                    updateChart(response);
+                    document.querySelector('#chartTitle').textContent = `Presenze studenti negli ultimi ${range} giorni`;
+                },
+            });
+        }
     </script>
 {% endblock %}
