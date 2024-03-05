@@ -443,8 +443,7 @@ def registerAttendances():
         cursor.execute('update Partecipazione set Presenza = 0 where idLezione = %(lessonID)s', {'lessonID': selectedLessonID})
         connection.commit()
         for attendance in attendances:
-            #FIXME: Setting attendance = 1 for every lesson
-            cursor.execute('update Partecipazione set Presenza = 1 where userID = %(uid)s', {'uid': attendance})
+            cursor.execute('update Partecipazione set Presenza = 1 where userID = %(uid)s and idLezione = %(lessonID)s', {'uid': attendance, 'lessonID': selectedLessonID})
             connection.commit()
         connection.close()
         flash('Attendances saved', 'success')
