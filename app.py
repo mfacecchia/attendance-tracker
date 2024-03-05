@@ -271,8 +271,7 @@ def userScreening():
                         where Utente.userID = %(uid)s', {'uid': session['uid']})
             response = getValuesFromQuery(cursor)
             connection.close()
-        if(session.get('role') in ['Studente', 'Insegnante']):
-            scheduledLessons = getLessonsList()
+        scheduledLessons = getLessonsList()
         return render_template('userScreening.html',
                             session = session,
                             roleOptions = roleOptions,
