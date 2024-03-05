@@ -864,6 +864,8 @@ def selectUsersFromCourse(courseName, courseYear):
 def getLessonsAttendancesCount(range = 7):
     '''Executes a query and returns in form of JSON the count of attendances subdivided per lesson date and course id'''
     connection = connectToDB()
+    if(not connection):
+        return []
     cursor = connection.cursor()
     dateNow = date.today()
     #Getting the analysis start range by subtracting days from today
