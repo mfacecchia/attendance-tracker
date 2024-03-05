@@ -869,16 +869,32 @@ def getLessonsAttendancesCount(range = 7):
     #Getting the analysis start range by subtracting days from today
     dateRange = dateNow - timedelta(days = range)
     #FIXME: Returns attendances from all courses (even the not subscribed to ones)
-    cursor.execute('select count(*) as "conteggioPresenze", dataLezione, nomeCorso, annoCorso\
-                from Partecipazione\
-                inner join Lezione on Lezione.idLezione = Partecipazione.idLezione\
-                inner join Corso on Corso.idCorso = Lezione.idCorso\
-                where dataLezione between %(dateRange)s and %(dateToday)s\
-                and Presenza = 1\
-                group by Materia\
-                order by dataLezione', {'dateRange': dateRange, 'dateToday': '2024-03-07'})
-    #TODO: IMPORTANT => change lesson date range with today's date
+    if(session.get('role') == 'Admin'):
+        cursor.execute('select count(*) as "conteggioPresenze", dataLezione, nomeCorso, annoCorso\
+                    from Partecipazione\
+                    inner join Lezione on Lezione.idLezione = Partecipazione.idLezione\
+                    inner join Corso on Corso.idCorso = Lezione.idCorso\
+                    where dataLezione between %(dateRange)s and %(dateToday)s\
+                    and Presenza = 1\
+                    group by Materia\
+                    order by dataLezione', {'dateRange': dateRange, 'dateToday': '2024-03-07'})
+    elif(session.get('role') in ['Studente', 'Insegnante']):
+        cursor.execute('select count(*) as "conteggioPresenze", dataLezione, nomeCorso, annoCorso\
+                    from Partecipazione\
+                    inner join Lezione on Lezione.idLezione = Partecipazione.idLezione\
+                    inner join Corso on Corso.idCorso = Lezione.idCorso\
+                    where dataLezione between %(dateRange)s and %(dateToday)s\
+                    and Presenza = 1\
+                    and Lezione.idCorso in (\
+                        select idCorso\
+                        from Registrazione\
+                        inner join Utente on Utente.userID = Registrazione.userID\
+                        where Utente.userID = %(userID)s\
+                    )\
+                    group by Materia\
+                    order by dataLezione', {'dateRange': dateRange, 'dateToday': '2024-03-07', 'userID': session['uid']})
     jsonResponse = reformatResponse(getValuesFromQuery(cursor))
+    # print(jsonResponse)
     return jsonify(jsonResponse)
 
 def reformatResponse(response):
