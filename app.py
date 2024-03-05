@@ -1,11 +1,11 @@
-from flask import Flask, render_template, url_for, request, redirect, session,flash, Response
+from flask import Flask, render_template, url_for, request, redirect, session,flash, jsonify
 from werkzeug import exceptions as flaskExceptions
 from flask_mail import Mail, Message, BadHeaderError
 from argon2 import PasswordHasher, exceptions
 import mysql.connector
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from binascii import Error as conversionError
 from os import environ
@@ -127,6 +127,7 @@ def forgotPassword():
             uid = str(uid['userID'])
             message = Message(subject = 'Recupera Password',
                             recipients = [email],
+                            #TODO: Decode after email is sent, not before
                             html = render_template('recoverPasswordTemplate.html', userMail = b64_encode_decode(email).decode(), userID = b64_encode_decode(uid).decode()),
                             sender = ('Attendance Tracker Mailing System', environ['MAIL_USERNAME'])
                             )
@@ -276,10 +277,7 @@ def userScreening():
                         where Utente.userID = %(uid)s', {'uid': session['uid']})
             response = getValuesFromQuery(cursor)
             connection.close()
-        if(session.get('role') in ['Studente', 'Insegnante']):
-            scheduledLessons = getLessonsList()
-            if(not scheduledLessons):
-                return redirect(url_for('index'))
+        scheduledLessons = getLessonsList()
         return render_template('userScreening.html',
                             session = session,
                             roleOptions = roleOptions,
@@ -331,6 +329,7 @@ def createUser():
                         response = getValuesFromQuery(cursor)
                         if(len(response) == 0):
                             #Matrix with all the queries to execute to create the account
+                            #TODO: Add default lesson attendance column in `Partecipazione` table for lessons after the current date
                             queries = [
                                         ['insert into Utente(Nome, Cognome, Tipologia) values(%(name)s, %(surname)s, %(role)s)', {'name': fname, 'surname': lname, 'role': role}],
                                         ['insert into Credenziali(Email, PW, userID) values(%(email)s, %(pw)s, (select max(userID) from Utente))', {'email': email, 'pw': hashedPW}],
@@ -378,6 +377,14 @@ def createLesson():
                     cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso) values\
                                 (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'subjectName': subject, 'description': description, 'lessonDate': lessonDate, 'lessonRoom': lessonRoom, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear})
                     connection.commit()
+                    #Getting all users attending the lesson's course and adding them all to the `Partecipazione` table with default `Presenza` value (`0` or `False`)
+                    usersList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
+                    cursor.execute('select max(idLezione) from Lezione')
+                    latestLesson = cursor.fetchone()[0]
+                    #TODO: Make async request
+                    for user in usersList:
+                        cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(latestLessonID)s)', {'uid': user['userID'], 'latestLessonID': latestLesson})
+                        connection.commit()
                     connection.close()
                     flash('Lesson created', 'success')
                 else:
@@ -389,6 +396,62 @@ def createLesson():
     else:
         flash(commonErrorMessage, 'error')
     return redirect(url_for('login'))
+
+@app.route('/lesson', methods = ['GET'])
+def manageLesson():
+    if(session.get('role') in ['Admin', 'Insegnante']):
+        try:
+            lessonID = int(request.args.get('id'))
+        except ValueError:
+            return redirect(url_for('userScreening'))
+        connection = connectToDB()
+        cursor = connection.cursor()
+        cursor.execute('select Utente.userID, Nome, Cognome, Materia, dataLezione, Lezione.idLezione, Presenza\
+                    from Utente\
+                    inner join Partecipazione on Utente.userID = Partecipazione.userID\
+                    inner join Lezione on Partecipazione.idLezione = Lezione.idLezione\
+                    where Utente.Tipologia = "Studente"\
+                    and Lezione.idLezione = %(lessonID)s', {'lessonID': lessonID})
+        response = getValuesFromQuery(cursor)
+        if(not response):
+            flash('No entries found for the selected lesson', 'error')
+            return redirect(url_for('userScreening'))
+        #Converting all gotten dates to a more user friendly format
+        for lessonDate in response:
+            lessonDate['dataLezione'] = lessonDate['dataLezione'].strftime('%d/%m/%Y')
+        connection.close()
+        return render_template('manageLesson.html', lessonInfo = response)
+    else:
+        return redirect(url_for('userScreening'))
+
+@app.route('/lesson/register-attendance', methods = ['GET', 'POST'])
+def registerAttendances():
+    if(session.get('role') in ['Admin', 'Insegnante']):
+        selectedLessonID = request.form.get('registerAttendance')
+        attendances = request.form.getlist('attendanceCheck')
+        connection = connectToDB()
+        cursor = connection.cursor()
+        #Resetting the the attendance flag from every user in the DB to set the correct values
+        cursor.execute('update Partecipazione set Presenza = 0 where idLezione = %(lessonID)s', {'lessonID': selectedLessonID})
+        connection.commit()
+        for attendance in attendances:
+            cursor.execute('update Partecipazione set Presenza = 1 where userID = %(uid)s', {'uid': attendance})
+            connection.commit()
+        connection.close()
+        flash('Attendances saved', 'success')
+    return redirect(url_for('manageLesson', id = selectedLessonID))
+
+@app.route('/lesson/attendances', methods = ['GET'])
+def getAttendancesCount():
+    '''API that returns the list of all attended courses attendances count'''
+    if(session.get('role') in ['Admin', 'Insegnante']):
+        try:
+            return getLessonsAttendancesCount(int(request.args.get('range')))
+        except ValueError:
+            return getLessonsAttendancesCount()
+    else:
+        return []
+
 
 @app.route('/course/create', methods = ['GET', 'POST'])
 def create_course():
@@ -747,11 +810,25 @@ def getLessonsList():
     if(not connection):
         return False
     cursor = connection.cursor()
-    cursor.execute('select Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso\
-                from Lezione\
-                inner join Corso on Corso.idCorso = Lezione.idCorso\
-                where dataLezione >= %(today)s\
-                order by dataLezione, Materia asc', {'today': date.today()})
+    #Default query for all user types
+    preparedQuery = [
+        'select idLezione, Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso\
+        from Lezione\
+        inner join Corso on Corso.idCorso = Lezione.idCorso\
+        where dataLezione >= %(today)s', {'today': date.today()}
+    ]
+    #Adding course filter for students and teachers
+    if(session.get('role') in ['Studente', 'Insegnante']):
+        preparedQuery[0] += ' and Lezione.idCorso in (\
+                            select idCorso\
+                            from Registrazione\
+                            inner join Utente on Utente.userID = Registrazione.userID\
+                            where Utente.userID = %(userID)s\
+                        )'
+        preparedQuery[1].setdefault('userID', session['uid'])
+    #Adding the last SQL directives
+    preparedQuery[0] += ' order by dataLezione, Materia asc'
+    cursor.execute(*preparedQuery)
     response = getValuesFromQuery(cursor)
     #Converting all gotten dates to a more user friendly format
     for lessonDate in response:
@@ -785,6 +862,75 @@ def b64_encode_decode(string:str, encode = True):
         #Excepting any type of error while decoding base64 to string
         except conversionError:
             return False
+
+def selectUsersFromCourse(courseName, courseYear):
+    '''Executes a query and returns the count of students attending a defined course\
+        Returns a list of dictionaries'''
+    connection = connectToDB()
+    cursor = connection.cursor()
+    cursor.execute('select Utente.userID\
+                from Corso\
+                inner join Registrazione on Registrazione.idCorso = Corso.idCorso\
+                inner join Utente on Utente.userID = Registrazione.userID\
+                where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s', {'courseName': courseName, 'courseYear': courseYear})
+    response = getValuesFromQuery(cursor)
+    connection.close()
+    return response
+
+def getLessonsAttendancesCount(range = 7):
+    '''Executes a query and returns in form of JSON the count of attendances subdivided per lesson date and course id'''
+    connection = connectToDB()
+    if(not connection):
+        return []
+    cursor = connection.cursor()
+    dateNow = date.today()
+    #Getting the analysis start range by subtracting days from today
+    dateRange = dateNow - timedelta(days = range)
+    #Default query for all user types
+    preparedQuery = ['select count(*) as "conteggioPresenze", dataLezione, nomeCorso, annoCorso\
+                    from Partecipazione\
+                    inner join Lezione on Lezione.idLezione = Partecipazione.idLezione\
+                    inner join Corso on Corso.idCorso = Lezione.idCorso\
+                    where dataLezione between %(dateRange)s and %(dateToday)s\
+                    and Presenza = 1', {'dateRange': dateRange, 'dateToday': dateNow}]
+    #Adding course filter for students and teachers
+    if(session.get('role') in ['Studente', 'Insegnante']):
+        preparedQuery[0] += ' and Lezione.idCorso in (\
+                            select idCorso\
+                            from Registrazione\
+                            inner join Utente on Utente.userID = Registrazione.userID\
+                            where Utente.userID = %(userID)s\
+                        )'
+        preparedQuery[1].setdefault('userID', session['uid'])
+    #Adding the last SQL directives
+    preparedQuery[0] += ' group by Materia order by dataLezione'
+    cursor.execute(*preparedQuery)
+    jsonResponse = reformatResponse(getValuesFromQuery(cursor))
+    return jsonify(jsonResponse)
+
+def reformatResponse(response):
+    '''Gets a list and orders it based on course name and year'''
+    orderedResponse = []
+
+    for col in response:
+        #Flag variable used to check if the query resulting column's course name and year combination is already in the list
+        found = False
+        for orderedResponseCol in orderedResponse:
+            #Checking if the course's name and year combination is already in the ordered list
+            if(f"{col['nomeCorso']} - {col['annoCorso']}" == orderedResponseCol['nomeCorso']):
+                found = True
+                #Appending related course lesson's date and attendances count
+                orderedResponseCol['dataLezione'].append(col['dataLezione'].strftime('%d/%m/%Y'))
+                orderedResponseCol['conteggioPresenze'].append(col['conteggioPresenze'])
+                break
+        #Appending a new whole dictionary if the course does not exist in the list
+        if(not found):
+            orderedResponse.append({
+                'nomeCorso': f"{col['nomeCorso']} - {col['annoCorso']}",
+                'dataLezione': [col['dataLezione'].strftime('%d/%m/%Y')],
+                'conteggioPresenze': [col['conteggioPresenze']]
+            })
+    return orderedResponse
 
 if __name__ == "__main__":
     app.run(debug = True)
