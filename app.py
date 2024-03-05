@@ -272,10 +272,7 @@ def userScreening():
             response = getValuesFromQuery(cursor)
             connection.close()
         if(session.get('role') in ['Studente', 'Insegnante']):
-            #FIXME: Lessons list not filtered for user attended courses
             scheduledLessons = getLessonsList()
-            if(not scheduledLessons):
-                return redirect(url_for('index'))
         return render_template('userScreening.html',
                             session = session,
                             roleOptions = roleOptions,
@@ -808,11 +805,25 @@ def getLessonsList():
     if(not connection):
         return False
     cursor = connection.cursor()
-    cursor.execute('select idLezione, Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso\
-                from Lezione\
-                inner join Corso on Corso.idCorso = Lezione.idCorso\
-                where dataLezione >= %(today)s\
-                order by dataLezione, Materia asc', {'today': date.today()})
+    #Default query for all user types
+    preparedQuery = [
+        'select idLezione, Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso\
+        from Lezione\
+        inner join Corso on Corso.idCorso = Lezione.idCorso\
+        where dataLezione >= %(today)s', {'today': date.today()}
+    ]
+    #Adding course filter for students and teachers
+    if(session.get('role') in ['Studente', 'Insegnante']):
+        preparedQuery[0] += ' and Lezione.idCorso in (\
+                            select idCorso\
+                            from Registrazione\
+                            inner join Utente on Utente.userID = Registrazione.userID\
+                            where Utente.userID = %(userID)s\
+                        )'
+        preparedQuery[1].setdefault('userID', session['uid'])
+    #Adding the last SQL directives
+    preparedQuery[0] += ' order by dataLezione, Materia asc'
+    cursor.execute(*preparedQuery)
     response = getValuesFromQuery(cursor)
     #Converting all gotten dates to a more user friendly format
     for lessonDate in response:
@@ -880,10 +891,10 @@ def getLessonsAttendancesCount(range = 7):
     #Adding course filter for students and teachers
     if(session.get('role') in ['Studente', 'Insegnante']):
         preparedQuery[0] += ' and Lezione.idCorso in (\
-                        select idCorso\
-                        from Registrazione\
-                        inner join Utente on Utente.userID = Registrazione.userID\
-                        where Utente.userID = %(userID)s\
+                            select idCorso\
+                            from Registrazione\
+                            inner join Utente on Utente.userID = Registrazione.userID\
+                            where Utente.userID = %(userID)s\
                         )'
         preparedQuery[1].setdefault('userID', session['uid'])
     #Adding the last SQL directives

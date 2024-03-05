@@ -34,30 +34,35 @@ Gestione account
 
         <a href = "{{url_for('usersList')}}">Lista utenti</a>
     {% endif %}
-
+    
+    <!-- TODO: Display for all users -->
     {% if session['role'] in ['Studente', 'Insegnante'] %}
         <h1>Lezioni programmate</h1>
-        <table style = "border: 1px solid gray">
-            <tr>
-                <th style = "border: 1px solid gray">Materia</th>
-                <th style = "border: 1px solid gray">Descrizione</th>
-                <th style = "border: 1px solid gray">Data Lezione</th>
-                <th style = "border: 1px solid gray">Aula</th>
-                <th style = "border: 1px solid gray">Tipologia</th>
-                <th style = "border: 1px solid gray">Corso</th>
-                <th style = "border: 1px solid gray">Gestione</th>
-            </tr>
-            {% for lesson in scheduledLessons %}
+        {% if not scheduledLessons %}
+            <p>Nessuna lezione programmata</p>
+        {% else %}
+            <table style = "border: 1px solid gray">
                 <tr>
-                    {% for lessonCol in lesson.values() %}
-                        {% if loop.index != 1 %}
-                            <td style = "border: 1px solid gray">{{lessonCol}}</td>
-                        {% endif %}
-                    {% endfor %}
-                    <td><a href = "{{url_for('manageLesson', id = lesson['idLezione'])}}">Apri Lezione</a></td>
+                    <th style = "border: 1px solid gray">Materia</th>
+                    <th style = "border: 1px solid gray">Descrizione</th>
+                    <th style = "border: 1px solid gray">Data Lezione</th>
+                    <th style = "border: 1px solid gray">Aula</th>
+                    <th style = "border: 1px solid gray">Tipologia</th>
+                    <th style = "border: 1px solid gray">Corso</th>
+                    <th style = "border: 1px solid gray">Gestione</th>
                 </tr>
-            {% endfor %}
-        </table>
+                {% for lesson in scheduledLessons %}
+                    <tr>
+                        {% for lessonCol in lesson.values() %}
+                            {% if loop.index != 1 %}
+                                <td style = "border: 1px solid gray">{{lessonCol}}</td>
+                            {% endif %}
+                        {% endfor %}
+                        <td><a href = "{{url_for('manageLesson', id = lesson['idLezione'])}}">Apri Lezione</a></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
     {% endif %}
 
     {% if session['role'] in ['Insegnante', 'Admin'] %}
@@ -74,6 +79,7 @@ Gestione account
                 {% endfor %}
             </select>
             <select name = "course">
+                <!-- TODO: Remove first option -->
                 <option>-- Seleziona un corso --</option>
                 {% for course in courses %}
                     <option value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">{{course['nomeCorso']}} - {{course['annoCorso']}}</option>
