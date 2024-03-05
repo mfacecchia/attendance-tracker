@@ -903,27 +903,11 @@ def getLessonsAttendancesCount(range = 7):
     return jsonify(jsonResponse)
 
 def reformatResponse(response):
-    '''Gets a list and orders it based on course name and year'''
+    '''Gets a list and converts each date to the desired format\
+    Returns a list of dictionaries'''
     orderedResponse = []
-
     for col in response:
-        #Flag variable used to check if the query resulting column's course name and year combination is already in the list
-        found = False
-        for orderedResponseCol in orderedResponse:
-            #Checking if the course's name and year combination is already in the ordered list
-            if(f"{col['nomeCorso']} - {col['annoCorso']}" == orderedResponseCol['nomeCorso']):
-                found = True
-                #Appending related course lesson's date and attendances count
-                orderedResponseCol['dataLezione'].append(col['dataLezione'].strftime('%d/%m/%Y'))
-                orderedResponseCol['conteggioPresenze'].append(col['conteggioPresenze'])
-                break
-        #Appending a new whole dictionary if the course does not exist in the list
-        if(not found):
-            orderedResponse.append({
-                'nomeCorso': f"{col['nomeCorso']} - {col['annoCorso']}",
-                'dataLezione': [col['dataLezione'].strftime('%d/%m/%Y')],
-                'conteggioPresenze': [col['conteggioPresenze']]
-            })
+        orderedResponse.append({'nomeCorso': f"{col['nomeCorso']} - {col['annoCorso']}", 'dataLezione': col['dataLezione'].strftime('%d/%m/%Y'), 'conteggioPresenze': col['conteggioPresenze']})
     return orderedResponse
 
 if __name__ == "__main__":

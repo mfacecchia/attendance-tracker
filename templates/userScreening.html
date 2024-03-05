@@ -141,7 +141,6 @@ Gestione account
                 contentType: 'application/json',
                 data: {'range': range},
                 success: function(response){
-                    console.log(response);
                     updateChart(response);
                     document.querySelector('#chartTitle').textContent = `Presenze studenti negli ultimi ${range} giorni`;
                 },
