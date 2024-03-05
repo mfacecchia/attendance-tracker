@@ -339,6 +339,7 @@ def createUser():
                             for x in range(len(coursesNames)):
                                 cursor.execute('insert into Registrazione(userID, idCorso) values((select max(userID) from Utente), (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
                                 connection.commit()
+                                #Getting all upcoming lesson codes for every user course in order to automatically add a default row in the `Partecipazione` table
                                 cursor.execute('select idLezione\
                                             from Lezione\
                                             inner join Corso on Corso.idCorso = Lezione.idCorso\
@@ -346,8 +347,10 @@ def createUser():
                                             and nomeCorso = %(selectedCName)s\
                                             and annoCorso = %(selectedCYear)s', {'dateToday': date.today(), 'selectedCName': coursesNames[x], 'selectedCYear': coursesYears[x]})
                                 response.append(getValuesFromQuery(cursor))
+                            #NOTE: nested `for` loop because the ending `response` format will be a matrix (each list represents a course's set of lessons)
                             for lessonList in response:
                                 for lesson in lessonList:
+                                    #Adding the user to all lessons
                                     cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(lessonID)s)', {'uid': userID, 'lessonID': lesson['idLezione']})
                                     connection.commit()
                             flash('Account created', 'success')
