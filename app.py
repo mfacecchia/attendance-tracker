@@ -330,12 +330,26 @@ def createUser():
                                     ]
                             #Executing all queries from the pre-created matrix
                             for query in queries:
-                                cursor.execute(query[0], query[1])
+                                cursor.execute(*query)
                                 #Sending request to DB
                                 connection.commit()
+                            cursor.execute('select max(userID) as "userID" from Utente')
+                            userID = getValuesFromQuery(cursor)[0]['userID']
+                            response = []
                             for x in range(len(coursesNames)):
                                 cursor.execute('insert into Registrazione(userID, idCorso) values((select max(userID) from Utente), (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
                                 connection.commit()
+                                cursor.execute('select idLezione\
+                                            from Lezione\
+                                            inner join Corso on Corso.idCorso = Lezione.idCorso\
+                                            where dataLezione >= %(dateToday)s\
+                                            and nomeCorso = %(selectedCName)s\
+                                            and annoCorso = %(selectedCYear)s', {'dateToday': date.today(), 'selectedCName': coursesNames[x], 'selectedCYear': coursesYears[x]})
+                                response.append(getValuesFromQuery(cursor))
+                            for lessonList in response:
+                                for lesson in lessonList:
+                                    cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(lessonID)s)', {'uid': userID, 'lessonID': lesson['idLezione']})
+                                    connection.commit()
                             flash('Account created', 'success')
                         else:
                             flash('User with this email already exists', 'error')
@@ -429,6 +443,7 @@ def registerAttendances():
         cursor.execute('update Partecipazione set Presenza = 0 where idLezione = %(lessonID)s', {'lessonID': selectedLessonID})
         connection.commit()
         for attendance in attendances:
+            #FIXME: Setting attendance = 1 for every lesson
             cursor.execute('update Partecipazione set Presenza = 1 where userID = %(uid)s', {'uid': attendance})
             connection.commit()
         connection.close()
