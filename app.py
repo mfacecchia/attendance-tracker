@@ -420,7 +420,14 @@ def manageLesson():
         except ValueError:
             return redirect(url_for('userScreening'))
         connection = connectToDB()
+        if not connection:
+            return redirect(url_for('index'))
         cursor = connection.cursor()
+        #Validating lesson (can only select same date lessons)
+        cursor.execute('select dataLezione from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
+        response = cursor.fetchone()[0]
+        if(response != date.today()):
+            return redirect(url_for('userScreening'))
         cursor.execute('select Utente.userID, Nome, Cognome, Materia, dataLezione, Lezione.idLezione, Presenza\
                     from Utente\
                     inner join Partecipazione on Utente.userID = Partecipazione.userID\
