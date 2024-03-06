@@ -116,6 +116,13 @@ Gestione account
     <button class = "updateRange" value = '7'>7 Giorni</button>
     <button class = "updateRange" value = '14'>14 Giorni</button>
     <button class = "updateRange" value = '30'>1 Mese</button>
+    {% if session.get('role') == 'Studente' %}
+        <h1 id = "chartTitle">Percentuale presenze negli ultimi 7 giorni</h1>
+        <canvas id = "attendancePercentageStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
+        <button class = "updateRange" value = '7'>7 Giorni</button>
+        <button class = "updateRange" value = '14'>14 Giorni</button>
+        <button class = "updateRange" value = '30'>1 Mese</button>
+    {% endif %}
 
     <a href = "{{ url_for('logout') }}">Logout</a>
 
@@ -147,4 +154,10 @@ Gestione account
             });
         }
     </script>
+
+    {% if session.get('role') == 'Studente' %}
+        <script>
+            //TODO: AJAX Obtain attendance percentage per period
+        </script>
+    {% endif %}
 {% endblock %}
