@@ -152,7 +152,7 @@ Gestione account
                     contentType: 'application/json',
                     data: {'range': range},
                     success: function(response){
-                        updateChart(response);
+                        updateBarChart(response);
                         document.querySelector('#chartTitle').textContent = `Presenze studenti negli ultimi ${range} giorni`;
                     },
                 });
@@ -178,7 +178,7 @@ Gestione account
                     contentType: 'application/json',
                     data: {'range': range},
                     success: function(response){
-                        updatePercentageChart(response);
+                        updatePieChart(response);
                         document.querySelector('#percChartTitle').textContent = `Percentuale presenze negli ultimi ${range} giorni`
                     }
                 })
