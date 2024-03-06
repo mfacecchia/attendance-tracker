@@ -492,7 +492,8 @@ def getAttendancesPercentage():
             [
                 {
                     'total_lessons': len(lessons),
-                    'attended_lessons': attendedLessons
+                    'attended_lessons': attendedLessons,
+                    'not_attended_lessons': len(lessons) - attendedLessons
                 }
             ]
         )
