@@ -16,13 +16,6 @@ const barChartConfig = {
 }
 var barChart = new Chart(barCanvas, barChartConfig);
 
-var pieCanvas = document.getElementById('attendancePercentageStatistics').getContext('2d');
-const pieChartConfig = {
-    type: 'pie',
-};
-var pieChart = new Chart(pieCanvas, pieChartConfig);
-
-
 function updateBarChart(apiData){
     //All courses names obtained from the API Response
     var coursesNames = [];
@@ -65,7 +58,4 @@ function updateBarChart(apiData){
     barChart.data.labels = [...coursesDates];
     barChart.data.datasets = chartDatasets;
     barChart.update();
-}
-function updatePieChart(apiData){
-    
 }
