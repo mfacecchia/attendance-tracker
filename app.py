@@ -127,7 +127,6 @@ def forgotPassword():
             uid = str(uid['userID'])
             message = Message(subject = 'Recupera Password',
                             recipients = [email],
-                            #TODO: Decode after email is sent, not before
                             html = render_template('recoverPasswordTemplate.html', userMail = b64_encode_decode(email).decode(), userID = b64_encode_decode(uid).decode()),
                             sender = ('Attendance Tracker Mailing System', environ['MAIL_USERNAME'])
                             )
@@ -329,7 +328,6 @@ def createUser():
                         response = getValuesFromQuery(cursor)
                         if(len(response) == 0):
                             #Matrix with all the queries to execute to create the account
-                            #TODO: Add default lesson attendance column in `Partecipazione` table for lessons after the current date
                             queries = [
                                         ['insert into Utente(Nome, Cognome, Tipologia) values(%(name)s, %(surname)s, %(role)s)', {'name': fname, 'surname': lname, 'role': role}],
                                         ['insert into Credenziali(Email, PW, userID) values(%(email)s, %(pw)s, (select max(userID) from Utente))', {'email': email, 'pw': hashedPW}],
@@ -906,7 +904,8 @@ def verifyUserExistence(userEmail, userID = None):
     return response[0]
 
 def b64_encode_decode(string:str, encode = True):
-    '''Takes a string as input parameter and returns its relative base64 encoded/decoded value'''
+    '''Takes a string as input parameter and returns its relative base64 encoded/decoded value\
+        If `encode` parameter is `True`, the string will be encoded, if it's `False` it will be decoded'''
     if encode:
         return urlsafe_b64encode(string.encode())
     else:
