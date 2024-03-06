@@ -1,5 +1,5 @@
-canvas = document.getElementById('attendanceStatistics').getContext('2d');
-const config = {
+var barCanvas = document.getElementById('attendanceStatistics').getContext('2d');
+const barChartConfig = {
     type: 'bar',
     options: {
         borderRadius: 5,
@@ -14,10 +14,9 @@ const config = {
         }
     }
 }
-var chart = new Chart(canvas, config);
+var barChart = new Chart(barCanvas, barChartConfig);
 
-function updateChart(apiData){
-
+function updateBarChart(apiData){
     //All courses names obtained from the API Response
     var coursesNames = [];
     //All courses dates obtained from the API Response
@@ -56,7 +55,7 @@ function updateChart(apiData){
         })
     })
     //NOTE: `chart.data.labels` represent all the X axis labels
-    chart.data.labels = [...coursesDates];
-    chart.data.datasets = chartDatasets;
-    chart.update();
+    barChart.data.labels = [...coursesDates];
+    barChart.data.datasets = chartDatasets;
+    barChart.update();
 }
