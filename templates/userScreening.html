@@ -56,6 +56,7 @@ Gestione account
                             <td style = "border: 1px solid gray">{{lessonCol}}</td>
                         {% endif %}
                     {% endfor %}
+                    <!-- TODO: IMPORTANT => Check for user role before displaying the `manage lesson` button -->
                     <td><a href = "{{url_for('manageLesson', id = lesson['idLezione'])}}">Apri Lezione</a></td>
                 </tr>
             {% endfor %}
@@ -111,17 +112,20 @@ Gestione account
         <a href = "{{url_for('githubAuth', login = False)}}">Collega Account Github</a><br>
     {% endif %}
 
-    <h1 id = "chartTitle">Presenze studenti negli ultimi 7 giorni</h1>
-    <canvas id = "attendanceStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
-    <button class = "updateRange" value = '7'>7 Giorni</button>
-    <button class = "updateRange" value = '14'>14 Giorni</button>
-    <button class = "updateRange" value = '30'>1 Mese</button>
-    {% if session.get('role') == 'Studente' %}
-        <h1 id = "chartTitle">Percentuale presenze negli ultimi 7 giorni</h1>
-        <canvas id = "attendancePercentageStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
+    {% if session.get('role') in ['Admin', 'Insegnante'] %}
+        <h1 id = "chartTitle">Presenze studenti negli ultimi 7 giorni</h1>
+        <canvas id = "attendanceStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
         <button class = "updateRange" value = '7'>7 Giorni</button>
         <button class = "updateRange" value = '14'>14 Giorni</button>
         <button class = "updateRange" value = '30'>1 Mese</button>
+    {% endif %}
+    
+    {% if session.get('role') == 'Studente' %}
+        <h1 id = "percChartTitle">Percentuale presenze negli ultimi 7 giorni</h1>
+        <canvas id = "attendancePercentageStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
+        <button class = "percUpdateRange" value = '7'>7 Giorni</button>
+        <button class = "percUpdateRange" value = '14'>14 Giorni</button>
+        <button class = "percUpdateRange" value = '30'>1 Mese</button>
     {% endif %}
 
     <a href = "{{ url_for('logout') }}">Logout</a>
@@ -130,34 +134,55 @@ Gestione account
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src = "{{url_for('static', filename = 'script/chart.js')}}"></script>
-    <script>
-        updateChartRange()
+    {% if session.get('role') in ['Admin', 'Insegnante'] %}
+        <script>
+            updateChartRange()
 
-        let rangeButtons = document.querySelectorAll('.updateRange');
-        rangeButtons.forEach((element) => {
-            element.onclick = (() => {
-                updateChartRange(element.value)
-            })
-        });
-
-        function updateChartRange(range = 7){
-            $.ajax({
-                async: false,
-                url: '/lesson/attendances',
-                type: 'GET',
-                contentType: 'application/json',
-                data: {'range': range},
-                success: function(response){
-                    updateChart(response);
-                    document.querySelector('#chartTitle').textContent = `Presenze studenti negli ultimi ${range} giorni`;
-                },
+            let rangeButtons = document.querySelectorAll('.updateRange');
+            rangeButtons.forEach((element) => {
+                element.onclick = (() => {
+                    updateChartRange(element.value)
+                })
             });
-        }
-    </script>
+
+            function updateChartRange(range = 7){
+                $.ajax({
+                    url: '/lesson/attendances',
+                    type: 'GET',
+                    contentType: 'application/json',
+                    data: {'range': range},
+                    success: function(response){
+                        updateChart(response);
+                        document.querySelector('#chartTitle').textContent = `Presenze studenti negli ultimi ${range} giorni`;
+                    },
+                });
+            }
+        </script>
+    {% endif %}
 
     {% if session.get('role') == 'Studente' %}
         <script>
-            //TODO: AJAX Obtain attendance percentage per period
+            updateChartRange()
+
+            let percRangeButtons = document.querySelectorAll('.percUpdateRange');
+            percRangeButtons.forEach((element) => {
+                element.onclick = (() => {
+                    updatePercChartRange(element.value)
+                })
+            });
+
+            function updatePercChartRange(range = 7){
+                $.ajax({
+                    url: '/lesson/attendances/percentage',
+                    type: 'GET',
+                    contentType: 'application/json',
+                    data: {'range': range},
+                    success: function(response){
+                        updatePercentageChart(response);
+                        document.querySelector('#percChartTitle').textContent = `Percentuale presenze negli ultimi ${range} giorni`
+                    }
+                })
+            }
         </script>
     {% endif %}
 {% endblock %}

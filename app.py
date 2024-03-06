@@ -463,6 +463,10 @@ def getAttendancesCount():
     else:
         return []
 
+@app.route('/lesson/attendances/percentage', methods = ['GET'])
+def getAttendancesPercentage():
+    return "Hello world"
+
 
 @app.route('/course/create', methods = ['GET', 'POST'])
 def create_course():
