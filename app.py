@@ -465,7 +465,39 @@ def getAttendancesCount():
 
 @app.route('/lesson/attendances/percentage', methods = ['GET'])
 def getAttendancesPercentage():
-    return "Hello world"
+    '''API that returns the total number of lessons and the total count of attendances'''
+    if(session.get('role') == 'Studente'):
+        connection = connectToDB()
+        if not connection:
+            return redirect(url_for('index'))
+        try:
+            range = int(request.args.get('range'))
+        except ValueError:
+            range = 7
+        #Calculating date range starting from today's date
+        dateRange = date.today() - timedelta(days = range)
+        cursor = connection.cursor()
+        #Obtaining all user attended lessons based on userID and date range previously calculated
+        cursor.execute('select Presenza\
+                    from Partecipazione\
+                    inner join Lezione on Lezione.idLezione = Partecipazione.idLezione\
+                    where userID = %(uid)s\
+                    and dataLezione between %(dateRange)s and %(dateToday)s', {'uid': session.get('uid'), 'dateRange': dateRange, 'dateToday': date.today()})
+        lessons = getValuesFromQuery(cursor)
+        attendedLessons = 0
+        #Calculating the total number of attended lessons (query returning values are ONLY `0` and `1`)
+        for attendance in lessons:
+            attendedLessons += attendance['Presenza']
+        return jsonify(
+            [
+                {
+                    'total_lessons': len(lessons),
+                    'attended_lessons': attendedLessons
+                }
+            ]
+        )
+    else:
+        return []
 
 
 @app.route('/course/create', methods = ['GET', 'POST'])
