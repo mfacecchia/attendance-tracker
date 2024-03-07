@@ -789,14 +789,6 @@ input, select {
 .border {
   border-width: 1px;
 }
-.bg-attendance-blue-700 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(0 39 85 / var(--tw-bg-opacity));
-}
-.bg-slate-200 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(226 232 240 / var(--tw-bg-opacity));
-}
 .text-center {
   text-align: center;
 }
@@ -810,8 +802,4 @@ input, select {
 .text-blue-600 {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
-}
-.text-white {
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
