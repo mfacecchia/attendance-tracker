@@ -4,7 +4,7 @@
     <head>
         <meta charset = "UTF-8">
         <meta name = "viewport" content = "width=device-width, initial-scale=1.0">
-        <link rel = "icon" href = "{{url_for('static', filename = 'assets/favicon.png')}}">
+        <link rel = "icon" href = "{{url_for('static', filename = 'assets/favicon.svg')}}">
 
         <link rel = "stylesheet" href = "{{url_for('static', filename = './style/style.css')}}">
         <title>Attendance Tracker - {% block title %}Benvenuto{% endblock %}</title>
@@ -24,15 +24,14 @@
             <nav>
                 <div class = "flex items-center gap-x-2">
                     <a href = "{{url_for('index')}}">
-                        <img src = "{{url_for('static', filename = 'assets/favicon.png')}}">
+                        <img src = "{{url_for('static', filename = 'assets/favicon-wide.svg')}}">
                     </a>
-                    <h1 class = "text-xl">Attendance Tracker</h1>
                 </div>
                 {% block loginLink %}
                     {% if session['name'] %}
-                        <a href = "{{url_for('logout')}}">Logout</a>
+                        <a class = "button" href = "{{url_for('logout')}}">Logout</a>
                     {% else %}
-                        <a href = "{{url_for('login')}}">Login</a>
+                        <a class = "button" href = "{{url_for('login')}}">Login</a>
                     {% endif %}
                 {% endblock %}
             </nav>

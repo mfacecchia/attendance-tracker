@@ -15,6 +15,13 @@ module.exports = {
       },
       animation: {
         'hide': 'hide 200ms ease-in-out forwards 5s'
+      },
+      backgroundColor: {
+        'attendance-blue': {
+          100: '#CEE7FF',
+          700: '#002755'
+        },
+        'carbon': '#1E1E1E'
       }
     },
   },

@@ -10,11 +10,11 @@
     h1{
         @apply text-2xl leading-tight;
     }
-    p{
+    p, a{
         @apply text-base leading-normal;
     }
     nav{
-        @apply w-full box-border p-3 bg-slate-100/50 backdrop-blur-2xl flex justify-between items-center gap-x-3 fixed top-0 left-0 z-50;
+        @apply w-full box-border p-3 bg-slate-200/50 backdrop-blur-2xl flex justify-between items-center gap-x-3 fixed top-0 left-0 z-50;
     }
     nav img{
         @apply h-6 drop-shadow-2xl;
@@ -74,5 +74,8 @@
     }
     .action p{
         @apply text-xs text-center;
+    }
+    .button{
+        @apply px-5 py-1.5 rounded-md bg-attendance-blue-100 text-black font-light text-sm uppercase;
     }
 }
