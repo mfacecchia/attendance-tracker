@@ -40,17 +40,14 @@
     form img{
         @apply h-7;
     }
-    form button{
-        @apply rounded-md px-5 py-2 text-white;
-    }
     .blue{
         @apply bg-blue-500;
     }
     .formInputBox{
-        @apply box-border px-2 py-2 w-full border-solid border border-slate-600 rounded-md text-sm;
+        @apply bg-transparent box-border px-2 py-2 w-full border-solid border-1.5 border-attendance-blue-700 rounded-md text-sm text-attendance-blue-700;
     }
     .formInputBox:focus{
-        @apply border-2 border-blue-500;
+        @apply border-2 border-blue-600;
     }
     
     input::placeholder.formInputBox{

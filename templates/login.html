@@ -11,7 +11,7 @@ Login
 {% endblock %}
 
 {% block content %}
-    <form action = '{{ url_for("check_login") }}' method = "post" class = "m-auto min-w-56 w-3/4 max-w-[500px] flex flex-col justify-center items-center gap-y-3 rounded-md px-5 py-11 my-20">
+    <form action = '{{ url_for("check_login") }}' method = "post" class = "m-auto min-w-56 w-3/4 max-w-[500px] flex flex-col justify-center items-center gap-y-3 px-5 py-11 my-20 bg-attendance-blue-100 rounded-2xl shadow-sm">
         <div class = "text-center mb-5">
             <h1 class = "mb-0 font-bold">Benvenuto</h1>
             <p class = "mt-0">Inserisci i tuoi dati per iniziare</p>
@@ -21,13 +21,16 @@ Login
 
         <p class = "mt-3">Oppure</p>
         <div class = "flex justify-center mb-3">
-            <a href = "{{url_for('githubAuth', login = True)}}" name = "Fai il login con il tuo account di GitHub"><img src = "{{url_for('static', filename = 'assets/github.png')}}"></a>
+            <a href = "{{url_for('githubAuth', login = True)}}" name = "Fai il login con il tuo account di GitHub"><img src = "{{url_for('static', filename = 'assets/github.svg')}}"></a>
         </div>
 
-        <div>
-            <input type = "checkbox" name = "remember">
-            <label>Ricordami</label>
+        <div class = "flex flex-col items-center gap-y-3 mb-3">
+            <div class = "flex gap-x-1 justify-center items-center">
+                <input type = "checkbox" name = "remember">
+                <label>Ricordami</label>
+            </div>
+            <a class = "text-blue-600" href = "">Password dimenticata?</a>
         </div>
-        <button type = "submit" class = "blue">Login</button>
+        <button class = "button bg-attendance-blue-700 text-white" type = "submit">Login</button>
     </form>
 {% endblock %}
