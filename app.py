@@ -66,9 +66,9 @@ def login():
         cursor = connection.cursor()
         #Getting all data from the database related to that single email (representing Unique key)
         cursor.execute('select Utente.userID, Nome, Tipologia, ultimoLogin, PW, githubID, googleID\
-                                from Credenziali, Utente\
-                                where Credenziali.userID = Utente.userID\
-                                and Email = %(email)s', {'email': email})
+                        from Credenziali, Utente\
+                        where Credenziali.userID = Utente.userID\
+                        and Email = %(email)s', {'email': email})
         response = getValuesFromQuery(cursor)
         if(len(response) == 0):
             flash("Account not found", 'error')
@@ -265,10 +265,10 @@ def userScreening():
             connection = connectToDB()
             cursor = connection.cursor()
             cursor.execute('select nomeCorso, annoCorso\
-                        from Corso\
-                        inner join Registrazione on Corso.idCorso = Registrazione.idCorso\
-                        inner join Utente on Registrazione.userID = Utente.userID\
-                        where Utente.userID = %(uid)s', {'uid': session['uid']})
+                            from Corso\
+                            inner join Registrazione on Corso.idCorso = Registrazione.idCorso\
+                            inner join Utente on Registrazione.userID = Utente.userID\
+                            where Utente.userID = %(uid)s', {'uid': session['uid']})
             response = getValuesFromQuery(cursor)
             connection.close()
         scheduledLessons = getLessonsList()
@@ -340,11 +340,11 @@ def createUser():
                                 connection.commit()
                                 #Getting all upcoming lesson codes for every user course in order to automatically add a default row in the `Partecipazione` table
                                 cursor.execute('select idLezione\
-                                            from Lezione\
-                                            inner join Corso on Corso.idCorso = Lezione.idCorso\
-                                            where dataLezione >= %(dateToday)s\
-                                            and nomeCorso = %(selectedCName)s\
-                                            and annoCorso = %(selectedCYear)s', {'dateToday': date.today(), 'selectedCName': coursesNames[x], 'selectedCYear': coursesYears[x]})
+                                                from Lezione\
+                                                inner join Corso on Corso.idCorso = Lezione.idCorso\
+                                                where dataLezione >= %(dateToday)s\
+                                                and nomeCorso = %(selectedCName)s\
+                                                and annoCorso = %(selectedCYear)s', {'dateToday': date.today(), 'selectedCName': coursesNames[x], 'selectedCYear': coursesYears[x]})
                                 response.append(getValuesFromQuery(cursor))
                             #NOTE: nested `for` loop because the ending `response` format will be a matrix (each list represents a course's set of lessons)
                             for lessonList in response:
@@ -424,11 +424,11 @@ def manageLesson():
         if(response != date.today()):
             return redirect(url_for('userScreening'))
         cursor.execute('select Utente.userID, Nome, Cognome, Materia, dataLezione, Lezione.idLezione, Presenza\
-                    from Utente\
-                    inner join Partecipazione on Utente.userID = Partecipazione.userID\
-                    inner join Lezione on Partecipazione.idLezione = Lezione.idLezione\
-                    where Utente.Tipologia = "Studente"\
-                    and Lezione.idLezione = %(lessonID)s', {'lessonID': lessonID})
+                        from Utente\
+                        inner join Partecipazione on Utente.userID = Partecipazione.userID\
+                        inner join Lezione on Partecipazione.idLezione = Lezione.idLezione\
+                        where Utente.Tipologia = "Studente"\
+                        and Lezione.idLezione = %(lessonID)s', {'lessonID': lessonID})
         response = getValuesFromQuery(cursor)
         if(not response):
             flash('No entries found for the selected lesson', 'error')
@@ -485,10 +485,10 @@ def getAttendancesPercentage():
         cursor = connection.cursor()
         #Obtaining all user attended lessons based on userID and date range previously calculated
         cursor.execute('select Presenza\
-                    from Partecipazione\
-                    inner join Lezione on Lezione.idLezione = Partecipazione.idLezione\
-                    where userID = %(uid)s\
-                    and dataLezione between %(dateRange)s and %(dateToday)s', {'uid': session.get('uid'), 'dateRange': dateRange, 'dateToday': date.today()})
+                        from Partecipazione\
+                        inner join Lezione on Lezione.idLezione = Partecipazione.idLezione\
+                        where userID = %(uid)s\
+                        and dataLezione between %(dateRange)s and %(dateToday)s', {'uid': session.get('uid'), 'dateRange': dateRange, 'dateToday': date.today()})
         lessons = getValuesFromQuery(cursor)
         attendedLessons = 0
         #Calculating the total number of attended lessons (query returning values are ONLY `0` and `1`)
@@ -505,7 +505,6 @@ def getAttendancesPercentage():
         )
     else:
         return []
-
 
 @app.route('/course/create', methods = ['GET', 'POST'])
 def create_course():
@@ -658,9 +657,9 @@ def loginWithGithub(githubUserID):
     cursor = connection.cursor()
     #Finding between all `Utente`'s table columns for a matching github user ID and storing its relative data in a session
     cursor.execute("select Utente.userID, Nome, Tipologia, ultimoLogin, Credenziali.githubID\
-                from Utente\
-                inner join Credenziali on Utente.userID = Credenziali.userID\
-                where githubID = %(github_userID)s", {'github_userID': str(githubUserID)})
+                    from Utente\
+                    inner join Credenziali on Utente.userID = Credenziali.userID\
+                    where githubID = %(github_userID)s", {'github_userID': str(githubUserID)})
     response = getValuesFromQuery(cursor)
     #Checking for `response` var content in case the Query returns no columns so returned value = empty list
     if(response and response[0]['githubID'] == str(githubUserID)):
@@ -691,10 +690,10 @@ def getUsersList():
         return redirect(url_for('index'))
     cursor = connection.cursor()
     cursor.execute("select Utente.userID, Nome, Cognome, Tipologia, nomeCorso\
-                from Utente\
-                inner join Registrazione on Utente.userID = Registrazione.userID\
-                inner join Corso on Registrazione.idCorso = Corso.idCorso\
-                group by(userID)")
+                    from Utente\
+                    inner join Registrazione on Utente.userID = Registrazione.userID\
+                    inner join Corso on Registrazione.idCorso = Corso.idCorso\
+                    group by(userID)")
     usersList = getValuesFromQuery(cursor)
     connection.close()
     return usersList
@@ -706,11 +705,11 @@ def getUserData(uid):
     cursor = connection.cursor()
 
     cursor.execute('select Utente.userID, Nome, Cognome, Tipologia, Email, nomeCorso, annoCorso\
-                from Utente\
-                inner join Credenziali on Utente.userID = Credenziali.userID\
-                inner join Registrazione on Registrazione.userID = Utente.userID\
-                inner join Corso on Corso.idCorso = Registrazione.idCorso\
-                where Utente.userID = %(uid)s', {'uid': int(uid)})
+                    from Utente\
+                    inner join Credenziali on Utente.userID = Credenziali.userID\
+                    inner join Registrazione on Registrazione.userID = Utente.userID\
+                    inner join Corso on Corso.idCorso = Registrazione.idCorso\
+                    where Utente.userID = %(uid)s', {'uid': int(uid)})
     response = getValuesFromQuery(cursor)
     
     response[0]['nomeCorso'] = getUserCourses(response)
@@ -924,10 +923,10 @@ def selectUsersFromCourse(courseName, courseYear):
     connection = connectToDB()
     cursor = connection.cursor()
     cursor.execute('select Utente.userID\
-                from Corso\
-                inner join Registrazione on Registrazione.idCorso = Corso.idCorso\
-                inner join Utente on Utente.userID = Registrazione.userID\
-                where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s', {'courseName': courseName, 'courseYear': courseYear})
+                    from Corso\
+                    inner join Registrazione on Registrazione.idCorso = Corso.idCorso\
+                    inner join Utente on Utente.userID = Registrazione.userID\
+                    where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s', {'courseName': courseName, 'courseYear': courseYear})
     response = getValuesFromQuery(cursor)
     connection.close()
     return response
