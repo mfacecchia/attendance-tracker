@@ -5,44 +5,188 @@ Gestione account
 {% endblock %}
 
 {% block content %}
-    <section class = "relative min-h-screen bg-screening-mobile bg-cover bg-fixed bg-center bg-no-repeat flex flex-wrap items-center justify-center gap-5 box-border px-3 py-20">
-        <div class = "container">
-            <img src = "{{url_for('static', filename = 'assets/user_icon.png')}}">
-            <h1>{{ helloMessage }}, {{ session['name'] }}!</h1>
-            <p>{{ session['role'] }}</p>
-            <p>Ultima volta online: {{session['lastLogin']}}</p>
-            <a href = "{{url_for('update_user_data')}}">Informazioni utente</a>
-        </div>
-        <div class = "container grid grid-cols-3 grid-rows-3 gap-3 justify-center">
-            {% if session['role'] == 'Admin' %}
-                <a href = "{{url_for('createUser')}}" class = "action">
-                    <img src = "{{url_for('static', filename = 'assets/user_icon.png')}}">
-                    <p>Crea utente</p>
-                </a>
-                <a href = "{{url_for('usersList')}}" class = "action">
-                    <img src = "{{url_for('static', filename = 'assets/users_management.png')}}">
-                    <p>Gestisci utenti</p>
-                </a>
-            {% endif %}
-                
-            {% if session['role'] in ['Admin', 'Insegnante'] %}
-                <a href = "{{url_for('createLesson')}}" class = "action">
-                    <img src = "{{url_for('static', filename = 'assets/create_lesson.png')}}">
-                    <p>Gestisci utenti</p>
-                </a>
-            {% endif %}
 
-            {% if session['githubConnected'] %}
-                <a href = "{{url_for('unlinkGithubAccount')}}" class = "action">
-                    <img src = "{{url_for('static', filename = 'assets/github.png')}}">
-                    <p>Disconnetti Github</p>
-                </a>
-            {% else %}
-                <a href = "{{url_for('githubAuth', login = False)}}" class = "action">
-                    <img src = "{{url_for('static', filename = 'assets/github.png')}}">
-                    <p>Connetti Github</p>
-                </a>
-            {% endif %}
-        </div>
-    </section>
+    <h1>{{ helloMessage }}, {{ session['name'] }}!</h1>
+    <p>{{ session['role'] }}</p>
+    <p>Ultima volta online: {{session['lastLogin']}}</p>
+
+    {% if session['role'] == 'Admin' %}
+        <h1>Crea utente</h1>
+        <form action = '{{ url_for("createUser") }}' method = "post">
+            <input type = "text" name = "fname" placeholder = "Name" autofocus required maxlength = "20">
+            <input type = "text" name = "lname" placeholder = "Surname" required maxlength = "20">
+            <input type = "email" name = "email" placeholder = "Email" required maxlength = "40">
+            <!-- TODO: JS function to check password strength -->
+            <input type = "password" name = "password" placeholder = "Password" minlength = "10" required>
+            <select name = "role">
+                <option value = "">-- Seleziona un ruolo --</option>
+                {% for role in roleOptions %}
+                    <option value = {{role}}>{{role}}</option>
+                {% endfor %}
+            </select><br>
+            {% for course in courses %}
+                <input type = "checkbox" name = "course" value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">
+                <label for = "course">{{course['nomeCorso']}} - {{course['annoCorso']}}</label><br>
+            {% endfor %}
+
+            <button type = "submit">Crea account</button>
+        </form>
+
+        <a href = "{{url_for('usersList')}}">Lista utenti</a>
+    {% endif %}
+    
+    <h1>Lezioni programmate</h1>
+    {% if not scheduledLessons %}
+        <p>Nessuna lezione programmata</p>
+    {% else %}
+        <table style = "border: 1px solid gray">
+            <tr>
+                <th style = "border: 1px solid gray">Materia</th>
+                <th style = "border: 1px solid gray">Descrizione</th>
+                <th style = "border: 1px solid gray">Data Lezione</th>
+                <th style = "border: 1px solid gray">Aula</th>
+                <th style = "border: 1px solid gray">Tipologia</th>
+                <th style = "border: 1px solid gray">Corso</th>
+                {% if session.get('role') in ['Admin', 'Insegnante'] %}
+                    <th style = "border: 1px solid gray">Gestione</th>
+                {% endif %}
+            </tr>
+            {% for lesson in scheduledLessons %}
+                <tr>
+                    {% for lessonCol in lesson.values() %}
+                        {% if loop.index != 1 %}
+                            <td style = "border: 1px solid gray">{{lessonCol}}</td>
+                        {% endif %}
+                    {% endfor %}
+                    {% if session.get('role') in ['Admin', 'Insegnante'] and lesson['dataLezione'] == today.strftime('%d/%m/%Y') %}
+                        <td style = "border: 1px solid gray"><a href = "{{url_for('manageLesson', id = lesson['idLezione'])}}">Apri Lezione</a></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    {% if session['role'] in ['Insegnante', 'Admin'] %}
+        <h1>Crea una lezione</h1>
+        <form action = "{{url_for('createLesson')}}" method = "post">
+            <input type = "text" name = "subject" placeholder = "Materia" required autofocus maxlength = "30">
+            <textarea name = "description" placeholder = "Descrizione (Opzionale)" maxlength = "1000"></textarea>
+            <input type = "date" name = "lessonDate" value = "{{today}}" required>
+            <input type = "text" name = "room" placeholder = "Aula (ex. A001)" required pattern = "[a-zA-Z][0-9]+" minlength = "4" maxlength = "4">
+            <select name = "lessonType">
+                <option>-- Seleziona una tipologia --</option>
+                {% for lesson in lessonTypes %}
+                    <option value = "{{lesson}}">{{ lesson }}</option>
+                {% endfor %}
+            </select>
+            <select name = "course">
+                {% for course in courses %}
+                    <option value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">{{course['nomeCorso']}} - {{course['annoCorso']}}</option>
+                {% endfor %}
+            </select>
+            
+            <button type = "submit">Crea lezione</button>
+        </form>
+    {% endif %}
+
+    {% if session['role'] == 'Admin' %}
+        <form action = "{{url_for('create_course')}}" method = "post">
+            <h1>Crea corso</h1>
+            <input type = "text" name = "courseName" placeholder = "Nome corso" maxlength = "30" required>
+            <input type = "text" name = "courseYear" placeholder = "Anno Corso ({{currentYear}}-{{currentYear + 1}})" value = "{{currentYear}}-{{currentYear + 1}}" pattern = "[0-9]{4}-[0-9]{4}" minlength = "9" maxlength = "9" required>
+
+            <button type = "submit">Crea corso</button>
+        </form>
+    {% endif %}
+
+    <form action = "{{url_for('update_user_data')}}" method = "post">
+        <h1>Modifica dati utente</h1>
+        <input type = "email" name = "email" placeholder = "Email" maxlength = "40">
+        <input type = "password" name = "password" placeholder = "Password" minlength = "10">
+        <input type = "password" name = "password_verify" placeholder = "Verifica password">
+        
+        <button type = "submit">Modifica</button>
+        <button type = "reset">Cancella</button>
+    </form>
+
+    {% if session['githubConnected'] %}
+        <a href = "{{url_for('unlinkGithubAccount')}}">Disconnetti Account Github</a><br>
+    {% else %}
+        <a href = "{{url_for('githubAuth', login = False)}}">Collega Account Github</a><br>
+    {% endif %}
+
+    {% if session.get('role') in ['Admin', 'Insegnante'] %}
+        <h1 id = "chartTitle">Presenze studenti negli ultimi 7 giorni</h1>
+        <canvas id = "attendanceStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
+        <button class = "updateRange" value = '7'>7 Giorni</button>
+        <button class = "updateRange" value = '14'>14 Giorni</button>
+        <button class = "updateRange" value = '30'>1 Mese</button>
+    {% endif %}
+    
+    {% if session.get('role') == 'Studente' %}
+        <h1 id = "percChartTitle">Percentuale presenze negli ultimi 7 giorni</h1>
+        <canvas id = "attendancePercentageStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
+        <button class = "percUpdateRange" value = '7'>7 Giorni</button>
+        <button class = "percUpdateRange" value = '14'>14 Giorni</button>
+        <button class = "percUpdateRange" value = '30'>1 Mese</button>
+    {% endif %}
+
+    <a href = "{{ url_for('logout') }}">Logout</a>
+
+    <!-- NOTE: Script declaration -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    {% if session.get('role') in ['Admin', 'Insegnante'] %}
+        <script src = "{{url_for('static', filename = 'script/bar.js')}}"></script>
+        <script>
+            updateBarChartRange()
+
+            let rangeButtons = document.querySelectorAll('.updateRange');
+            rangeButtons.forEach((element) => {
+                element.onclick = (() => {
+                    updateBarChartRange(element.value)
+                })
+            });
+
+            function updateBarChartRange(range = 7){
+                $.ajax({
+                    url: '/lesson/attendances',
+                    type: 'GET',
+                    contentType: 'application/json',
+                    data: {'range': range},
+                    success: function(response){
+                        updateBarChart(response);
+                        document.querySelector('#chartTitle').textContent = `Presenze studenti negli ultimi ${range} giorni`;
+                    },
+                });
+            }
+        </script>
+    {% endif %}
+
+    {% if session.get('role') == 'Studente' %}
+        <script src = "{{url_for('static', filename = 'script/pie.js')}}"></script>
+        <script>
+            updatePieChartRange()
+
+            let percRangeButtons = document.querySelectorAll('.percUpdateRange');
+            percRangeButtons.forEach((element) => {
+                element.onclick = (() => {
+                    updatePieChartRange(element.value)
+                })
+            });
+
+            function updatePieChartRange(range = 7){
+                $.ajax({
+                    url: '/lesson/attendances/percentage',
+                    type: 'GET',
+                    contentType: 'application/json',
+                    data: {'range': range},
+                    success: function(response){
+                        updatePieChart(response);
+                        document.querySelector('#percChartTitle').textContent = `Percentuale presenze negli ultimi ${range} giorni`
+                    }
+                })
+            }
+        </script>
+    {% endif %}
 {% endblock %}
