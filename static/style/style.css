@@ -421,7 +421,7 @@ video {
   justify-content: space-between;
   -moz-column-gap: 0.75rem;
        column-gap: 0.75rem;
-  background-color: rgb(226 232 240 / 0.5);
+  background-color: rgb(226 232 240 / 0.7);
   padding: 0.75rem;
   --tw-backdrop-blur: blur(40px);
   -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
