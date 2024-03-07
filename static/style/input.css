@@ -43,6 +43,9 @@
     .blue{
         @apply bg-blue-500;
     }
+    .formContainer{
+        @apply m-auto min-w-56 w-3/4 max-w-[500px] flex flex-col justify-center items-center gap-y-3 px-5 py-11 my-20 bg-attendance-blue-100 rounded-2xl shadow-sm
+    }
     .formInputBox{
         @apply bg-transparent box-border px-2 py-2 w-full border-solid border-1.5 border-attendance-blue-700 rounded-md text-sm text-attendance-blue-700;
     }
