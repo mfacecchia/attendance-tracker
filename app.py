@@ -50,16 +50,12 @@ def pageNotFound(error):
 def index():
     return render_template('index.html')
 
-@app.route('/login')
+@app.route('/login', methods = ['GET', 'POST'])
 def login():
     #Redirecting to user screening page if the user is already logged in
     if(session.get('name')):
         return redirect(url_for('userScreening'))
-    return(render_template('login.html'))
-
-@app.route('/login/request', methods = ['GET', 'POST'])
-def check_login():
-    '''Handler for User login request'''
+    #Checking if form was submitted to begin input validation, otherwise rendering the page
     if(request.form.get('email') and request.form.get('password')):
         email = request.form.get('email')
         pw = request.form.get('password')
@@ -76,7 +72,7 @@ def check_login():
         response = getValuesFromQuery(cursor)
         if(len(response) == 0):
             flash("Account not found", 'error')
-            return redirect(url_for('login'))
+            return render_template('login.html', emailField = email)
         phasher = PasswordHasher()
         try:
             #Verifying the hashed password gotten from the database with the user input one in the form
@@ -86,6 +82,7 @@ def check_login():
         except exceptions.VerifyMismatchError:
             #Sending an error message to back to the login page in order to display why the login didn't happen
             flash('The password is incorrect. Please try again.', 'error')
+            return render_template('login.html', emailField = email)
         else:
             #Dinamically changing session permanent state based on form checkbox
             if(request.form.get('remember')):
@@ -109,9 +106,7 @@ def check_login():
                 return redirect(url_for('userScreening'))
         finally:
             connection.close()
-    else:
-        flash(commonErrorMessage, 'error')
-    return redirect(url_for('login'))
+    return(render_template('login.html'))
 
 @app.route('/forgot-password', methods = ['GET', 'POST'])
 def forgotPassword():
