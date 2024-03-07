@@ -963,7 +963,7 @@ def getLessonsAttendancesCount(range = 7):
                         )'
         preparedQuery[1].setdefault('userID', session['uid'])
     #Adding the last SQL directives
-    preparedQuery[0] += ' group by Materia order by dataLezione'
+    preparedQuery[0] += ' group by nomeCorso, dataLezione, Materia order by dataLezione'
     cursor.execute(*preparedQuery)
     jsonResponse = reformatResponse(getValuesFromQuery(cursor))
     return jsonify(jsonResponse)
