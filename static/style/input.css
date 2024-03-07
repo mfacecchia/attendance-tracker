@@ -78,4 +78,10 @@
     .button{
         @apply px-5 py-1.5 rounded-md bg-attendance-blue-100 text-black font-light text-sm uppercase;
     }
+    .button.dark-blue{
+        @apply bg-attendance-blue-700 text-white;
+    }
+    .button.slate{
+        @apply bg-slate-200;
+    }
 }
