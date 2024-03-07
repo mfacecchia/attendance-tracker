@@ -76,7 +76,7 @@
         @apply text-xs text-center;
     }
     .button{
-        @apply px-5 py-1.5 rounded-md bg-attendance-blue-100 text-black font-light text-sm uppercase;
+        @apply px-5 py-1.5 rounded-md bg-attendance-blue-100 text-attendance-blue-700 font-medium text-sm uppercase;
     }
     .button.dark-blue{
         @apply bg-attendance-blue-700 text-white;
