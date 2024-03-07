@@ -153,7 +153,10 @@ def updatePassword():
         else:
             flash('This user does not exist.', 'error')
             return redirect(url_for('login'))
-    return render_template('updatePassword.html')
+    elif(session.get('name')):
+        return render_template('updatePassword.html')
+    else:
+        return redirect(url_for('login'))
 
 @app.route('/user/updatepassword/verify', methods = ['GET', 'POST'])
 def verify_updated_password():
