@@ -5,6 +5,7 @@ from argon2 import PasswordHasher, exceptions
 import mysql.connector
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
+from google_auth_oauthlib.flow import Flow
 from datetime import datetime, date, timedelta
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from binascii import Error as conversionError
@@ -22,6 +23,13 @@ app.config['MAIL_USERNAME'] = environ['MAIL_USERNAME']
 app.config['MAIL_PASSWORD'] = environ['MAIL_PASSWORD']
 app.config['MAIL_USE_TLS'] = True
 mailer = Mail(app)
+
+#nitializing google authentication device flow (from google client secrets JSON file and additional data)
+google_flow = Flow.from_client_secrets_file(
+    'google_client_secret.json',
+    scopes = 'openid',
+    redirect_uri = '/auth/google/callback'
+)
 
 #Registering OAuth application for future requests
 oauth.register(
