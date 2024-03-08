@@ -6,6 +6,8 @@ import mysql.connector
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
 from google_auth_oauthlib.flow import Flow
+#TODO: Import google OAuth exceptions module
+from googleapiclient.discovery import build
 from datetime import datetime, date, timedelta
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from binascii import Error as conversionError
@@ -28,7 +30,7 @@ mailer = Mail(app)
 google_flow = Flow.from_client_secrets_file(
     'google_client_secret.json',
     scopes = 'openid',
-    redirect_uri = '/auth/google/callback'
+    redirect_uri = 'http://127.0.0.1:5000/auth/google/callback'
 )
 
 #Registering OAuth application for future requests
@@ -50,9 +52,9 @@ lessonTypes = ['Lezione', 'Seminario', 'Laboratorio']
 commonErrorMessage = 'An error occured while handling your request... Please try again.'
 
 #Handler for `Error 404 Not Found`
-@app.errorhandler(flaskExceptions.NotFound)
-def pageNotFound(error):
-    return redirect(url_for('index'))
+# @app.errorhandler(flaskExceptions.NotFound)
+# def pageNotFound(error):
+#     return redirect(url_for('index'))
 
 @app.route('/')
 def index():
@@ -212,6 +214,14 @@ def githubAuth():
     #NOTE: `_external` means that it's pointing to an external domain
     return oauth.github.authorize_redirect(url_for('authorize', _external = True, login = [login]))
 
+@app.route('/auth/google', methods = ['GET'])
+def googleAuth():
+    #TODO: Manage login/link account mechanism
+    login = request.args.get('login')
+    #Caccling Google's OAuth authorization URL for managing developer console app and redirecting to callback page
+    google_auth_uri = google_flow.authorization_url()
+    return redirect(google_auth_uri[0])
+
 @app.route('/auth/github/callback', methods = ['GET'])
 def authorize():
     #Converting the `login` request from the URL to a boolean value
@@ -247,6 +257,18 @@ def authorize():
         #Redirecting to login page if the account was not found
         flash("Account not found", 'error')
         return redirect(url_for('login'))
+
+@app.route('/auth/google/callback', methods = ['GET'])
+def googleAuthorization():
+    code = request.args.get('code')
+    #Obtaining access token from google API in order to execute all user related requests
+    google_flow.fetch_token(code = code)
+    #Creating a resource variable to talk to google's API and obtain all needed data
+    google_user_info = build('oauth2', 'v2', credentials = google_flow.credentials)
+    #Asking google's API for user data (returned values `id` and `picture`)
+    user_info = google_user_info.userinfo().get().execute()
+    #TODO: Add obtained user id to Database
+    return user_info['id']
 
 @app.route('/auth/github/disconnect')
 def unlinkGithubAccount():
