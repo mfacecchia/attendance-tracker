@@ -466,6 +466,23 @@ video {
   z-index: 50;
   display: flex;
   width: 50%;
+}
+    @keyframes hide {
+
+  0% {
+    opacity: 1;
+  }
+
+  99% {
+    visibility: hidden;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+    .messages {
+  animation: hide 200ms ease-in-out forwards 5s;
   flex-direction: column;
   flex-wrap: wrap;
   align-items: flex-end;
