@@ -48,7 +48,9 @@ def pageNotFound(error):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    if not session.get('name'):
+        return render_template('index.html')
+    return redirect(url_for('userScreening'))
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
