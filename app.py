@@ -39,7 +39,7 @@ roleOptions = ['Studente', 'Insegnante', 'Admin']
 #Creating a variable used to store all available courses from the database and pass them to the HTML template
 courses = []
 lessonTypes = ['Lezione', 'Seminario', 'Laboratorio']
-commonErrorMessage = 'An error occured while handling your request... Please try again.'
+commonErrorMessage = 'Si è verificato un errore imprevisto. Per favore, riprova più tardi.'
 
 #Handler for `Error 404 Not Found`
 @app.errorhandler(flaskExceptions.NotFound)
@@ -73,7 +73,7 @@ def login():
                         and Email = %(email)s', {'email': email})
         response = getValuesFromQuery(cursor)
         if(len(response) == 0):
-            flash("Account not found", 'error')
+            flash("Account non trovato", 'Errore')
             return render_template('login.html', emailField = email)
         phasher = PasswordHasher()
         try:
@@ -83,7 +83,7 @@ def login():
         #Redirecting to login page form to retry the input
         except exceptions.VerifyMismatchError:
             #Sending an error message to back to the login page in order to display why the login didn't happen
-            flash('The password is incorrect. Please try again.', 'error')
+            flash('La password non è corretta. Per favore, riprova', 'Errore')
             return render_template('login.html', emailField = email)
         else:
             #Dinamically changing session permanent state based on form checkbox
@@ -118,7 +118,7 @@ def forgotPassword():
     if(email):
         #Checking if the user exist by getting its relative userID from the database
         uid = verifyUserExistence(email)
-        flash('You will shortly receive a reset password email if it\'s registered', 'success')
+        flash('Riceverai a breve un\'Email all\'indirizzo fornito se è registrato.', 'Successo')
         if(uid):
             #Getting the dictionary's `userID` key's value and parsing it to string
             uid = str(uid['userID'])
@@ -131,7 +131,7 @@ def forgotPassword():
                 mailer.send(message)
             #Avoiding HTTP Header injections
             except BadHeaderError:
-                flash('There was an error while sending the email. Please try again', 'error')
+                flash('Si è verificato un errore durante l\'invio dell\'Email. Per favore più tardi', 'Errore')
         return redirect(url_for('login'))
     else:
         return render_template('reset-password-form.html')
@@ -146,14 +146,14 @@ def updatePassword():
         userID = b64_encode_decode(userID, False)
         #Managing conversion error with redirect to login page if `b64_encode_decode` function returns `False`
         if(not userEmail or not userID):
-            flash('An error occured. Please try again', 'error')
+            flash(commonErrorMessage, 'Errore')
             return redirect(url_for('login'))
         #Query `count` result = 1 means account found so redirecting to update password
         if(verifyUserExistence(userEmail, userID)['result'] == 1):
             session['uid'] = userID
             return render_template('updatePassword.html')
         else:
-            flash('This user does not exist.', 'error')
+            flash('Questo utente non esiste.', 'Errore')
             return redirect(url_for('login'))
     elif(session.get('name')):
         return render_template('updatePassword.html')
@@ -181,7 +181,7 @@ def verify_updated_password():
             except exceptions.VerifyMismatchError:
                 pass
             else:
-                flash("Password cannot be the same as before, try again", 'error')
+                flash("La password non può essere uguale a quella precedente. Per favore, riprova", 'Errore')
                 return redirect(url_for('updatePassword'))
             hashedPW = pHasher.hash(newPassword.encode())
             cursor.execute("update Credenziali set PW = %(newPW)s\
@@ -189,13 +189,13 @@ def verify_updated_password():
             connection.commit()
             session['lastLogin'] = updateLastLoginTime()
             connection.close()
-            flash('Password updated!', 'success')
+            flash('Password aggiornata con successo.', 'Successo')
             return redirect(url_for('login'))
         else:
-            flash('Passwords not matching', 'error')
+            flash('Le password inserite non combaciano. Per favore, riprova', 'Errore')
         return redirect(url_for('updatePassword'))
     else:
-        flash("Please try again", 'error')
+        flash(commonErrorMessage, 'Errore')
         return redirect(url_for('updatePassword'))
 
 @app.route('/auth/github', methods = ['GET'])
@@ -214,7 +214,7 @@ def authorize():
         oauth.github.authorize_access_token()
         profile = oauth.github.get('user').json()
     except OAuthError:
-        flash('Request failed', 'error')
+        flash('Tentativo di collegamento fallito.', 'Errore')
         return redirect(url_for('login'))
     #`not login` = `False` means that the service requested is github account link (account already linked)
     if(not login):
@@ -222,14 +222,14 @@ def authorize():
             #Checking if user has already linked a github account, otherwise the account linking function will be called
             if(not checkUserGithubConnection()):
                 if(linkGithubAccount(profile['id'])):
-                    flash('Account linked successfully', 'success')
+                    flash('Account Github collegato con successo.', 'Successo')
                 else:
-                    flash('This github account is already linked to a different user... Please try using a different one.', 'error')
+                    flash('Questo account Github risulta collegato ad un altro account. Per favore, prova a usare un altro account', 'Errore')
             else:
-                flash('Account already linked', 'error')
+                flash('Account Github già collegato.', 'Errore')
             return redirect(url_for('userScreening'))
         else:
-            flash('You must login first', 'error')
+            flash('Devi prima fare il login.', 'Errore')
             return redirect(url_for('login'))
     #Requested login with github account
     else:
@@ -237,7 +237,7 @@ def authorize():
         if(loginWithGithub(profile['id'])):
             return redirect(url_for('userScreening'))
         #Redirecting to login page if the account was not found
-        flash("Account not found", 'error')
+        flash("Nessun utente collegato a questo account Github.", 'Errore')
         return redirect(url_for('login'))
 
 @app.route('/auth/github/disconnect')
@@ -253,7 +253,7 @@ def unlinkGithubAccount():
         connection.commit()
         connection.close()
         session['githubConnected'] = False
-        flash('Github account unlinked', 'success')
+        flash('Account Github scollegato con successo.', 'Successo')
     return redirect(url_for('userScreening'))
 
 @app.route('/user')
@@ -288,7 +288,7 @@ def userScreening():
                             today = date.today()
                         )
     else:
-        flash('Please login', 'error')
+        flash('Devi prima fare il login.', 'Errore')
         return redirect(url_for('login'))
 
 @app.route('/user/create', methods = ['GET', 'POST'])
@@ -357,22 +357,22 @@ def createUser():
                                     #Adding the user to all lessons
                                     cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(lessonID)s)', {'uid': userID, 'lessonID': lesson['idLezione']})
                                     connection.commit()
-                            flash('Account created', 'success')
+                            flash('Account creato con successo.', 'Successo')
                         else:
-                            flash('User with this email already exists', 'error')
+                            flash('Indirizzo Email già collegato a un altro account. Per favore, riprova.', 'Errore')
                         #Closing connection
                         connection.close()
                     else:
-                        flash('Wrong input values. Please try again', 'error')
+                        flash(commonErrorMessage, 'Errore')
                 else:
-                    flash('Wrong input values. Please try again', 'error')
+                    flash(commonErrorMessage, 'Errore')
         #Redirecting back to register page if the input values are not correct
             else:
-                flash('Please select at least one valid course from the list', 'error')
+                flash('Devi selezionare almeno un corso dalla lista.', 'Errore')
         else:
-            flash('Please select a valid role and at least one course from the menu')
+            flash('Devi selezionare una tipologia valida dal menu e almeno un corso dalla lista.', 'Errore')
     else:
-        flash(commonErrorMessage, 'error')
+        flash(commonErrorMessage, 'Error')
     return(redirect(url_for('userScreening')))
 
 @app.route('/lesson/create', methods = ['GET', 'POST'])
@@ -401,15 +401,15 @@ def createLesson():
                         cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(latestLessonID)s)', {'uid': user['userID'], 'latestLessonID': latestLesson})
                         connection.commit()
                     connection.close()
-                    flash('Lesson created', 'success')
+                    flash('Lezione creata con successo.', 'Successo')
                 else:
-                    flash('Wrong input values. Please try again.', 'error')
+                    flash(commonErrorMessage, 'Errore')
             else:
-                flash('Course not found. Please try again.', 'error')
+                flash('Corso non trovato.', 'Errore')
         else:
-            flash('Please select a valid lesson type and course from the menus', 'error')
+            flash('Devi selezionare una tipologia di lezione e un corso valido.', 'Errore')
     else:
-        flash(commonErrorMessage, 'error')
+        flash(commonErrorMessage, 'Errore')
     return redirect(url_for('login'))
 
 @app.route('/lesson', methods = ['GET'])
@@ -436,7 +436,7 @@ def manageLesson():
                         and Lezione.idLezione = %(lessonID)s', {'lessonID': lessonID})
         response = getValuesFromQuery(cursor)
         if(not response):
-            flash('No entries found for the selected lesson', 'error')
+            flash('Nessuno studente trovato per la lezione selezionata.', 'Errore')
             return redirect(url_for('userScreening'))
         #Converting all gotten dates to a more user friendly format
         for lessonDate in response:
@@ -460,7 +460,7 @@ def registerAttendances():
             cursor.execute('update Partecipazione set Presenza = 1 where userID = %(uid)s and idLezione = %(lessonID)s', {'uid': attendance, 'lessonID': selectedLessonID})
             connection.commit()
         connection.close()
-        flash('Attendances saved', 'success')
+        flash('Presenze registrate con successo.', 'Successo')
     return redirect(url_for('manageLesson', id = selectedLessonID))
 
 @app.route('/lesson/attendances', methods = ['GET'])
@@ -525,13 +525,13 @@ def create_course():
                 cursor.execute('insert into Corso(nomeCorso, annoCorso) values(%(courseName)s, %(courseYear)s)', {'courseName': courseName, 'courseYear': courseYear})
                 connection.commit()
                 connection.close()
-                flash('Course added', 'success')
+                flash('Corso creato con successo.', 'Successo')
             else:
-                flash('This course already exists. Please try again.', 'error')
+                flash('Questo corso è già esistente.', 'Errore')
         else:
-            flash('Invalid input. Please try again.', 'error')
+            flash(commonErrorMessage, 'Errore')
     else:
-        flash(commonErrorMessage, 'error')
+        flash(commonErrorMessage, 'Errore')
     return redirect(url_for('userScreening'))
 
 @app.route('/user/list')
@@ -551,7 +551,7 @@ def select_user():
                 return render_template('userData.html', userData = selectedUser, courses = courses, roles = roleOptions)
         else:
             deleteUser(uid)
-            flash('User removed!', 'success')
+            flash('Utente rimosso con successo.', 'Successo')
             return redirect(url_for('usersList'))
     return redirect(url_for('userScreening'))
 
@@ -562,9 +562,9 @@ def update_user_data():
         return redirect(url_for('select_user', userID = userID))
     elif(session.get('role') in ['Studente', 'Insegnante']):
         if(updateDataAsUser()):
-            flash('Data updated', 'success')
+            flash('Utente modificato con successo.', 'Successo')
     else:
-        flash(commonErrorMessage, 'error')
+        flash(commonErrorMessage, 'Errore')
     return(redirect(url_for('userScreening')))
 
 @app.route('/user/logout')
@@ -573,7 +573,7 @@ def logout():
     if(session.get('name')):
         updateLastLoginTime()
         session.clear()
-        flash("Successfully logged out.", 'success')
+        flash("Logout effettuato con successo.", 'Successo')
     return redirect(url_for('login'))
 
 @app.route('/info')
@@ -598,7 +598,7 @@ def connectToDB():
     try:
         connection = mysql.connector.connect(user = environ['DB_USERNAME'], password = environ['DB_PWORD'], host = environ['DB_HOSTNAME'], database = environ['DB_NAME'])
     except mysql.connector.Error:
-        flash('The service is having some problems at the moment. Please try again later', 'error')
+        flash('Il sistema sta avendo dei problemi sconosciuti al momento. Per favore riprova più tardi', 'Errore')
         return False
     return connection
 
@@ -763,7 +763,7 @@ def updateDataAsAdmin():
                         phasher = PasswordHasher()
                         hashedPW = phasher.hash(pw.encode())
                     else:
-                        flash('Passwords not matching or password shorter than 10 characters.', 'error')
+                        flash('Le password inserite non combaciano o contengono meno di 10 caratteri. Per favore, riprova.', 'Errore')
                         return userID
                 connection = connectToDB()
                 if(not connection):
@@ -789,17 +789,17 @@ def updateDataAsAdmin():
                     for x in range(len(coursesNames)):
                         cursor.execute('insert into Registrazione(userID, idCorso) values(%(uid)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'uid': userID, 'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
                         connection.commit()
-                    flash('Account updated', 'success')
+                    flash('Dati aggiornati con successo.', 'Successo')
                 else:
-                    flash('Email already associated with a different account... Cannot proceed', 'error')
+                    flash('Questo indirizzo Email è già associato a un altro account. Per favore, riprova.', 'Errore')
                 #Closing connection
                 connection.close()
             else:
-                flash('Invalid input. Please try again.', 'error')
+                flash(commonErrorMessage, 'Errore')
         else:
-            flash('Please select a valid role and course from the menus')
+            flash('Devi selezionare una tipologia valida dal menu e almeno un corso dalla lista.', 'Errore')
     else:
-        flash('Please select a valid role and course from the menus')
+        flash('Devi selezionare una tipologia valida dal menu e almeno un corso dalla lista.', 'Errore')
     return userID
 
 def updateDataAsUser():
@@ -819,7 +819,7 @@ def updateDataAsUser():
                     where Email = %(newEmail)s', {'newEmail': email})
         response = cursor.fetchone()
         if(response[0] > 0):
-            flash('Email already associated with an account... Cannot proceed', 'error')
+            flash('Questo indirizzo Email è già associato a un altro account. Per favore, riprova.', 'Errore')
             return False
         queries.append(['update Credenziali set Email = %(newEmail)s where userID = %(uid)s', {'newEmail': email, 'uid': session['uid']}])
     if(pw != ''):
@@ -828,10 +828,10 @@ def updateDataAsUser():
             hashedPW = phasher.hash(pw.encode())
             queries.append(['update Credenziali set PW = %(updatedHashedPW)s where userID = %(userID)s', {'updatedHashedPW': hashedPW, 'userID': session['uid']}])
         else:
-            flash('Passwords not matching or password shorter than 10 characters.', 'error')
+            flash('Le password inserite non combaciano o contengono meno di 10 caratteri. Per favore, riprova.', 'Errore')
             return False
     if(not queries):
-        flash('No data provided for updating user.', 'error')
+        flash('Nessun dato fornito per la modifica. Per favore, riprova', 'Errore')
         return False
     for query in queries:
         cursor.execute(query[0], query[1])
