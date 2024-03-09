@@ -307,22 +307,6 @@ def unlinkGoogleAccount():
         flash('Account Google disconnesso con successo.', 'Successo')
     return redirect(url_for('userScreening'))
 
-@app.route('/auth/google/disconnect')
-def unlinkGoogleAccount():
-    #Checks if the logged user has a linked github account
-    if(session.get('googleConnected')):
-        connection = connectToDB()
-        if(not connection):
-            return redirect(url_for('index'))
-        cursor = connection.cursor()
-        cursor.execute('update Credenziali set googleID = NULL\
-                    where userID = %(uid)s', {'uid': session['uid']})
-        connection.commit()
-        connection.close()
-        session['googleConnected'] = False
-        flash('Account Google disconnesso con successo.', 'Successo')
-    return redirect(url_for('userScreening'))
-
 @app.route('/user')
 def userScreening():
     if(session.get('name')):
