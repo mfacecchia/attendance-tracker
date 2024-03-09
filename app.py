@@ -207,24 +207,19 @@ def verify_updated_password():
         flash("Please try again", 'error')
         return redirect(url_for('updatePassword'))
 
-@app.route('/auth/github', methods = ['GET'])
+@app.route('/auth/github')
 def githubAuth():
-    login = request.args.get('login')
     #NOTE: `_external` means that it's pointing to an external domain
     return oauth.github.authorize_redirect(url_for('authorize', _external = True, login = [login]))
 
-@app.route('/auth/google', methods = ['GET'])
+@app.route('/auth/google')
 def googleAuth():
-    #TODO: Manage login/link account mechanism
     #Calling Google's OAuth authorization URL for managing developer console app and redirecting to callback page
     google_auth_uri = google_flow.authorization_url()
     return redirect(google_auth_uri[0])
 
-@app.route('/auth/github/callback', methods = ['GET'])
+@app.route('/auth/github/callback')
 def authorize():
-    #Converting the `login` request from the URL to a boolean value
-    #Obtaining the value from URL as a GET parameter
-    login = True if request.args.get('login') == 'True' else False
     #Getting the user values and starting the OAuth autorization process
     try:
         oauth.github.authorize_access_token()
@@ -233,20 +228,16 @@ def authorize():
         flash('Request failed', 'error')
         return redirect(url_for('login'))
     #`not login` = `False` means that the service requested is github account link (account already linked)
-    if(not login):
-        if(session.get('name')):
-            #Checking if user has already linked a github account, otherwise the account linking function will be called
-            if(not checkUserGithubConnection()):
-                if(linkGithubAccount(profile['id'])):
-                    flash('Account linked successfully', 'success')
-                else:
-                    flash('This github account is already linked to a different user... Please try using a different one.', 'error')
+    if(session.get('name')):
+        #Checking if user has already linked a github account, otherwise the account linking function will be called
+        if(not checkUserGithubConnection()):
+            if(linkGithubAccount(profile['id'])):
+                flash('Account linked successfully', 'success')
             else:
-                flash('Account already linked', 'error')
-            return redirect(url_for('userScreening'))
+                flash('This github account is already linked to a different user... Please try using a different one.', 'error')
         else:
-            flash('You must login first', 'error')
-            return redirect(url_for('login'))
+            flash('Account already linked', 'error')
+        return redirect(url_for('userScreening'))
     #Requested login with github account
     else:
         #Account found, so redirecting to user screening page
