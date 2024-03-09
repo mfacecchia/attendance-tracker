@@ -5,6 +5,8 @@ from argon2 import PasswordHasher, exceptions
 import mysql.connector
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
+from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
 from datetime import datetime, date, timedelta
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from binascii import Error as conversionError
@@ -22,6 +24,13 @@ app.config['MAIL_USERNAME'] = environ['MAIL_USERNAME']
 app.config['MAIL_PASSWORD'] = environ['MAIL_PASSWORD']
 app.config['MAIL_USE_TLS'] = True
 mailer = Mail(app)
+
+#nitializing google authentication device flow (from google client secrets JSON file and additional data)
+google_flow = Flow.from_client_secrets_file(
+    'google_client_secret.json',
+    scopes = 'openid',
+    redirect_uri = 'http://127.0.0.1:5000/auth/google/callback'
+)
 
 #Registering OAuth application for future requests
 oauth.register(
@@ -198,17 +207,19 @@ def verify_updated_password():
         flash(commonErrorMessage, 'Errore')
         return redirect(url_for('updatePassword'))
 
-@app.route('/auth/github', methods = ['GET'])
+@app.route('/auth/github')
 def githubAuth():
-    login = request.args.get('login')
     #NOTE: `_external` means that it's pointing to an external domain
     return oauth.github.authorize_redirect(url_for('authorize', _external = True, login = [login]))
 
-@app.route('/auth/github/callback', methods = ['GET'])
+@app.route('/auth/google')
+def googleAuth():
+    #Calling Google's OAuth authorization URL for managing developer console app and redirecting to callback page
+    google_auth_uri = google_flow.authorization_url()
+    return redirect(google_auth_uri[0])
+
+@app.route('/auth/github/callback')
 def authorize():
-    #Converting the `login` request from the URL to a boolean value
-    #Obtaining the value from URL as a GET parameter
-    login = True if request.args.get('login') == 'True' else False
     #Getting the user values and starting the OAuth autorization process
     try:
         oauth.github.authorize_access_token()
@@ -217,20 +228,16 @@ def authorize():
         flash('Tentativo di collegamento fallito.', 'Errore')
         return redirect(url_for('login'))
     #`not login` = `False` means that the service requested is github account link (account already linked)
-    if(not login):
-        if(session.get('name')):
-            #Checking if user has already linked a github account, otherwise the account linking function will be called
-            if(not checkUserGithubConnection()):
-                if(linkGithubAccount(profile['id'])):
-                    flash('Account Github collegato con successo.', 'Successo')
-                else:
-                    flash('Questo account Github risulta collegato ad un altro account. Per favore, prova a usare un altro account', 'Errore')
+    if(session.get('name')):
+        #Checking if user has already linked a github account, otherwise the account linking function will be called
+        if(not checkUserGithubConnection()):
+            if(linkGithubAccount(profile['id'])):
+                flash('Account linked successfully', 'success')
             else:
-                flash('Account Github già collegato.', 'Errore')
-            return redirect(url_for('userScreening'))
+                flash('This github account is already linked to a different user... Please try using a different one.', 'error')
         else:
-            flash('Devi prima fare il login.', 'Errore')
-            return redirect(url_for('login'))
+            flash('Account already linked', 'error')
+        return redirect(url_for('userScreening'))
     #Requested login with github account
     else:
         #Account found, so redirecting to user screening page
@@ -239,6 +246,34 @@ def authorize():
         #Redirecting to login page if the account was not found
         flash("Nessun utente collegato a questo account Github.", 'Errore')
         return redirect(url_for('login'))
+
+@app.route('/auth/google/callback', methods = ['GET'])
+def googleAuthorization():
+    #Managing denied google OAuth authorization
+    if(request.args.get('error')):
+        flash('Accesso con Google rifiutato. Per favore, riprova.', 'Errore')
+        return redirect(url_for('login'))
+    code = request.args.get('code')
+    #Obtaining access token from google API in order to execute all user related requests
+    google_flow.fetch_token(code = code)
+    #Creating a resource variable to talk to google's API and obtain all needed data
+    google_user_info = build('oauth2', 'v2', credentials = google_flow.credentials)
+    #Asking google's API for user data (returned values `id` and `picture`)
+    user_info = google_user_info.userinfo().get().execute()
+    if(session.get('name')):
+        #`checkUserGoogleConnection = False` means no user is using that Google account
+        if(not checkUserGoogleConnection()):
+            if(linkGoogleAccount(user_info['id'])):
+                flash('Account Google collegato con successo', 'Successo')
+            else:    
+                flash('Questo account Google è già utilizzato da un altro utente.', 'Errore')
+        return redirect(url_for('userScreening'))
+    else:
+        if(loginWithGoogle(user_info['id'])):
+            return redirect(url_for('userScreening'))
+        else:
+            flash('Account non trovato.', 'Errore')
+            return redirect(url_for('login'))
 
 @app.route('/auth/github/disconnect')
 def unlinkGithubAccount():
@@ -254,6 +289,38 @@ def unlinkGithubAccount():
         connection.close()
         session['githubConnected'] = False
         flash('Account Github scollegato con successo.', 'Successo')
+    return redirect(url_for('userScreening'))
+
+@app.route('/auth/google/disconnect')
+def unlinkGoogleAccount():
+    #Checks if the logged user has a linked github account
+    if(session.get('googleConnected')):
+        connection = connectToDB()
+        if(not connection):
+            return redirect(url_for('index'))
+        cursor = connection.cursor()
+        cursor.execute('update Credenziali set googleID = NULL\
+                    where userID = %(uid)s', {'uid': session['uid']})
+        connection.commit()
+        connection.close()
+        session['googleConnected'] = False
+        flash('Account Google disconnesso con successo.', 'Successo')
+    return redirect(url_for('userScreening'))
+
+@app.route('/auth/google/disconnect')
+def unlinkGoogleAccount():
+    #Checks if the logged user has a linked github account
+    if(session.get('googleConnected')):
+        connection = connectToDB()
+        if(not connection):
+            return redirect(url_for('index'))
+        cursor = connection.cursor()
+        cursor.execute('update Credenziali set googleID = NULL\
+                    where userID = %(uid)s', {'uid': session['uid']})
+        connection.commit()
+        connection.close()
+        session['googleConnected'] = False
+        flash('Account Google disconnesso con successo.', 'Successo')
     return redirect(url_for('userScreening'))
 
 @app.route('/user')
@@ -649,7 +716,7 @@ def checkUserGithubConnection():
     returnedValue = bool(response)
     connection.close()
     return returnedValue
-    
+
 def linkGithubAccount(userID):
     connection = connectToDB()
     if(not connection):
@@ -658,7 +725,7 @@ def linkGithubAccount(userID):
     #Checking if the github user ID is already in the database (same UID cannot be used my more than 1 person)
     cursor.execute('select githubID from Credenziali where githubID = %(github_userID)s', {'github_userID': userID})
     response = cursor.fetchone()
-    #`response = None` means no one has linked that specific account
+    #`response = None` means that the defined google account ID is already linked to a different account
     if(response != None):
         accountLinked = False
     else:
@@ -677,7 +744,7 @@ def loginWithGithub(githubUserID):
         return redirect(url_for('index'))
     cursor = connection.cursor()
     #Finding between all `Utente`'s table columns for a matching github user ID and storing its relative data in a session
-    cursor.execute("select Utente.userID, Nome, Tipologia, ultimoLogin, Credenziali.githubID\
+    cursor.execute("select Utente.userID, Nome, Tipologia, ultimoLogin, Credenziali.githubID, Credenziali.googleID\
                     from Utente\
                     inner join Credenziali on Utente.userID = Credenziali.userID\
                     where githubID = %(github_userID)s", {'github_userID': str(githubUserID)})
@@ -690,6 +757,66 @@ def loginWithGithub(githubUserID):
         #Reformatting last login date for clean output
         session['lastLogin'] = response[0]['ultimoLogin'].replace(' ', ' alle ')
         session['githubConnected'] = True
+        session['googleConnected'] = True if response[0]['googleID'] else False
+        accountFound = True
+    #Returning `False` if the github user ID was not found in the table
+    else:
+        accountFound = False
+    connection.close()
+    return accountFound
+
+def checkUserGoogleConnection():
+    '''Checks if the user has a linked Google account'''
+    connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
+    cursor = connection.cursor()
+    response = cursor.execute('select googleID from Credenziali where userID = %(uid)s', {'uid': session['uid']})
+    returnedValue = bool(response)
+    connection.close()
+    return returnedValue
+
+def linkGoogleAccount(userID):
+    connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
+    cursor = connection.cursor()
+    #Checking if the github user ID is already in the database (same UID cannot be used my more than 1 person)
+    cursor.execute('select googleID from Credenziali where googleID = %(google_userID)s', {'google_userID': userID})
+    response = cursor.fetchone()
+    #`response = None` means that the defined google account ID is already linked to a different account
+    if(response != None):
+        accountLinked = False
+    else:
+        #Updating table column with github user id
+        cursor.execute("update Credenziali set googleID = %(google_userID)s where userID = %(uid)s", {'google_userID': userID, 'uid': session['uid']})
+        connection.commit()
+        session['googleConnected'] = True
+        accountLinked = True
+    connection.close()
+    return accountLinked
+
+def loginWithGoogle(googleID):
+    '''Lets the user login with a valid linked github account'''
+    connection = connectToDB()
+    if(not connection):
+        return redirect(url_for('index'))
+    cursor = connection.cursor()
+    #Finding between all `Utente`'s table columns for a matching github user ID and storing its relative data in a session
+    cursor.execute("select Utente.userID, Nome, Tipologia, ultimoLogin, Credenziali.githubID, Credenziali.googleID\
+                    from Utente\
+                    inner join Credenziali on Utente.userID = Credenziali.userID\
+                    where googleID = %(google_userID)s", {'google_userID': str(googleID)})
+    response = getValuesFromQuery(cursor)
+    #Checking for `response` var content in case the Query returns no columns so returned value = empty list
+    if(response and response[0]['googleID'] == str(googleID)):
+        session['uid'] = response[0]['userID']
+        session['name'] = response[0]['Nome']
+        session['role'] = response[0]['Tipologia']
+        #Reformatting last login date for clean output
+        session['lastLogin'] = response[0]['ultimoLogin'].replace(' ', ' alle ')
+        session['googleConnected'] = True
+        session['githubConnected'] = True if response[0]['githubID'] else False
         accountFound = True
     #Returning `False` if the github user ID was not found in the table
     else:

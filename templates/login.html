@@ -34,4 +34,9 @@ Login
         </div>
         <button class = "button dark-blue" type = "submit">Login</button>
     </form>
+
+    <a href = "{{url_for('forgotPassword')}}">Password dimenticata?</a>
+
+    <a href = "{{url_for('githubAuth')}}">Fai il login con Github</a>
+    <a href = "{{url_for('googleAuth')}}">Fai il login con Google</a>
 {% endblock %}

@@ -112,7 +112,12 @@ Gestione account
     {% if session['githubConnected'] %}
         <a href = "{{url_for('unlinkGithubAccount')}}">Disconnetti Account Github</a><br>
     {% else %}
-        <a href = "{{url_for('githubAuth', login = False)}}">Collega Account Github</a><br>
+        <a href = "{{url_for('githubAuth')}}">Collega Account Github</a><br>
+    {% endif %}
+    {% if session['googleConnected'] %}
+        <a href = "{{url_for('unlinkGoogleAccount')}}">Disconnetti Account Google</a><br>
+    {% else %}
+        <a href = "{{url_for('googleAuth')}}">Collega Account Google</a><br>
     {% endif %}
 
     {% if session.get('role') in ['Admin', 'Insegnante'] %}
