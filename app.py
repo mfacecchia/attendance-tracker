@@ -6,7 +6,6 @@ import mysql.connector
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
 from google_auth_oauthlib.flow import Flow
-#TODO: Import google OAuth exceptions module
 from googleapiclient.discovery import build
 from datetime import datetime, date, timedelta
 from base64 import urlsafe_b64encode, urlsafe_b64decode
@@ -260,6 +259,10 @@ def authorize():
 
 @app.route('/auth/google/callback', methods = ['GET'])
 def googleAuthorization():
+    #Managing denied google OAuth authorization
+    if(request.args.get('error')):
+        flash('Accesso con Google rifiutato. Per favore, riprova.', 'Errore')
+        return redirect(url_for('login'))
     code = request.args.get('code')
     #Obtaining access token from google API in order to execute all user related requests
     google_flow.fetch_token(code = code)
