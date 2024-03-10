@@ -3,8 +3,9 @@
 <p align = 'center'>Simple but useful app for managing teachers and students attendances in a school.</p>
 
 <h2>Table of Contents</h2>
-<a href = "#built-in">Built in</a>
-<a href = "#environmental-variables">Environmental Variables</a>
+<a href = "#built-in">Built in</a><br>
+<a href = "#environmental-variables">Environmental Variables</a><br>
+<a href = "#db-er">Database Entity Relationship model</a>
 
 <h2 id = "built-in">Built in</h2>
 <img src = "https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white">
@@ -81,3 +82,6 @@
   </tr>
 </table>
 <b>NOTE:</b> For this project the database is locally hosted so the environmental values of DB_USERNAME, DB_PWORD, DB_HOSTNAME, DB_NAME will be `root`, `""`, `localhost` (port 3306), `Attendance_Tracker`
+
+<h2 id = "db-er">Database Entity Relationship model</h2>
+<img src="https://github.com/mfacecchia/attendance-tracker/assets/86726458/a7bcf8b3-4055-4f8f-be83-1c3342a57a9b">
