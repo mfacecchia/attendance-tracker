@@ -197,8 +197,4 @@
     <td>/terms-and-conditions</td>
     <td>Terms and conditions page randomly generated from <a href = "https://termly.io">Termly policies generator tool</a>.</td>
   </tr>
-  <tr>
-    <td>/docs</td>
-    <td>Documentation page. Link to this README file</td>
-  </tr>
 </table>
