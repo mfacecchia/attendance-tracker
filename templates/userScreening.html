@@ -25,8 +25,8 @@ Gestione account
                 {% endfor %}
             </select><br>
             {% for course in courses %}
-                <input type = "checkbox" name = "course" value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">
-                <label for = "course">{{course['nomeCorso']}} - {{course['annoCorso']}}</label><br>
+                <input type = "checkbox" name = "course" value = "{{course['annoCorso']}}a {{course['nomeCorso']}}">
+                <label for = "course">{{course['annoCorso']}}a {{course['nomeCorso']}}</label><br>
             {% endfor %}
 
             <button type = "submit">Crea account</button>
@@ -81,7 +81,7 @@ Gestione account
             </select>
             <select name = "course">
                 {% for course in courses %}
-                    <option value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">{{course['nomeCorso']}} - {{course['annoCorso']}}</option>
+                    <option value = "{{course['annoCorso']}}a {{course['nomeCorso']}}">{{course['annoCorso']}}a {{course['nomeCorso']}}</option>
                 {% endfor %}
             </select>
             
@@ -93,7 +93,7 @@ Gestione account
         <form action = "{{url_for('create_course')}}" method = "post">
             <h1>Crea corso</h1>
             <input type = "text" name = "courseName" placeholder = "Nome corso" maxlength = "30" required>
-            <input type = "text" name = "courseYear" placeholder = "Anno Corso ({{currentYear}}-{{currentYear + 1}})" value = "{{currentYear}}-{{currentYear + 1}}" pattern = "[0-9]{4}-[0-9]{4}" minlength = "9" maxlength = "9" required>
+            <input type = "text" name = "courseYear" placeholder = "Anno Corso" value = "1" pattern = "[0-9]" maxlength = "1" required>
 
             <button type = "submit">Crea corso</button>
         </form>
