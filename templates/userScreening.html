@@ -25,7 +25,7 @@ Gestione account
                 {% endfor %}
             </select><br>
             {% for course in courses %}
-                <input type = "checkbox" name = "course" value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">
+                <input type = "checkbox" name = "course" value = "{{course['annoCorso']}}a {{course['nomeCorso']}}">
                 <label for = "course">{{course['annoCorso']}}a {{course['nomeCorso']}}</label><br>
             {% endfor %}
 
@@ -81,7 +81,7 @@ Gestione account
             </select>
             <select name = "course">
                 {% for course in courses %}
-                    <option value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">{{course['nomeCorso']}} - {{course['annoCorso']}}</option>
+                    <option value = "{{course['annoCorso']}}a {{course['nomeCorso']}}">{{course['annoCorso']}}a {{course['nomeCorso']}}</option>
                 {% endfor %}
             </select>
             

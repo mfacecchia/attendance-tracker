@@ -31,9 +31,9 @@ Modifica utente
         </select><br>
         {% for course in courses %}
             {% if course['nomeCorso'] in userData["nomeCorso"] %}
-                <input type = "checkbox" name = "course" value = "{{course['nomeCorso']}} - {{course['annoCorso']}}" checked>
+                <input type = "checkbox" name = "course" value = "{{course['annoCorso']}}a {{course['nomeCorso']}}" checked>
             {% else %}
-                <input type = "checkbox" name = "course" value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">
+                <input type = "checkbox" name = "course" value = "{{course['annoCorso']}}a {{course['nomeCorso']}}">
             {% endif %}
             <label for = "course">{{course['annoCorso']}}a {{course['nomeCorso']}}</label><br>
         {% endfor %}
