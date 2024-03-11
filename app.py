@@ -98,6 +98,7 @@ def login():
             #Reformatting last login date for clean output
             session['lastLogin'] = response[0]['ultimoLogin'].replace(' ', ' alle ')
             session['githubConnected'] = bool(response[0]['githubID'])
+            session['googleConnected'] = bool(response[0]['googleID'])
 
             #Default last login value in database = fresh account so a new password needs to be set. Redirecting to password creation page
             if(session['lastLogin'] == 'Mai'):
