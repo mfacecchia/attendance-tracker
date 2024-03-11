@@ -979,7 +979,7 @@ def getLessonsList():
     cursor = connection.cursor()
     #Default query for all user types
     preparedQuery = [
-        'select idLezione, Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso\
+        'select idLezione, Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso, annoCorso\
         from Lezione\
         inner join Corso on Corso.idCorso = Lezione.idCorso\
         where dataLezione >= %(today)s', {'today': date.today()}
@@ -998,8 +998,11 @@ def getLessonsList():
     cursor.execute(*preparedQuery)
     response = getValuesFromQuery(cursor)
     #Converting all gotten dates to a more user friendly format
-    for lessonDate in response:
-        lessonDate['dataLezione'] = lessonDate['dataLezione'].strftime('%d/%m/%Y')
+    for lesson in response:
+        lesson['dataLezione'] = lesson['dataLezione'].strftime('%d/%m/%Y')
+        #Updating course name with course year and name combination and removing course year key from dict
+        lesson['nomeCorso'] = f"{lesson['annoCorso']}a {lesson['nomeCorso']}"
+        lesson.pop('annoCorso')
     connection.close()
     return response
 
