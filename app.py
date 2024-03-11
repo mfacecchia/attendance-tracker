@@ -107,6 +107,7 @@ def login():
             #Reformatting last login date for clean output
             session['lastLogin'] = response[0]['ultimoLogin'].replace(' ', ' alle ')
             session['githubConnected'] = bool(response[0]['githubID'])
+            session['googleConnected'] = bool(response[0]['googleID'])
 
             #Default last login value in database = fresh account so a new password needs to be set. Redirecting to password creation page
             if(session['lastLogin'] == 'Mai'):
@@ -357,8 +358,8 @@ def createUser():
             coursesNames = []
             coursesYears = []
             for course in chosenCourses:
-                coursesNames.append(course.split(" - ")[0])
-                coursesYears.append(course.split(" - ")[1])
+                coursesYears.append(course.split("a ")[0])
+                coursesNames.append(course.split("a ")[1])
             #Validating the chosen courses
             if(validateCoursesSelection(coursesNames, coursesYears)):
                 #Checking if all the form fields input are not empty and the password contains at least 10 characters before proceeding
@@ -435,7 +436,7 @@ def createLesson():
             lessonDate = request.form.get('lessonDate')
             lessonRoom = request.form.get('room').upper()
             lessonType = request.form.get('lessonType')
-            chosenCourseName, chosenCourseYear = request.form.get('course').split(' - ')
+            chosenCourseYear, chosenCourseName = request.form.get('course').split('a ')
             if(validateCoursesSelection([chosenCourseName], [chosenCourseYear])):
                 if(validateFormInput(subject, lessonDate, lessonRoom)):
                     connection = connectToDB()
@@ -661,18 +662,15 @@ def getValuesFromQuery(cursor):
 
 def updateLastLoginTime():
     '''Programmatically updates user's last login time on database'''
-    timeNow = datetime.now()
-    timeNow = timeNow.strftime('%d/%m/%Y %H:%M')
-
     connection = connectToDB()
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
-    cursor.execute("update Utente set ultimoLogin = %(timeNow)s where userID = %(uid)s", {'timeNow': timeNow, 'uid': session['uid']})
+    cursor.execute("update Utente set ultimoLogin = %(timeNow)s where userID = %(uid)s", {'timeNow': date.today(), 'uid': session['uid']})
     connection.commit()
     cursor.close()
     connection.close()
-    return str(timeNow).replace(' ', ' alle ')
+    return str(date.today().strftime('%d/%m/%Y')).replace(' ', ' alle ')
 
 def checkUserGithubConnection():
     '''Checks if the user has a linked Github account'''
@@ -805,7 +803,7 @@ def getUsersList():
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
-    cursor.execute("select Utente.userID, Nome, Cognome, Tipologia, nomeCorso\
+    cursor.execute("select Utente.userID, Nome, Cognome, Tipologia, nomeCorso, annoCorso\
                     from Utente\
                     inner join Registrazione on Utente.userID = Registrazione.userID\
                     inner join Corso on Registrazione.idCorso = Corso.idCorso\
@@ -848,8 +846,8 @@ def updateDataAsAdmin():
         coursesNames = []
         coursesYears = []
         for course in chosenCourses:
-            coursesNames.append(course.split(" - ")[0])
-            coursesYears.append(course.split(" - ")[1])
+            coursesYears.append(course.split("a ")[0])
+            coursesNames.append(course.split("a ")[1])
         if(validateCoursesSelection(coursesNames, coursesYears)):
             #Checking if all the form fields input are not empty
             if(validateFormInput(fname, lname, email)):
@@ -1083,7 +1081,7 @@ def reformatResponse(response):
     Returns a list of dictionaries'''
     orderedResponse = []
     for col in response:
-        orderedResponse.append({'nomeCorso': f"{col['nomeCorso']} - {col['annoCorso']}", 'dataLezione': col['dataLezione'].strftime('%d/%m/%Y'), 'conteggioPresenze': col['conteggioPresenze']})
+        orderedResponse.append({'nomeCorso': f"{col['annoCorso']}a {col['nomeCorso']}", 'dataLezione': col['dataLezione'].strftime('%d/%m/%Y'), 'conteggioPresenze': col['conteggioPresenze']})
     return orderedResponse
 
 if __name__ == "__main__":
