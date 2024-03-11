@@ -35,7 +35,7 @@ Modifica utente
             {% else %}
                 <input type = "checkbox" name = "course" value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">
             {% endif %}
-            <label for = "course">{{course['nomeCorso']}} - {{course['annoCorso']}}</label><br>
+            <label for = "course">{{course['annoCorso']}}a {{course['nomeCorso']}}</label><br>
         {% endfor %}
 
         <input type = "number" name = "uid" value = "{{userData['userID']}}" readonly hidden>
