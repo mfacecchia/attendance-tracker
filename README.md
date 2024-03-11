@@ -7,7 +7,7 @@
 <a href = "#environmental-variables">Environmental Variables</a><br>
 <a href = "#db-er">Database Entity Relationship model</a><br>
 <a href = "#app-routes">App Routes</a><br>
-<a href = "#hashing-methods">Hashing methods</a>
+<a href = "#hashing-methods">Hashing methods</a><br>
 <a href = "#functions">Functions</a>
 
 <h2 id = "built-in">Built in</h2>
