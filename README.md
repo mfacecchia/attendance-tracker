@@ -6,7 +6,8 @@
 <a href = "#built-in">Built in</a><br>
 <a href = "#environmental-variables">Environmental Variables</a><br>
 <a href = "#db-er">Database Entity Relationship model</a><br>
-<a href = "#app-routes">App Routes</a>
+<a href = "#app-routes">App Routes</a><br>
+<a href = "#hashing-methods">Hashing methods</a>
 
 <h2 id = "built-in">Built in</h2>
 <img src = "https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white">
@@ -24,7 +25,7 @@
 <a href = "https://docs.python.org/3/library/os.html">OS</a> |
 <a href = "https://docs.python.org/3/library/datetime.html">Datetime</a>
 <a href = "https://tailwindcss.com/docs/installation">Tailwind CSS</a>
-<h4>Encryption & security</h4>
+<h4>Hashing & security</h4>
 <a href = "https://argon2-cffi.readthedocs.io/en/stable/">Argon2</a> |
 <a href = "https://docs.python.org/3/library/base64.html">Base64</a>
 <h4>Login Methods</h4>
@@ -100,11 +101,11 @@
   </tr>
   <tr>
     <td>/login</td>
-    <td>Login form. Outputs the form with Email and password input and validates the input passed through POST request. If already logged in, the user will be automatically redirected to the screening page. For more information about encrypted password verification, <a href = "#encryption-methods">this section</a> will better explain the process.</td>
+    <td>Login form. Outputs the form with Email and password input and validates the input passed through POST request. If already logged in, the user will be automatically redirected to the screening page. For more information about hashed password verification, <a href = "#hashing-methods">this section</a> will better explain the process.</td>
   </tr>
   <tr>
     <td>/forgot-password</td>
-    <td>Outputs the form with Email input and sends an email to that adress with a reset password link. Accessible via the `/login` page.</td>
+    <td>Outputs the form with Email input and sends an email to that adress with a reset password link. Accessible via the `/login` page. For more information about Email sending function and reset password link GET parameters, <a href = "#password-reset">this section</a> will better explain the process.</td>
   </tr>
   <tr>
     <td>/user/updatepassword</td>
@@ -112,7 +113,7 @@
   </tr>
   <tr>
     <td>/user/updatepassword/verify</td>
-    <td>Validates the already input password from `/user/updatepassword` form. For more information about password verification and encryption, <a href = "#encryption-methods">this section</a> will better explain the process.</td>
+    <td>Validates the already input password from `/user/updatepassword` form. For more information about password verification and hashing, <a href = "#hashing-methods">this section</a> will better explain the process.</td>
   </tr>
   <tr>
     <td>/auth/github</td>
@@ -198,3 +199,6 @@
     <td>Terms and conditions page randomly generated from <a href = "https://termly.io">Termly policies generator tool</a>.</td>
   </tr>
 </table>
+
+<h2 id = "hashing-methods">Hashing methods</h2>
+<p>All user related sensitive data such as passwords are securely hashed and stored in the database using <a href = "https://en.wikipedia.org/wiki/Argon2">Argon2id algorithm</a>. To manage and verify such data, <a href = "https://argon2-cffi.readthedocs.io/en/stable/">Argon2-cffi</a> Python module is being used, in particular the `PasswordHasher` class and its relative methods <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.verify">verify</a> for login and reset password verification functionalities and <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.hash">hash</a> for user creation and reset password functionalities. Non matching passwords after the <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.verify">verify</a> function is called are managed with Argon2 module built-in <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.exceptions.VerifyMismatchError">VerifyMismatchError exception</a>.</p>
