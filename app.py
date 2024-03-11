@@ -611,18 +611,15 @@ def getValuesFromQuery(cursor):
 
 def updateLastLoginTime():
     '''Programmatically updates user's last login time on database'''
-    timeNow = datetime.now()
-    timeNow = timeNow.strftime('%d/%m/%Y %H:%M')
-
     connection = connectToDB()
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
-    cursor.execute("update Utente set ultimoLogin = %(timeNow)s where userID = %(uid)s", {'timeNow': timeNow, 'uid': session['uid']})
+    cursor.execute("update Utente set ultimoLogin = %(timeNow)s where userID = %(uid)s", {'timeNow': date.today(), 'uid': session['uid']})
     connection.commit()
     cursor.close()
     connection.close()
-    return str(timeNow).replace(' ', ' alle ')
+    return str(date.today().strftime('%d/%m/%Y')).replace(' ', ' alle ')
 
 def checkUserGithubConnection():
     '''Checks if the user has a linked Github account'''
