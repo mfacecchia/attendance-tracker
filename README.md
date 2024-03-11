@@ -8,6 +8,7 @@
 <a href = "#db-er">Database Entity Relationship model</a><br>
 <a href = "#app-routes">App Routes</a><br>
 <a href = "#hashing-methods">Hashing methods</a>
+<a href = "#functions">Functions</a>
 
 <h2 id = "built-in">Built in</h2>
 <img src = "https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white">
@@ -16,6 +17,7 @@
 <img src = "https://img.shields.io/badge/CSS-239120?&style=for-the-badge&logo=css3&logoColor=white">
 <img src = "https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white">
 <img src = "https://img.shields.io/badge/chart.js-F5788D.svg?style=for-the-badge&logo=chart.js&logoColor=white">
+<img src = "https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white">
 
 <h2>Modules References</h2>
 <h4>Core Functionalities</h4>
@@ -123,7 +125,7 @@
     <td>/auth/github/callback</th>
     <td>GitHub OAuth App callback page, used to manage GitHub OAuth REST API return values. For more information about GitHub OAuth App Authorization process, please visit <a href = "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authenticating-to-the-rest-api-with-an-oauth-app">the official documentation</a>.</td>
   </tr>
-  <tr>
+  <tr id = "github-oauth-callback">
     <td>/auth/github/disconnect</td>
     <td>Removes GitHub Accoutn user id from the database</td>
   <tr>
@@ -202,3 +204,57 @@
 
 <h2 id = "hashing-methods">Hashing methods</h2>
 <p>All user related sensitive data such as passwords are securely hashed and stored in the database using <a href = "https://en.wikipedia.org/wiki/Argon2">Argon2id algorithm</a>. To manage and verify such data, <a href = "https://argon2-cffi.readthedocs.io/en/stable/">Argon2-cffi</a> Python module is being used, in particular the `PasswordHasher` class and its relative methods <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.verify">verify</a> for login and reset password verification functionalities and <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.hash">hash</a> for user creation and reset password functionalities. Non matching passwords after the <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.verify">verify</a> function is called are managed with Argon2 module built-in <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.exceptions.VerifyMismatchError">VerifyMismatchError exception</a>.</p>
+
+<h2 id = "functions">Functions</h2>
+<h3>connectToDB()</h3>
+<p>Starts a connection to the database with the given data through <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlconnection-connect.html">MySQLConnector.connect() function</a>. Connection not established is managed with <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-errors-error.html">MySQLConnector.Error</a> error.</p>
+<p>Returns <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-example-connecting.html">MySQLConnection object</a> or `False` if the connection to Database fails for some reason.</p>
+
+<h3>getCourses()</h3>
+<p>Executes a simple `select` query on the database and returns all courses names and years.</p>
+<p>Returns the formatted output of <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html">cursor.execute()</a>. For more information about query to list conversion, <a href = "#get-values-from-query">this section</a> will better explain the process.</p>
+
+<h3 id = "get-values-from-query">getValuesFromQuery()</h3>
+<p>Gets a <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlconnection-cursor.html">MySQLConnector cursor</a> as parameter and returns a list with dictionaries as items with cursor columns names as keys and obtained values as dictionary values. Briefly, this function will iterate though the entire cursor and create a dictionary for each query returned column. If the cursor is empty this function will return an empty list.</p>
+<p>This function will return a list like the following</p>
+
+```
+[
+  {
+    'nomeCorso': 'Sviluppo Software',
+    'annoCorso': '2023-2024'
+  },
+  {
+    'nomeCorso': 'Sviluppo Web',
+    'annoCorso': '2023-2024'
+  }
+]
+```
+
+<h3>updateLastLoginTime()</h3>
+<p>Programmatically updates user's last login time on database by executing an `update` SQL query on the database. The user is defined by session's userID value and the current time is obtained from <a href = "https://docs.python.org/3/library/datetime.html#datetime.date.today">date.today()</a> function.</p>
+<p>Returns the formatted current date in `%d/%m/%Y` format by using <a href = "https://docs.python.org/3/library/datetime.html#datetime.date.strftime">date.strftime()</a> function.</p>
+
+<h3>checkUserGithubConnection()</h3>
+<p>Checks if the user has a linked Github account. The user is defined by session's userID value</p>
+<p>Returns a boolean value corresponding `True` if the defined user has a linked Github Account or `False` if the Database's "githubID" field is empty</p>
+
+<h3>linkGithubAccount()</h3>
+<p>Updates user's "githubID" database column with the GitHub account id passed as function parameter from <a href = "#github-oauth-callback">GitHub OAuth API return values</a>. Before updating the column, a verifications is done; a <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlconnection-cursor.html">cursor</a> gets instantiated and checks if the obtained GitHub user id is already linked to an account with a simple `select` query. If the cursor's result contains no rows, then it is possible to update the user's `githubID` column and the session's related `githubConnected` value is set to `True`.</p>
+<p>Returns `True` if the column is updated, otherwise `False` in all other cases.</p>
+
+<h3>loginWithGithub()</h3>
+<p>Looks for github user id obtained from the GitHub account id from <a href = "#github-oauth-callback">GitHub OAuth API return values</a> and executes a `select` query to obtain the relative user id from the database. If the user is found, a session gets created.</p>
+<p>Returns `True` if the GitHub user id was found, otherwise `False`.</p>
+
+<h3>validateFormInput()</h3>
+<p>Validates form user input by checking if the input data is not an empty string.</p>
+<p>Returns `True` if the passed string is empty, otherwise `False`</p>
+
+<h3>getUsersList()</h3>
+<p>Obtains all users from the database by executng a `select` query.</p>
+<p>Returns the formatted output of <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html">cursor.execute()</a>. For more information about query to list conversion, <a href = "#get-values-from-query">this section</a> will better explain the process.</p>
+
+<h3>getUserData()</h3>
+<p>Gets all user related data by executing a `select` query. The user is defined by function parameter `uid`.</p>
+<p>Returns the formatted output of <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html">cursor.execute()</a>. For more information about query to list conversion, <a href = "#get-values-from-query">this section</a> will better explain the process.</p>
