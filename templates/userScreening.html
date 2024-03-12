@@ -6,9 +6,32 @@ Gestione account
 
 {% block content %}
 
-    <h1>{{ helloMessage }}, {{ session['name'] }}!</h1>
-    <p>{{ session['role'] }}</p>
-    <p>Ultima volta online: {{session['lastLogin']}}</p>
+    <h1 class = "text-center">{{ helloMessage }}, {{ session['name'] }}!</h1>
+    
+    <section class = "flex flex-wrap">
+        <div class = "container blue mt-3">
+            <div class = "w-1/2 text-center">
+                <b>{{ session['role'] }}</b>
+                <p class = "mt-1 mb-2">Ultima volta online: {{session['lastLogin']}}</p>
+                <!-- TODO: Add update user data link -->
+                <a class = "button dark-blue px-[2px]" href = "">Modifica account</a>
+            </div>
+            <div class = "next-lesson">
+                <a class = "register-attendances" href = "{{url_for('manageLesson', id = scheduledLessons[0]['idLezione'])}}">
+                    <img class = "size-10" src = "{{url_for('static', filename = 'assets/attendance.svg')}}">
+                    <!-- TODO: Update with role check -->
+                    <p class = "text-sm">Registra presenze</p>
+                </a>
+                <div class = "lesson-description">
+                    <b class = "text-sm">Prossima lezione:</b>
+                    <p class = "text-sm">{{scheduledLessons[0]['Materia']}}</p>
+                    <p class = "text-sm">Aula {{scheduledLessons[0]['aula']}}</p>
+                    <!-- TODO: Add lessons list route -->
+                    <a class = "button dark-blue mt-2">Vedi tutte</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
     {% if session['role'] == 'Admin' %}
         <h1>Crea utente</h1>

@@ -5,7 +5,7 @@
 @layer base{
 
     body{
-        @apply min-h-screen flex flex-col relative;
+        @apply min-h-screen flex flex-col items-center justify-center relative pt-20 px-5 box-border;
     }
     h1{
         @apply text-2xl leading-tight;
@@ -47,7 +47,7 @@
         @apply bg-blue-500;
     }
     .formContainer{
-        @apply m-auto min-w-56 w-3/4 max-w-[500px] flex flex-col justify-center items-center gap-y-3 px-5 py-11 my-20 bg-attendance-blue-100 rounded-2xl shadow-sm;
+        @apply m-auto min-w-56 w-3/4 max-w-[500px] flex flex-col justify-center items-center gap-y-3 px-5 py-11 mb-20 bg-attendance-blue-100 rounded-2xl shadow-sm;
         @apply sm:shadow-md;
     }
     .formInputBox{
@@ -67,7 +67,10 @@
         @apply sm:scale-125;
     }
     .container{
-        @apply min-w-56 w-4/5 max-w-[300px] aspect-square border border-slate-100 bg-slate-100/50 backdrop-blur-md rounded-md box-border p-2 space-y-1;
+        @apply min-w-56 w-full max-w-[500px] border border-slate-100 bg-slate-100 rounded-md box-border p-2 space-y-1 flex justify-between items-center gap-5;
+    }
+    .container.blue{
+        @apply bg-attendance-blue-100
     }
     .container img{
         @apply size-14;
@@ -83,12 +86,27 @@
         @apply text-xs text-center;
     }
     .button{
-        @apply px-5 py-1.5 rounded-md bg-attendance-blue-100 text-attendance-blue-700 font-medium text-sm uppercase;
+        @apply px-5 py-1.5 rounded-md bg-attendance-blue-100 text-attendance-blue-700 font-medium text-sm text-center uppercase;
     }
     .button.dark-blue{
         @apply bg-attendance-blue-700 text-white;
     }
     .button.slate{
         @apply bg-slate-200;
+    }
+    .next-lesson{
+        @apply w-1/2 h-52 rounded-md overflow-hidden bg-white/30;
+    }
+    .register-attendances{
+        @apply flex flex-col justify-center items-center w-full h-1/2 bg-white;
+    }
+    .register-attendances img{
+        @apply size-1/2;
+    }
+    .next-lesson a p{
+        @apply text-xs;
+    }
+    .lesson-description{
+        @apply box-border px-2 text-sm flex flex-col justify-center;
     }
 }
