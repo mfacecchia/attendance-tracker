@@ -258,3 +258,7 @@
 <h3>getUserData()</h3>
 <p>Gets all user related data by executing a `select` query. The user is defined by function parameter `uid`.</p>
 <p>Returns the formatted output of <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html">cursor.execute()</a>. For more information about query to list conversion, <a href = "#get-values-from-query">this section</a> will better explain the process.</p>
+
+<h3>updateDataAsAdmin()</h3>
+<p>Updates all selected user data (ADMIN user only). Before updating user's data, all the input fields such as first name, last name, Email, password, role and enrolled courses, will be validated through a series of statements in order to avoid wrong values in database.</p>
+<p>For more information about password hashing, <a href = "#hashing-methods">this section</a> will better explain the process.</p>
