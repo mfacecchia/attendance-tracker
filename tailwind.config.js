@@ -3,9 +3,6 @@ module.exports = {
   content: ["./static/script/*.js", "./templates/*.html"],
   theme: {
     extend: {
-      backgroundImage: {
-        'screening-mobile': 'url(/static/assets/screeningBG_mobile.jpg)'
-      },
       keyframes: {
         'hide': {
           '0%': { opacity: '1' },
