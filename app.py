@@ -682,7 +682,7 @@ def updateLastLoginTime():
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
-    cursor.execute("update Utente set ultimoLogin = %(timeNow)s where userID = %(uid)s", {'timeNow': date.today(), 'uid': session['uid']})
+    cursor.execute("update Utente set ultimoLogin = %(timeNow)s where userID = %(uid)s", {'timeNow': datetime.now().strftime('%d/%m/%Y %H:%M'), 'uid': session['uid']})
     connection.commit()
     cursor.close()
     connection.close()
