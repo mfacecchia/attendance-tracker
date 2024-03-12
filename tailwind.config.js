@@ -18,6 +18,7 @@ module.exports = {
           100: '#CEE7FF',
           700: '#002755'
         },
+        'attendance-orange': '#B56328',
         'carbon': '#1E1E1E'
       },
       borderWidth: {

@@ -8,19 +8,19 @@ Gestione account
 
     <h1 class = "text-center">{{ helloMessage }}, {{ session['name'] }}!</h1>
     
-    <section class = "flex flex-wrap">
+    <section class = "flex justify-center flex-wrap gap-5">
         <div class = "container blue mt-3">
             <div class = "w-1/2 text-center">
                 <b>{{ session['role'] }}</b>
                 <p class = "mt-1 mb-2">Ultima volta online: {{session['lastLogin']}}</p>
                 <!-- TODO: Add update user data link -->
-                <a class = "button dark-blue px-[2px]" href = "">Modifica account</a>
+                <a class = "button dark-blue p-1 text-xs" href = "">Modifica account</a>
             </div>
             <div class = "next-lesson">
                 <a class = "register-attendances" href = "{{url_for('manageLesson', id = scheduledLessons[0]['idLezione'])}}">
-                    <img class = "size-10" src = "{{url_for('static', filename = 'assets/attendance.svg')}}">
+                    <img src = "{{url_for('static', filename = 'assets/attendance.svg')}}">
                     <!-- TODO: Update with role check -->
-                    <p class = "text-sm">Registra presenze</p>
+                    <p class = "button orange">Registra presenze</p>
                 </a>
                 <div class = "lesson-description">
                     <b class = "text-sm">Prossima lezione:</b>
@@ -31,6 +31,51 @@ Gestione account
                 </div>
             </div>
         </div>
+        {% if session['role'] == 'Admin' %}
+            <!-- TODO: Add create user route -->
+            <a class = "action" href = "">
+                <img src = "{{url_for('static', filename = 'assets/user.svg')}}">
+                <p class = "button orange">Crea utente</p>
+            </a>
+            <!-- TODO: Add create course route -->
+            <a class = "action" href = "">
+                <img src = "{{url_for('static', filename = 'assets/course.svg')}}">
+                <p class = "button orange">Crea corso</p>
+            </a>
+            <a class = "action" href = "{{url_for('usersList')}}">
+                <img src = "{{url_for('static', filename = 'assets/users.svg')}}">
+                <p class = "button orange">Lista utenti</p>
+            </a>
+            {% endif %}
+            {% if session['role'] in ['Insegnante', 'Admin'] %}
+                <!-- TODO: Add create lesson route -->
+                <a class = "action" href = "">
+                    <img src = "{{url_for('static', filename = 'assets/teacher.svg')}}">
+                    <p class = "button orange">Crea lezione</p>
+                </a>
+            {% endif %}
+            {% if not session['githubConnected'] %}
+                <a class = "action" href = "{{url_for('githubAuth')}}">
+                    <img src = "{{url_for('static', filename = 'assets/github.svg')}}">
+                    <p class = "button orange">Connetti GitHub</p>
+                </a>
+            {% else %}
+                    <a class = "action" href = "{{url_for('unlinkGithubAccount')}}">
+                        <img src = "{{url_for('static', filename = 'assets/github.svg')}}">
+                        <p class = "button orange">Disconnetti GitHub</p>
+                    </a>
+            {% endif %}
+            {% if not session['googleConnected'] %}
+                <a class = "action" href = "{{url_for('googleAuth')}}">
+                    <img src = "{{url_for('static', filename = 'assets/google.svg')}}">
+                    <p class = "button orange">Connetti Google</p>
+                </a>
+            {% else %}
+                    <a class = "action" href = "{{url_for('unlinkGoogleAccount')}}">
+                        <img src = "{{url_for('static', filename = 'assets/google.svg')}}">
+                        <p class = "button orange">Disconnetti Google</p>
+                    </a>
+            {% endif %}
     </section>
 
     {% if session['role'] == 'Admin' %}
@@ -54,8 +99,6 @@ Gestione account
 
             <button type = "submit">Crea account</button>
         </form>
-
-        <a href = "{{url_for('usersList')}}">Lista utenti</a>
     {% endif %}
     
     <h1>Lezioni programmate</h1>

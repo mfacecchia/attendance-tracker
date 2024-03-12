@@ -56,7 +56,6 @@
     .formInputBox:focus{
         @apply border-2 border-blue-600;
     }
-    
     input::placeholder.formInputBox{
         @apply text-slate-600;
     }
@@ -76,14 +75,18 @@
         @apply size-14;
     }
     .action{
-        @apply aspect-square !mt-0 bg-slate-50 rounded-md flex flex-col justify-center items-center gap-2 box-border p-2 shadow-lg transition-transform duration-100 ease-in-out;
-        @apply hover:scale-105
+        @apply w-1/3 max-w-40 h-full aspect-square bg-attendance-blue-100 rounded-md flex flex-col justify-center items-center box-border gap-2 p-2 transition-transform duration-100 ease-in-out;
+        @apply hover:scale-95;
+        @apply active:scale-90;
     }
     .action img{
-        @apply size-6 rounded-full;
+        @apply h-1/2;
     }
     .action p{
-        @apply text-xs text-center;
+        @apply text-xs;
+    }
+    .action .button{
+        @apply p-1;
     }
     .button{
         @apply px-5 py-1.5 rounded-md bg-attendance-blue-100 text-attendance-blue-700 font-medium text-sm text-center uppercase;
@@ -94,17 +97,20 @@
     .button.slate{
         @apply bg-slate-200;
     }
+    .button.orange{
+        @apply bg-attendance-orange text-white;
+    }
     .next-lesson{
         @apply w-1/2 h-52 rounded-md overflow-hidden bg-white/30;
     }
+    .next-lesson .button{
+        @apply p-1 text-xs;
+    }
     .register-attendances{
-        @apply flex flex-col justify-center items-center w-full h-1/2 bg-white;
+        @apply flex flex-col justify-center items-center gap-2 w-full h-1/2 bg-white box-border p-2;
     }
     .register-attendances img{
-        @apply size-1/2;
-    }
-    .next-lesson a p{
-        @apply text-xs;
+        @apply h-1/2;
     }
     .lesson-description{
         @apply box-border px-2 text-sm flex flex-col justify-center;
