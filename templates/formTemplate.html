@@ -1,0 +1,14 @@
+{% extends "index.html" %}
+
+{% block content %}
+    <form action = "{% block formAction %} {% endblock %}" method = "post" class = "formContainer">
+        {% block formTitle %}
+            <h1>Form title</h1>
+            <p>Form subtitle</p>
+        {% endblock %}
+        {% block inputFields %}
+            <input class = "formInputBox" type = "text" placeholder = "Example text input">
+            <button class = "button dark-blue" type = "submit">Submit</button>
+        {% endblock %}
+    </form>
+{% endblock %}
