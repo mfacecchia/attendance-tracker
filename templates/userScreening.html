@@ -14,7 +14,7 @@ Gestione account
                 <b>{{ session['role'] }}</b>
                 <p class = "mt-1 mb-2">Ultima volta online: {{session['lastLogin']}}</p>
                 <!-- TODO: Add update user data link -->
-                <a class = "button dark-blue p-1 text-xs" href = "">Modifica account</a>
+                <a class = "button dark-blue p-1 text-xs" href = "{{url_for('updateUserInfo')}}">Modifica account</a>
             </div>
             <div class = "next-lesson">
                 <a class = "register-attendances" href = "{{url_for('manageLesson', id = scheduledLessons[0]['idLezione'])}}">
@@ -93,8 +93,8 @@ Gestione account
                 {% endfor %}
             </select><br>
             {% for course in courses %}
-                <input type = "checkbox" name = "course" value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">
-                <label for = "course">{{course['nomeCorso']}} - {{course['annoCorso']}}</label><br>
+                <input type = "checkbox" name = "course" value = "{{course}}">
+                <label for = "course">{{course}}</label><br>
             {% endfor %}
 
             <button type = "submit">Crea account</button>

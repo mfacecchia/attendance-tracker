@@ -12,7 +12,7 @@
         {% block inputFields %}
             <input class = "formInputBox" type = "text" placeholder = "Example text input">
         {% endblock %}
-        <button class = "button dark-blue" type = "submit">{% block submit %} Submit {% endblock %}</button>
+        <button class = "button dark-blue" type = "submit" name = "{% block buttonName %}{% endblock %}" value = "{% block buttonValue %}{% endblock %}">{% block submit %} Submit {% endblock %}</button>
         {% block resetButton %}
             <button class = "button slate" type = "reset">{% block reset %} Cancella {% endblock %}</button>
         {% endblock %}

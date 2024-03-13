@@ -586,6 +586,10 @@ def create_course():
         flash(commonErrorMessage, 'Errore')
     return redirect(url_for('userScreening'))
 
+@app.route('/user/info')
+def updateUserInfo():
+    return render_template('userInfo.html')
+
 @app.route('/user/list')
 def usersList():
     if(session.get('role') == 'Admin'):
@@ -597,24 +601,31 @@ def select_user():
     if(session.get('role') == 'Admin'):
         uid = request.values.get('userID')
         if(request.form.get('submitButton') == 'Edit'):
-            if(request.values.get('userID')):
+            if(uid):
                 selectedUser = getUserData(uid)
                 getCourses()
-                return render_template('userData.html', userData = selectedUser, courses = courses, roles = roleOptions)
-        else:
+                return render_template('userInfo.html', userData = selectedUser, courses = courses, roles = roleOptions)
+        elif(request.form.get('submitButton') == 'Remove'):
             deleteUser(uid)
             flash('Utente rimosso con successo.', 'Successo')
             return redirect(url_for('usersList'))
+        elif(uid):
+            selectedUser = getUserData(uid)
+            print(selectedUser)
+            getCourses()
+            return render_template('userInfo.html', userData = selectedUser, courses = courses, roles = roleOptions)
     return redirect(url_for('userScreening'))
 
 @app.route('/user/update', methods = ['GET', 'POST'])
 def update_user_data():
-    if(session.get('role') == 'Admin'):
-        userID = updateDataAsAdmin()
-        return redirect(url_for('select_user', userID = userID))
-    elif(session.get('role') in ['Studente', 'Insegnante']):
+    #`not request.form.get('uid')` means that the administrator wants to update his own data
+    #NOTE: (`uid` is a special field in `userInfo.html` form which links the selected user id to the button value with name `uid`)
+    if(session.get('role') in ['Studente', 'Insegnante'] or not request.form.get('uid')):
         if(updateDataAsUser()):
             flash('Utente modificato con successo.', 'Successo')
+    elif(session.get('role') == 'Admin'):
+        userID = updateDataAsAdmin()
+        return redirect(url_for('select_user', userID = userID))
     else:
         flash(commonErrorMessage, 'Errore')
     return(redirect(url_for('userScreening')))
@@ -657,13 +668,18 @@ def connectToDB():
 def getCourses():
     '''Gets all courses from database'''
     global courses
+    courses = []
     connection = connectToDB()
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
     cursor.execute("select nomeCorso, annoCorso from Corso")
     #Overwriting list with newly values from DB response
-    courses = getValuesFromQuery(cursor)
+    response = getValuesFromQuery(cursor)
+    for course in response:
+        courses.append(f"{course['annoCorso']}a {course['nomeCorso']}")
+
+
 
 def getValuesFromQuery(cursor):
     '''Returns the DB response in form of list of dictionaries\n
@@ -843,6 +859,7 @@ def getUserData(uid):
     response = getValuesFromQuery(cursor)
     
     response[0]['nomeCorso'] = getUserCourses(response)
+    response[0].pop('annoCorso')
     connection.close()
     return response[0]
 
@@ -858,7 +875,7 @@ def updateDataAsAdmin():
         hashedPW = ''
         role = request.form.get('role')
         chosenCourses = request.form.getlist('course')
-
+        
         coursesNames = []
         coursesYears = []
         for course in chosenCourses:
@@ -867,7 +884,7 @@ def updateDataAsAdmin():
         if(validateCoursesSelection(coursesNames, coursesYears)):
             #Checking if all the form fields input are not empty
             if(validateFormInput(fname, lname, email)):
-                if(pw != ''):
+                if(pw):
                     if(len(pw) >= 10 and pw == pwVerify):
                         phasher = PasswordHasher()
                         hashedPW = phasher.hash(pw.encode())
@@ -913,10 +930,12 @@ def updateDataAsAdmin():
 
 def updateDataAsUser():
     email = request.form.get('email').strip().lower()
-    pw = request.form.get('password')
-    pwVerify = request.form.get('password_verify')
+    pw = request.form.get('newPassword')
+    pwVerify = request.form.get('passwordVerify')
     hashedPW = ''
     queries = []
+
+    #TODO: Check for email or password field to be valid (not empty) (at least one)
     
     connection = connectToDB()
     if(not connection):
@@ -931,7 +950,8 @@ def updateDataAsUser():
             flash('Questo indirizzo Email è già associato a un altro account. Per favore, riprova.', 'Errore')
             return False
         queries.append(['update Credenziali set Email = %(newEmail)s where userID = %(uid)s', {'newEmail': email, 'uid': session['uid']}])
-    if(pw != ''):
+    if(pw):
+        print(pw)
         if(len(pw) >= 10 and pw == pwVerify):
             phasher = PasswordHasher()
             hashedPW = phasher.hash(pw.encode())
@@ -943,7 +963,7 @@ def updateDataAsUser():
         flash('Nessun dato fornito per la modifica. Per favore, riprova', 'Errore')
         return False
     for query in queries:
-        cursor.execute(query[0], query[1])
+        cursor.execute(*query)
         connection.commit()
     connection.close()
     return True
@@ -975,9 +995,9 @@ def getCustomMessage():
         
 def getUserCourses(response):
     '''Getting all courses from the query and creating a single list with all the obtained ones'''
-    response[0]['nomeCorso'] = [response[0]['nomeCorso']]
+    response[0]['nomeCorso'] = [f"{response[0]['annoCorso']}a {response[0]['nomeCorso']}"]
     for course in response[1:]:
-        response[0]['nomeCorso'].append(course['nomeCorso'])
+        response[0]['nomeCorso'].append(f"{course['annoCorso']}a {course['nomeCorso']}")
     return response[0]['nomeCorso']
 
 def deleteUser(uid):
