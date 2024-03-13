@@ -5,7 +5,7 @@
 @layer base{
 
     body{
-        @apply min-h-screen flex flex-col items-center justify-center relative pt-20 px-5 box-border;
+        @apply min-h-screen flex flex-col items-center justify-center relative pt-20 pb-48 px-5 box-border;
     }
     h1{
         @apply text-2xl leading-tight;
@@ -23,7 +23,7 @@
         @apply h-6 drop-shadow-2xl;
     }
     footer{
-        @apply w-full box-border py-3 bg-slate-100 flex flex-col items-center gap-y-5 text-slate-400 mt-auto;
+        @apply absolute bottom-0 left-0 w-full box-border py-3 bg-slate-100 flex flex-col items-center gap-y-5 text-slate-400 mt-auto;
     }
     footer a, footer p{
         @apply text-slate-600;
@@ -47,7 +47,7 @@
         @apply bg-blue-500;
     }
     .formContainer{
-        @apply m-auto min-w-56 w-3/4 max-w-[500px] flex flex-col justify-center items-center gap-y-3 px-5 py-11 mb-20 bg-attendance-blue-100 rounded-2xl shadow-sm;
+        @apply m-auto min-w-56 w-full max-w-[500px] flex flex-col justify-center items-center gap-y-3 box-border px-5 py-11 bg-attendance-blue-100 rounded-2xl shadow-sm;
         @apply sm:shadow-md;
     }
     .formInputBox{

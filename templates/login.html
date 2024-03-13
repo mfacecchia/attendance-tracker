@@ -10,10 +10,8 @@ Login
     {% endblock %}
 {% endblock %}
 
-{% block formAction %}
-    {{url_for('login')}}
-{% endblock %}
-{% block formImage %}{% endblock %}
+{% block formAction %} {{url_for('login')}} {% endblock %}
+{% block formImageSource %}{{url_for('static', filename = 'assets/favicon-dark_blue.svg')}}{% endblock %}
 {% block formTitle %} Benvenuto {% endblock %}
 {% block formSubtitle %} Inserisci i tuoi dati per iniziare {% endblock %}
 {% block inputFields %}
@@ -38,3 +36,4 @@ Login
     </div>
 {% endblock %}
 {% block submit %} Login {% endblock %}
+{% block resetButton %}{% endblock %}

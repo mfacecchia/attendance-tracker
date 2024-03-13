@@ -404,6 +404,7 @@ video {
   padding-left: 1.25rem;
   padding-right: 1.25rem;
   padding-top: 5rem;
+  padding-bottom: 12rem;
 }
     h1 {
   font-size: 1.5rem;
@@ -443,6 +444,9 @@ video {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
     footer {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
   margin-top: auto;
   box-sizing: border-box;
   display: flex;
@@ -652,9 +656,9 @@ form img {
 }
 .formContainer {
   margin: auto;
-  margin-bottom: 5rem;
+  box-sizing: border-box;
   display: flex;
-  width: 75%;
+  width: 100%;
   min-width: 14rem;
   max-width: 500px;
   flex-direction: column;
