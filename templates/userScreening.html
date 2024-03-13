@@ -17,17 +17,24 @@ Gestione account
                 <a class = "button dark-blue p-1 text-xs" href = "{{url_for('updateUserInfo')}}">Modifica account</a>
             </div>
             <div class = "next-lesson">
-                <a class = "register-attendances" href = "{{url_for('manageLesson', id = scheduledLessons[0]['idLezione'])}}">
-                    <img src = "{{url_for('static', filename = 'assets/attendance.svg')}}">
-                    <!-- TODO: Update with role check -->
-                    <p class = "button orange">Registra presenze</p>
-                </a>
+                {% if session['role'] in ['Admin', 'Insegnante'] %}
+                    <a class = "top-box" href = "{{url_for('manageLesson', id = scheduledLessons['idLezione'])}}">
+                        <img src = "{{url_for('static', filename = 'assets/attendance.svg')}}">
+                        <p class = "button orange">Registra presenze</p>
+                    </a>
+                    {% else %}
+                    <div class = "top-box">
+                        <img src = "{{url_for('static', filename = 'assets/attendance.svg')}}">
+                        <!-- TODO: Add attendance check for lesson (student only) -->
+                        <p class = "button orange">Presente</p>
+                    </div>
+                {% endif %}
                 <div class = "lesson-description">
                     <b class = "text-sm">Prossima lezione:</b>
-                    <p class = "text-sm">{{scheduledLessons[0]['Materia']}}</p>
-                    <p class = "text-sm">Aula {{scheduledLessons[0]['aula']}}</p>
+                    <p class = "text-sm">{{scheduledLessons['Materia']}}</p>
+                    <p class = "text-sm">Aula {{scheduledLessons['aula']}}</p>
                     <!-- TODO: Add lessons list route -->
-                    <a class = "button dark-blue mt-2">Vedi tutte</a>
+                    <a class = "button dark-blue mt-2" href = "{{url_for('lessonsList')}}">Vedi tutte</a>
                 </div>
             </div>
         </div>
@@ -99,37 +106,6 @@ Gestione account
 
             <button type = "submit">Crea account</button>
         </form>
-    {% endif %}
-    
-    <h1>Lezioni programmate</h1>
-    {% if not scheduledLessons %}
-        <p>Nessuna lezione programmata</p>
-    {% else %}
-        <table style = "border: 1px solid gray">
-            <tr>
-                <th style = "border: 1px solid gray">Materia</th>
-                <th style = "border: 1px solid gray">Descrizione</th>
-                <th style = "border: 1px solid gray">Data Lezione</th>
-                <th style = "border: 1px solid gray">Aula</th>
-                <th style = "border: 1px solid gray">Tipologia</th>
-                <th style = "border: 1px solid gray">Corso</th>
-                {% if session.get('role') in ['Admin', 'Insegnante'] %}
-                    <th style = "border: 1px solid gray">Gestione</th>
-                {% endif %}
-            </tr>
-            {% for lesson in scheduledLessons %}
-                <tr>
-                    {% for lessonCol in lesson.values() %}
-                        {% if loop.index != 1 %}
-                            <td style = "border: 1px solid gray">{{lessonCol}}</td>
-                        {% endif %}
-                    {% endfor %}
-                    {% if session.get('role') in ['Admin', 'Insegnante'] and lesson['dataLezione'] == today.strftime('%d/%m/%Y') %}
-                        <td style = "border: 1px solid gray"><a href = "{{url_for('manageLesson', id = lesson['idLezione'])}}">Apri Lezione</a></td>
-                    {% endif %}
-                </tr>
-            {% endfor %}
-        </table>
     {% endif %}
 
     {% if session['role'] in ['Insegnante', 'Admin'] %}

@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 @layer base{
-
     body{
         @apply min-h-screen flex flex-col items-center justify-center relative pt-20 pb-48 px-5 box-border;
     }
@@ -13,7 +12,7 @@
     p, a{
         @apply text-base leading-normal;
     }
-    h1, p{
+    h1, p, th, td{
         @apply text-attendance-blue-700;
     }
     nav{
@@ -36,6 +35,21 @@
     }
     .messages p{
         @apply text-sm;
+    }
+    table{
+        @apply w-full
+    }
+    table tr > td:last-child{
+        @apply text-center
+    }
+    th, td{
+        @apply border border-slate-200 box-border px-3 py-1;
+    }
+    table th{
+        @apply bg-attendance-blue-700 text-white;
+    }
+    table td{
+        @apply bg-attendance-blue-100
     }
 }
 
@@ -106,10 +120,10 @@
     .next-lesson .button{
         @apply p-1 text-xs;
     }
-    .register-attendances{
+    .top-box{
         @apply flex flex-col justify-center items-center gap-2 w-full h-1/2 bg-white box-border p-2;
     }
-    .register-attendances img{
+    .top-box img{
         @apply h-1/2;
     }
     .lesson-description{

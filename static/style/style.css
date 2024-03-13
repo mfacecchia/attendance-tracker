@@ -392,7 +392,6 @@ video {
 [hidden] {
   display: none;
 }
-
     body {
   position: relative;
   box-sizing: border-box;
@@ -416,7 +415,7 @@ video {
   line-height: 1.5rem;
   line-height: 1.5;
 }
-    h1, p {
+    h1, p, th, td {
   --tw-text-opacity: 1;
   color: rgb(0 39 85 / var(--tw-text-opacity));
 }
@@ -513,6 +512,32 @@ video {
     .messages p {
   font-size: 0.875rem;
   line-height: 1.25rem;
+}
+    table {
+  width: 100%;
+}
+    table tr > td:last-child {
+  text-align: center;
+}
+    th, td {
+  box-sizing: border-box;
+  border-width: 1px;
+  --tw-border-opacity: 1;
+  border-color: rgb(226 232 240 / var(--tw-border-opacity));
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+    table th {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 39 85 / var(--tw-bg-opacity));
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+    table td {
+  --tw-bg-opacity: 1;
+  background-color: rgb(206 231 255 / var(--tw-bg-opacity));
 }
 
 *, ::before, ::after {
@@ -842,7 +867,7 @@ input, select {
   font-size: 0.75rem;
   line-height: 1rem;
 }
-.register-attendances {
+.top-box {
   box-sizing: border-box;
   display: flex;
   height: 50%;
@@ -855,7 +880,7 @@ input, select {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
   padding: 0.5rem;
 }
-.register-attendances img {
+.top-box img {
   height: 50%;
 }
 .lesson-description {
@@ -874,9 +899,6 @@ input, select {
 .relative {
   position: relative;
 }
-.mb-0 {
-  margin-bottom: 0px;
-}
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -885,12 +907,6 @@ input, select {
 }
 .mb-4 {
   margin-bottom: 1rem;
-}
-.mb-5 {
-  margin-bottom: 1.25rem;
-}
-.mt-0 {
-  margin-top: 0px;
 }
 .mt-1 {
   margin-top: 0.25rem;
@@ -918,6 +934,12 @@ input, select {
 }
 .w-1\/2 {
   width: 50%;
+}
+.w-full {
+  width: 100%;
+}
+.max-w-\[1200px\] {
+  max-width: 1200px;
 }
 .flex-col {
   flex-direction: column;
@@ -949,18 +971,20 @@ input, select {
 .gap-y-3 {
   row-gap: 0.75rem;
 }
+.overflow-hidden {
+  overflow: hidden;
+}
+.overflow-x-scroll {
+  overflow-x: scroll;
+}
 .rounded {
   border-radius: 0.25rem;
 }
-.border {
-  border-width: 1px;
+.rounded-xl {
+  border-radius: 0.75rem;
 }
 .p-1 {
   padding: 0.25rem;
-}
-.py-4 {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
 }
 .text-center {
   text-align: center;
@@ -973,15 +997,8 @@ input, select {
   font-size: 0.75rem;
   line-height: 1rem;
 }
-.text-lg {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-}
 .font-semibold {
   font-weight: 600;
-}
-.font-bold {
-  font-weight: 700;
 }
 .text-blue-600 {
   --tw-text-opacity: 1;

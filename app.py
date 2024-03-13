@@ -328,7 +328,8 @@ def userScreening():
                             where Utente.userID = %(uid)s', {'uid': session['uid']})
             response = getValuesFromQuery(cursor)
             connection.close()
-        scheduledLessons = getLessonsList()
+        #Getting the first lesson data only
+        scheduledLessons = getLessonsList()[0]
         return render_template('userScreening.html',
                             session = session,
                             roleOptions = roleOptions,
@@ -464,13 +465,22 @@ def createLesson():
         flash(commonErrorMessage, 'Errore')
     return redirect(url_for('login'))
 
+@app.route('/lesson/list')
+def lessonsList():
+    scheduledLessons = getLessonsList()
+    if(session.get('role') in ['Admin', 'Insegnante']):
+        return render_template('lessons.html',
+                                scheduledLessons = scheduledLessons,
+                                today = date.today().strftime('%d/%m/%Y'))
+    return render_template('login')
+
 @app.route('/lesson', methods = ['GET'])
 def manageLesson():
     if(session.get('role') in ['Admin', 'Insegnante']):
         try:
             lessonID = int(request.args.get('id'))
         except ValueError:
-            return redirect(url_for('userScreening'))
+            return redirect(url_for('lessonsList'))
         connection = connectToDB()
         if not connection:
             return redirect(url_for('index'))
@@ -489,7 +499,7 @@ def manageLesson():
         response = getValuesFromQuery(cursor)
         if(not response):
             flash('Nessuno studente trovato per la lezione selezionata.', 'Errore')
-            return redirect(url_for('userScreening'))
+            return redirect(url_for('lessonsList'))
         #Converting all gotten dates to a more user friendly format
         for lessonDate in response:
             lessonDate['dataLezione'] = lessonDate['dataLezione'].strftime('%d/%m/%Y')
@@ -588,6 +598,7 @@ def create_course():
 
 @app.route('/user/info')
 def updateUserInfo():
+    #TODO: Check for session role before redirecting
     return render_template('userInfo.html')
 
 @app.route('/user/list')
