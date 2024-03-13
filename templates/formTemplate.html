@@ -2,13 +2,16 @@
 
 {% block content %}
     <form action = "{% block formAction %} {% endblock %}" method = "post" class = "formContainer">
-        {% block formTitle %}
-            <h1>Form title</h1>
-            <p>Form subtitle</p>
+        {% block formImage %}
+            <img class = "h-24 mb-4" src = "{% block formImageSource %} {{url_for('static', filename = 'assets/update-password.svg')}} {% endblock %}">
         {% endblock %}
+        <div class = "text-center mb-5">
+            <h1 class = "mb-0">{% block formTitle %} Form title {% endblock %}</h1>
+            <p>{% block formSubtitle %} Form subtitle {% endblock %}</p>
+        </div>
         {% block inputFields %}
             <input class = "formInputBox" type = "text" placeholder = "Example text input">
-            <button class = "button dark-blue" type = "submit">Submit</button>
         {% endblock %}
+        <button class = "button dark-blue" type = "submit">{% block submit %} Submit {% endblock %}</button>
     </form>
 {% endblock %}
