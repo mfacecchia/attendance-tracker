@@ -165,27 +165,6 @@ Gestione account
         </form>
     {% endif %}
 
-    <form action = "{{url_for('update_user_data')}}" method = "post">
-        <h1>Modifica dati utente</h1>
-        <input type = "email" name = "email" placeholder = "Email" maxlength = "40">
-        <input type = "password" name = "password" placeholder = "Password" minlength = "10">
-        <input type = "password" name = "password_verify" placeholder = "Verifica password">
-        
-        <button type = "submit">Modifica</button>
-        <button type = "reset">Cancella</button>
-    </form>
-
-    {% if session['githubConnected'] %}
-        <a href = "{{url_for('unlinkGithubAccount')}}">Disconnetti Account Github</a><br>
-    {% else %}
-        <a href = "{{url_for('githubAuth')}}">Collega Account Github</a><br>
-    {% endif %}
-    {% if session['googleConnected'] %}
-        <a href = "{{url_for('unlinkGoogleAccount')}}">Disconnetti Account Google</a><br>
-    {% else %}
-        <a href = "{{url_for('googleAuth')}}">Collega Account Google</a><br>
-    {% endif %}
-
     {% if session.get('role') in ['Admin', 'Insegnante'] %}
         <h1 id = "chartTitle">Presenze studenti negli ultimi 7 giorni</h1>
         <canvas id = "attendanceStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
