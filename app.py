@@ -314,7 +314,6 @@ def userScreening():
         #Redirecting to update password page if it's the first login
         if(session.get('lastLogin') == 'Mai'):
             return redirect(url_for('updatePassword'))
-        getCourses()
         response = []
         scheduledLessons = []
         #Getting teacher's courses to display in the lesson creation section
@@ -332,11 +331,9 @@ def userScreening():
         scheduledLessons = getLessonsList()[0]
         return render_template('userScreening.html',
                             session = session,
-                            roleOptions = roleOptions,
                             courses = courses if not response else response,
                             lessonTypes = lessonTypes,
                             helloMessage = getCustomMessage(),
-                            currentYear = int(datetime.now().strftime('%Y')),
                             scheduledLessons = scheduledLessons,
                             today = date.today()
                         )
@@ -347,82 +344,98 @@ def userScreening():
 @app.route('/user/create', methods = ['GET', 'POST'])
 def createUser():
     if(session.get('role') == 'Admin'):
-        if(request.form.get('role') in roleOptions and len(request.form.getlist('course')) > 0):
-            fname = request.form.get('fname').strip().capitalize()
-            lname = request.form.get('lname').strip().capitalize()
-            email = request.form.get('email').strip().lower()
-            pw = request.form.get('password')
-            role = request.form.get('role')
-            chosenCourses = request.form.getlist('course')
+        #Updating courses list
+        getCourses()
+        #Getting auto compilation form values before anything else in order to reload the form with those values if the validation process finds an error
+        fname = request.form.get('fname')
+        lname = request.form.get('lname')
+        email = request.form.get('email')
+        #If those values are null, it's probably the first time opening the form so loading form with no auto compiled fields
+        if(fname and lname and email):
+            #Checking if the role `select` field returns a valid value as well as the `courses` checkboxes
+            #NOTE: Validation based on `course` list obtained from `getCourses()` function and `roleOptions` from global variable list
+            if(request.form.get('role') in roleOptions and len(request.form.getlist('course')) > 0):
+                fname = fname.strip().capitalize()
+                lname = lname.strip().capitalize()
+                email = email.strip().lower()
+                pw = request.form.get('password')
+                role = request.form.get('role')
+                chosenCourses = request.form.getlist('course')
 
-            coursesNames = []
-            coursesYears = []
-            for course in chosenCourses:
-                coursesYears.append(course.split("a ")[0])
-                coursesNames.append(course.split("a ")[1])
-            #Validating the chosen courses
-            if(validateCoursesSelection(coursesNames, coursesYears)):
-                #Checking if all the form fields input are not empty and the password contains at least 10 characters before proceeding
-                if(validateFormInput(fname, lname, email, pw) and len(pw) >= 10):
-                    #Checking for actual values length to avoid DB values limits
-                    if(len(fname) <= 20 and len(lname) <= 20 and len(email) <= 40):
-                        pHasher = PasswordHasher()
-                        pw = pw.encode()
-                        hashedPW = pHasher.hash(pw)
+                coursesNames = []
+                coursesYears = []
+                #Getting all checked courses names and years
+                for course in chosenCourses:
+                    coursesYears.append(course.split("a ")[0])
+                    coursesNames.append(course.split("a ")[1])
+                #Validating the chosen courses
+                if(validateCoursesSelection(coursesNames, coursesYears)):
+                    #Checking if all the form fields input are not empty and the password contains at least 10 characters before proceeding
+                    if(validateFormInput(fname, lname, email, pw) and len(pw) >= 10):
+                        #Checking for actual values length to avoid DB values limits
+                        if(len(fname) <= 20 and len(lname) <= 20 and len(email) <= 40):
+                            pHasher = PasswordHasher()
+                            pw = pw.encode()
+                            hashedPW = pHasher.hash(pw)
 
-                        connection = connectToDB()
-                        if(not connection):
-                            return redirect(url_for('index'))
-                        #Creating a cursor reponsible for query executions
-                        cursor = connection.cursor()
-                        #Checking if user with the input Email does not already exist
-                        cursor.execute("select Email from Credenziali where Email = %(userEmail)s", {'userEmail': email})
-                        response = getValuesFromQuery(cursor)
-                        if(len(response) == 0):
-                            #Matrix with all the queries to execute to create the account
-                            queries = [
-                                        ['insert into Utente(Nome, Cognome, Tipologia) values(%(name)s, %(surname)s, %(role)s)', {'name': fname, 'surname': lname, 'role': role}],
-                                        ['insert into Credenziali(Email, PW, userID) values(%(email)s, %(pw)s, (select max(userID) from Utente))', {'email': email, 'pw': hashedPW}],
-                                    ]
-                            #Executing all queries from the pre-created matrix
-                            for query in queries:
-                                cursor.execute(*query)
-                                #Sending request to DB
-                                connection.commit()
-                            cursor.execute('select max(userID) as "userID" from Utente')
-                            userID = getValuesFromQuery(cursor)[0]['userID']
-                            response = []
-                            for x in range(len(coursesNames)):
-                                cursor.execute('insert into Registrazione(userID, idCorso) values((select max(userID) from Utente), (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
-                                connection.commit()
-                                #Getting all upcoming lesson codes for every user course in order to automatically add a default row in the `Partecipazione` table
-                                cursor.execute('select idLezione\
-                                                from Lezione\
-                                                inner join Corso on Corso.idCorso = Lezione.idCorso\
-                                                where dataLezione >= %(dateToday)s\
-                                                and nomeCorso = %(selectedCName)s\
-                                                and annoCorso = %(selectedCYear)s', {'dateToday': date.today(), 'selectedCName': coursesNames[x], 'selectedCYear': coursesYears[x]})
-                                response.append(getValuesFromQuery(cursor))
-                            #NOTE: nested `for` loop because the ending `response` format will be a matrix (each list represents a course's set of lessons)
-                            for lessonList in response:
-                                for lesson in lessonList:
-                                    #Adding the user to all lessons
-                                    cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(lessonID)s)', {'uid': userID, 'lessonID': lesson['idLezione']})
+                            connection = connectToDB()
+                            if(not connection):
+                                return redirect(url_for('index'))
+                            #Creating a cursor reponsible for query executions
+                            cursor = connection.cursor()
+                            #Checking if user with the input Email does not already exist
+                            cursor.execute("select Email from Credenziali where Email = %(userEmail)s", {'userEmail': email})
+                            response = getValuesFromQuery(cursor)
+                            if(len(response) == 0):
+                                #Matrix with all the queries to execute to create the account
+                                queries = [
+                                            ['insert into Utente(Nome, Cognome, Tipologia) values(%(name)s, %(surname)s, %(role)s)', {'name': fname, 'surname': lname, 'role': role}],
+                                            ['insert into Credenziali(Email, PW, userID) values(%(email)s, %(pw)s, (select max(userID) from Utente))', {'email': email, 'pw': hashedPW}],
+                                        ]
+                                #Executing all queries from the pre-created matrix
+                                for query in queries:
+                                    cursor.execute(*query)
+                                    #Sending request to DB
                                     connection.commit()
-                            flash('Account creato con successo.', 'Successo')
+                                cursor.execute('select max(userID) as "userID" from Utente')
+                                userID = getValuesFromQuery(cursor)[0]['userID']
+                                response = []
+                                for x in range(len(coursesNames)):
+                                    cursor.execute('insert into Registrazione(userID, idCorso) values((select max(userID) from Utente), (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
+                                    connection.commit()
+                                    #Getting all upcoming lesson codes for every user course in order to automatically add a default row in the `Partecipazione` table
+                                    cursor.execute('select idLezione\
+                                                    from Lezione\
+                                                    inner join Corso on Corso.idCorso = Lezione.idCorso\
+                                                    where dataLezione >= %(dateToday)s\
+                                                    and nomeCorso = %(selectedCName)s\
+                                                    and annoCorso = %(selectedCYear)s', {'dateToday': date.today(), 'selectedCName': coursesNames[x], 'selectedCYear': coursesYears[x]})
+                                    response.append(getValuesFromQuery(cursor))
+                                #NOTE: nested `for` loop because the ending `response` format will be a matrix (each list represents a course's set of lessons)
+                                for lessonList in response:
+                                    for lesson in lessonList:
+                                        #Adding the user to all lessons
+                                        cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(lessonID)s)', {'uid': userID, 'lessonID': lesson['idLezione']})
+                                        connection.commit()
+                                flash('Account creato con successo.', 'Successo')
+                                return render_template('createUserForm.html', roleOptions = roleOptions, courses = courses, firstName = '', lastName = '', email = '')
+                            else:
+                                flash('Indirizzo Email già collegato a un altro account. Per favore, riprova.', 'Errore')
+                            #Closing connection
+                            connection.close()
                         else:
-                            flash('Indirizzo Email già collegato a un altro account. Per favore, riprova.', 'Errore')
-                        #Closing connection
-                        connection.close()
+                            flash(commonErrorMessage, 'Errore')
                     else:
                         flash(commonErrorMessage, 'Errore')
+            #Redirecting back to register page if the input values are not correct
                 else:
-                    flash(commonErrorMessage, 'Errore')
-        #Redirecting back to register page if the input values are not correct
+                    flash('Devi selezionare almeno un corso dalla lista.', 'Errore')
             else:
-                flash('Devi selezionare almeno un corso dalla lista.', 'Errore')
+                flash('Devi selezionare una tipologia valida dal menu e almeno un corso dalla lista.', 'Errore')
+            #Returning form with auto compiled values in all form validation error cases
+            return render_template('createUserForm.html', roleOptions = roleOptions, courses = courses, firstName = fname, lastName = lname, email = email)
         else:
-            flash('Devi selezionare una tipologia valida dal menu e almeno un corso dalla lista.', 'Errore')
+            return render_template('createUserForm.html', roleOptions = roleOptions, courses = courses, firstName = '', lastName = '', email = '')
     else:
         flash(commonErrorMessage, 'Error')
     return(redirect(url_for('userScreening')))

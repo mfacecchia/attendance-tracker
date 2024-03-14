@@ -39,8 +39,7 @@ Gestione account
             </div>
         </div>
         {% if session['role'] == 'Admin' %}
-            <!-- TODO: Add create user route -->
-            <a class = "action" href = "">
+            <a class = "action" href = "{{url_for('createUser')}}">
                 <img src = "{{url_for('static', filename = 'assets/user.svg')}}">
                 <p class = "button orange">Crea utente</p>
             </a>
@@ -83,29 +82,6 @@ Gestione account
                     </a>
             {% endif %}
     </section>
-
-    {% if session['role'] == 'Admin' %}
-        <h1>Crea utente</h1>
-        <form action = '{{ url_for("createUser") }}' method = "post">
-            <input type = "text" name = "fname" placeholder = "Name" autofocus required maxlength = "20">
-            <input type = "text" name = "lname" placeholder = "Surname" required maxlength = "20">
-            <input type = "email" name = "email" placeholder = "Email" required maxlength = "40">
-            <!-- TODO: JS function to check password strength -->
-            <input type = "password" name = "password" placeholder = "Password" minlength = "10" required>
-            <select name = "role">
-                <option value = "">-- Seleziona un ruolo --</option>
-                {% for role in roleOptions %}
-                    <option value = {{role}}>{{role}}</option>
-                {% endfor %}
-            </select><br>
-            {% for course in courses %}
-                <input type = "checkbox" name = "course" value = "{{course}}">
-                <label for = "course">{{course}}</label><br>
-            {% endfor %}
-
-            <button type = "submit">Crea account</button>
-        </form>
-    {% endif %}
 
     {% if session['role'] in ['Insegnante', 'Admin'] %}
         <h1>Crea una lezione</h1>

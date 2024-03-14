@@ -1,0 +1,29 @@
+{% extends "formTemplate.html" %}
+
+{% block title %}
+Crea utente
+{% endblock %}
+
+{% block formAction %} {{url_for('createUser')}} {% endblock %}
+{% block formImageSource %} {{url_for('static', filename = 'assets/user.svg')}} {% endblock %}
+{% block formTitle %} Crea utente {% endblock %}
+{% block formSubtitle %} Inserisci tutti i dati richiesti per creare l'utente {% endblock %}
+{% block inputFields %}
+    <input class = "formInputBox" type = "text" name = "fname" value = "{{firstName}}" placeholder = "Nome" maxlength = "20" required>
+    <input class = "formInputBox" type = "text" name = "lname" value = "{{lastName}}" placeholder = "Cognome" maxlength = "20" required>
+    <input class = "formInputBox" type = "email" name = "email" value = "{{email}}" placeholder = "Email" maxlength = "40" required>
+    <input class = "formInputBox" type = "password" name = "password" placeholder = "Password" minlength = "10" required>
+    <select class = "formInputBox" name = "role">
+        <option value = "">-- Seleziona un ruolo --</option>
+        {% for role in roleOptions %}
+            <option value = "{{role}}">{{role}}</option>
+        {% endfor %}
+    </select>
+    {% for course in courses %}
+        <label>
+            <input type = "checkbox" name = "course" value = "{{course}}">
+            {{course}}
+        </label>
+    {% endfor %}
+{% endblock %}
+{% block submit %} Crea account {% endblock %}
