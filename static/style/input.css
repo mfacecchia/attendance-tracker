@@ -36,6 +36,9 @@
     .messages p{
         @apply text-sm;
     }
+    .tableContainer{
+        @apply rounded-xl w-full max-w-[1200px] overflow-hidden overflow-x-scroll;
+    }
     table{
         @apply w-full
     }

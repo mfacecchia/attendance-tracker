@@ -8,7 +8,7 @@ Lezioni programmate
     {% if not scheduledLessons %}
         <p>Nessuna lezione programmata</p>    
     {% else %}
-        <div class = "rounded-xl w-full max-w-[1200px] overflow-hidden overflow-x-scroll">
+        <div class = "tableContainer">
             <table>
                 <tr>
                     <th>Lezione</th>
@@ -29,7 +29,7 @@ Lezioni programmate
                         {% if session['role'] in ['Admin', 'Insegnante'] %}
                             <td>
                                 {% if lesson['dataLezione'] == today %}
-                                    <a href = "{{url_for('manageLesson', id = lesson['idLezione'])}}">Apri lezione</a>
+                                    <a class = "button orange" href = "{{url_for('manageLesson', id = lesson['idLezione'])}}">Apri lezione</a>
                                 {% endif %}
                             </td>
                         {% endif %}

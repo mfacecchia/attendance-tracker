@@ -29,6 +29,7 @@ Modifica utente
                 {% endif %}
             {% endfor %}
         </select><br>
+        <!-- TODO: Align checkboxes to left -->
         {% for course in courses %}
             {% if course['nomeCorso'] in userData["nomeCorso"] %}
                 <input type = "checkbox" name = "course" value = "{{course['annoCorso']}}a {{course['nomeCorso']}}" checked>
