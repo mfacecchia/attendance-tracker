@@ -1,29 +1,68 @@
 {% extends "index.html" %}
 
 {% block content %}
-<h1>Lezione di {{lessonInfo[0]['Materia']}} del {{lessonInfo[0]['dataLezione']}}</h1>
-<h1>Lista studenti</h1>
-<form action = "{{url_for('registerAttendances')}}" method = "post">
-    <table>
-        <tr>
-            <th>Nome</th>
-            <th>Cognome</th>
-            <th>Presente</th>
-        </tr>
-        {% for student in lessonInfo %}
+<h1 class = "text-center">👨‍🏫 Lezione di {{lessonInfo[0]['Materia']}} del {{lessonInfo[0]['dataLezione']}} 📚</h1>
+<form class = "tableContainer" action = "{{url_for('registerAttendances')}}" method = "post">
+        <table>
             <tr>
-                <td>{{student['Nome']}}</td>
-                <td>{{student['Cognome']}}</td>
-                {% if student['Presenza'] %}
-                    <td><input type = "checkbox" name = "attendanceCheck" value = "{{student['userID']}}" checked></td>
-                {% else %}
-                    <td><input type = "checkbox" name = "attendanceCheck" value = "{{student['userID']}}"></td>
-                {% endif %}
+                <th>Studente</th>
+                <th>Presenza</th>
             </tr>
-        {% endfor %}
-    </table>
-    <button type = "submit" name = "registerAttendance" value = "{{lessonInfo[0]['idLezione']}}">Registra lezioni</button>
-</form>
+            {% for student in lessonInfo %}
+                <tr>
+                    <td>
+                        <p>{{student['Nome']}}</p>
+                        <p>{{student['Cognome']}}</p>
+                    </td>
+                    <td>
+                        <label class = "formButton button dark-blue" id = "{{student['userID']}}">
+                            {% if student['Presenza'] %}
+                                <input class = "hidden" type = "checkbox" name = "attendanceCheck" value = "{{student['userID']}}" checked>
+                                Presente
+                            {% else %}
+                                <input class = "hidden" type = "checkbox" name = "attendanceCheck" value = "{{student['userID']}}">
+                                Assente
+                            {% endif %}
+                        </label>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <!-- TODO: Update button styling -->
+        <button type = "submit" name = "registerAttendance" value = "{{lessonInfo[0]['idLezione']}}">Registra lezioni</button>
+    </form>
 
 <a href = "{{url_for('userScreening')}}">Torna indetro</a>
+
+    <script>
+        //Getting all checkboxes from table
+        checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        
+        //Updating the parents' values (label wrapping all checkboxes) and setting an event listener for each checkbox
+        checkboxes.forEach(checkbox => {
+            updateButtonStyle(checkbox.value, checkbox.checked);
+            checkbox.addEventListener('change', updateButtonStyling);
+        })
+
+        function updateButtonStyling(event){
+            //Passing as functions parameters the value (repesenting the same value of label's ID) and a boolean value representing the checkbox state
+            updateButtonStyle(event.target.value, event.target.checked);
+        }
+        
+        //Updates the button background color and text by manipulating classes
+        function updateButtonStyle(element, present = false){
+            var label = document.getElementById(element)
+            //If the checked value is `True` the button becomes blue and updates the label text (childNode 2)
+            if(present){
+                label.classList.add('dark-blue');
+                label.classList.remove('orange');
+                label.childNodes[2].textContent = 'Presente';
+            }
+            else{
+                label.classList.add('orange');
+                label.classList.remove('dark-blue');
+                label.childNodes[2].textContent = 'Assente';
+            }
+        }
+    </script>
 {% endblock %}
