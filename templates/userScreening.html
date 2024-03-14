@@ -13,7 +13,6 @@ Gestione account
             <div class = "w-1/2 text-center">
                 <b>{{ session['role'] }}</b>
                 <p class = "mt-1 mb-2">Ultima volta online: {{session['lastLogin']}}</p>
-                <!-- TODO: Add update user data link -->
                 <a class = "button dark-blue p-1 text-xs" href = "{{url_for('updateUserInfo')}}">Modifica account</a>
             </div>
             <div class = "next-lesson">
@@ -33,7 +32,6 @@ Gestione account
                     <b class = "text-sm">Prossima lezione:</b>
                     <p class = "text-sm">{{scheduledLessons['Materia']}}</p>
                     <p class = "text-sm">Aula {{scheduledLessons['aula']}}</p>
-                    <!-- TODO: Add lessons list route -->
                     <a class = "button dark-blue mt-2" href = "{{url_for('lessonsList')}}">Vedi tutte</a>
                 </div>
             </div>
@@ -53,7 +51,6 @@ Gestione account
             </a>
             {% endif %}
             {% if session['role'] in ['Insegnante', 'Admin'] %}
-                <!-- TODO: Add create lesson route -->
                 <a class = "action" href = "{{url_for('createLesson')}}">
                     <img src = "{{url_for('static', filename = 'assets/teacher.svg')}}">
                     <p class = "button orange">Crea lezione</p>
