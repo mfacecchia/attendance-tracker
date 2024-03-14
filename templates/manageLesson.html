@@ -1,38 +1,37 @@
 {% extends "index.html" %}
 
 {% block content %}
-<h1 class = "text-center">👨‍🏫 Lezione di {{lessonInfo[0]['Materia']}} del {{lessonInfo[0]['dataLezione']}} 📚</h1>
-<form class = "tableContainer" action = "{{url_for('registerAttendances')}}" method = "post">
-        <table>
-            <tr>
-                <th>Studente</th>
-                <th>Presenza</th>
-            </tr>
-            {% for student in lessonInfo %}
+    <h1 class = "text-center mb-5">👨‍🏫 Lezione di {{lessonInfo[0]['Materia']}} del {{lessonInfo[0]['dataLezione']}} 📚</h1>
+    <form class = "tableContainer flex flex-col items-center" action = "{{url_for('registerAttendances')}}" method = "post">
+        <div class = "tableContainer">
+            <table>
                 <tr>
-                    <td>
-                        <p>{{student['Nome']}}</p>
-                        <p>{{student['Cognome']}}</p>
-                    </td>
-                    <td>
-                        <label class = "formButton button dark-blue" id = "{{student['userID']}}">
-                            {% if student['Presenza'] %}
-                                <input class = "hidden" type = "checkbox" name = "attendanceCheck" value = "{{student['userID']}}" checked>
-                                Presente
-                            {% else %}
-                                <input class = "hidden" type = "checkbox" name = "attendanceCheck" value = "{{student['userID']}}">
-                                Assente
-                            {% endif %}
-                        </label>
-                    </td>
+                    <th>Studente</th>
+                    <th>Presenza</th>
                 </tr>
-            {% endfor %}
-        </table>
-        <!-- TODO: Update button styling -->
-        <button type = "submit" name = "registerAttendance" value = "{{lessonInfo[0]['idLezione']}}">Registra lezioni</button>
+                {% for student in lessonInfo %}
+                    <tr>
+                        <td>
+                            <p>{{student['Nome']}}</p>
+                            <p>{{student['Cognome']}}</p>
+                        </td>
+                        <td>
+                            <label class = "formButton button dark-blue" id = "{{student['userID']}}">
+                                {% if student['Presenza'] %}
+                                    <input class = "hidden" type = "checkbox" name = "attendanceCheck" value = "{{student['userID']}}" checked>
+                                    Presente
+                                {% else %}
+                                    <input class = "hidden" type = "checkbox" name = "attendanceCheck" value = "{{student['userID']}}">
+                                    Assente
+                                {% endif %}
+                            </label>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <button class = "button mt-5" type = "submit" name = "registerAttendance" value = "{{lessonInfo[0]['idLezione']}}">Registra lezioni</button>
     </form>
-
-<a href = "{{url_for('userScreening')}}">Torna indetro</a>
 
     <script>
         //Getting all checkboxes from table
