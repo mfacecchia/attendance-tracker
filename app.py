@@ -346,7 +346,6 @@ def userScreening():
 
 @app.route('/user/create', methods = ['GET', 'POST'])
 def createUser():
-    #TODO: Make async request
     if(session.get('role') == 'Admin'):
         if(request.form.get('role') in roleOptions and len(request.form.getlist('course')) > 0):
             fname = request.form.get('fname').strip().capitalize()
@@ -449,7 +448,6 @@ def createLesson():
                     usersList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
                     cursor.execute('select max(idLezione) from Lezione')
                     latestLesson = cursor.fetchone()[0]
-                    #TODO: Make async request
                     for user in usersList:
                         cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(latestLessonID)s)', {'uid': user['userID'], 'latestLessonID': latestLesson})
                         connection.commit()
