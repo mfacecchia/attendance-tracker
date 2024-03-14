@@ -598,8 +598,11 @@ def create_course():
 
 @app.route('/user/info')
 def updateUserInfo():
-    #TODO: Check for session role before redirecting
-    return render_template('userInfo.html')
+    if(session.get('name')):
+        return render_template('userInfo.html')
+    else:
+        flash('Devi prima fare il login.', 'Errore')
+        return redirect(url_for('login'))
 
 @app.route('/user/list')
 def usersList():
