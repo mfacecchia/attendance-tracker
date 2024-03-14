@@ -331,11 +331,8 @@ def userScreening():
         scheduledLessons = getLessonsList()[0]
         return render_template('userScreening.html',
                             session = session,
-                            courses = courses if not response else response,
-                            lessonTypes = lessonTypes,
                             helloMessage = getCustomMessage(),
                             scheduledLessons = scheduledLessons,
-                            today = date.today()
                         )
     else:
         flash('Devi prima fare il login.', 'Errore')
@@ -443,7 +440,14 @@ def createUser():
 @app.route('/lesson/create', methods = ['GET', 'POST'])
 def createLesson():
     if(session.get('role') in ['Insegnante', 'Admin']):
-        getCourses()
+        enrolledCourses = None
+        if(session.get('role') == 'Insegnante'):
+            enrolledCourses = getUserEnrolledCourses()
+            #Returned value = `False` means that the connection to the database failed
+            if enrolledCourses is False:
+                return redirect(url_for('index'))
+        else:
+            getCourses()
         subject = request.form.get('subject') or ''
         description = request.form.get('description') or ''
         lessonDate = request.form.get('lessonDate') or date.today()
@@ -457,6 +461,7 @@ def createLesson():
                 lessonRoom = lessonRoom.upper()
                 lessonType = request.form.get('lessonType')
                 chosenCourseYear, chosenCourseName = request.form.get('course').split('a ')
+                #TODO: Update with userID check as well
                 if(validateCoursesSelection([chosenCourseName], [chosenCourseYear])):
                     if(validateFormInput(subject, lessonDate, lessonRoom)):
                         connection = connectToDB()
@@ -480,7 +485,7 @@ def createLesson():
                     flash('Corso non trovato.', 'Errore')
             else:
                 flash('Devi selezionare una tipologia di lezione e un corso valido.', 'Errore')
-        return render_template('createLessonForm.html', subject = subject, description = description, selectedDate = lessonDate, room = lessonRoom, lessonTypes = lessonTypes, courses = courses)
+        return render_template('createLessonForm.html', subject = subject, description = description, selectedDate = lessonDate, room = lessonRoom, lessonTypes = lessonTypes, courses = enrolledCourses if enrolledCourses else courses)
     else:
         flash(commonErrorMessage, 'Errore')
     return redirect(url_for('login'))
@@ -1161,6 +1166,26 @@ def reformatResponse(response):
     for col in response:
         orderedResponse.append({'nomeCorso': f"{col['annoCorso']}a {col['nomeCorso']}", 'dataLezione': col['dataLezione'].strftime('%d/%m/%Y'), 'conteggioPresenze': col['conteggioPresenze']})
     return orderedResponse
+
+def getUserEnrolledCourses():
+    '''Executes a query and gets all courses names and years based on userID\
+        Returns a list if the query returns valid values, else `False` if the connection to the database fails'''
+    connection = connectToDB()
+    if not connection:
+        return False
+    cursor = connection.cursor()
+    cursor.execute('select nomeCorso, annoCorso\
+                    from Corso\
+                    inner join Registrazione on Corso.idCorso = Registrazione.idCorso\
+                    inner join Utente on Registrazione.userID = Utente.userID\
+                    where Utente.userID = %(uid)s', {'uid': session['uid']})
+    response = getValuesFromQuery(cursor)
+    responseList = []
+    connection.close()
+    for course in response:
+        course['nomeCorso'] = f"{course['annoCorso']}a {course['nomeCorso']}"
+        responseList.append(course['nomeCorso'])
+    return responseList
 
 if __name__ == "__main__":
     app.run(debug = True)
