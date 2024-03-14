@@ -473,7 +473,7 @@ def createLesson():
                             connection.commit()
                         connection.close()
                         flash('Lezione creata con successo.', 'Successo')
-                        return render_template('createLessonForm.html', subject = '', description = '', selectedDate = date.today(), room = '', lessonTypes = lessonTypes, courses = courses)
+                        return redirect(url_for('createLesson'))
                     else:
                         flash(commonErrorMessage, 'Errore')
                 else:
@@ -596,11 +596,10 @@ def getAttendancesPercentage():
 @app.route('/course/create', methods = ['GET', 'POST'])
 def create_course():
     if(session.get('role') == 'Admin'):
-        courseName = request.form.get('courseName')
-        courseYear = request.form.get('courseYear')
-        #TODO: Update this condition to match the condition format of `createLesson` function
-        #If the form values are not "Falsy" then the database interaction can begin, otherwise just rendering form with empty default values
-        if(courseName and courseYear):
+        courseName = request.form.get('courseName') or ''
+        courseYear = request.form.get('courseYear') or ''
+        #Flag variable used to not trigger the condition below and avoid error printout at first page load without form submission
+        if(courseName):
             if(validateFormInput(courseName, courseYear)):
                 if(not validateCoursesSelection([courseName], [courseYear])):
                     connection = connectToDB()
@@ -611,14 +610,13 @@ def create_course():
                     connection.commit()
                     connection.close()
                     flash('Corso creato con successo.', 'Successo')
+                    return redirect(url_for('create_course'))
                 #Rendering auto compiled form with the already obtained values
                 else:
                     flash('Questo corso è già esistente.', 'Errore')
-                    return render_template('createCourseForm.html', courseName = courseName, courseYear = courseYear)
             else:
                 flash(commonErrorMessage, 'Errore')
-        else:
-            return render_template('createCourseForm.html', courseName = '', courseYear = '')
+        return render_template('createCourseForm.html', courseName = courseName, courseYear = courseYear)
     else:
         flash(commonErrorMessage, 'Errore')
     return redirect(url_for('userScreening'))
