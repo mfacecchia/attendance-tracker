@@ -576,22 +576,28 @@ def getAttendancesPercentage():
 @app.route('/course/create', methods = ['GET', 'POST'])
 def create_course():
     if(session.get('role') == 'Admin'):
-        courseName = request.form.get('courseName').capitalize()
+        courseName = request.form.get('courseName')
         courseYear = request.form.get('courseYear')
-        if(validateFormInput(courseName, courseYear)):
-            if(not validateCoursesSelection([courseName], [courseYear])):
-                connection = connectToDB()
-                if(not connection):
-                    return redirect(url_for('index'))
-                cursor = connection.cursor()
-                cursor.execute('insert into Corso(nomeCorso, annoCorso) values(%(courseName)s, %(courseYear)s)', {'courseName': courseName, 'courseYear': courseYear})
-                connection.commit()
-                connection.close()
-                flash('Corso creato con successo.', 'Successo')
+        #If the form values are not "Falsy" then the database interaction can begin, otherwise just rendering form with empty default values
+        if(courseName and courseYear):
+            if(validateFormInput(courseName, courseYear)):
+                if(not validateCoursesSelection([courseName], [courseYear])):
+                    connection = connectToDB()
+                    if(not connection):
+                        return redirect(url_for('index'))
+                    cursor = connection.cursor()
+                    cursor.execute('insert into Corso(nomeCorso, annoCorso) values(%(courseName)s, %(courseYear)s)', {'courseName': courseName.capitalize(), 'courseYear': courseYear})
+                    connection.commit()
+                    connection.close()
+                    flash('Corso creato con successo.', 'Successo')
+                #Rendering auto compiled form with the already obtained values
+                else:
+                    flash('Questo corso è già esistente.', 'Errore')
+                    return render_template('createCourseForm.html', courseName = courseName, courseYear = courseYear)
             else:
-                flash('Questo corso è già esistente.', 'Errore')
+                flash(commonErrorMessage, 'Errore')
         else:
-            flash(commonErrorMessage, 'Errore')
+            return render_template('createCourseForm.html', courseName = '', courseYear = '')
     else:
         flash(commonErrorMessage, 'Errore')
     return redirect(url_for('userScreening'))

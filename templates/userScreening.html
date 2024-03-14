@@ -44,8 +44,7 @@ Gestione account
                 <img src = "{{url_for('static', filename = 'assets/user.svg')}}">
                 <p class = "button orange">Crea utente</p>
             </a>
-            <!-- TODO: Add create course route -->
-            <a class = "action" href = "">
+            <a class = "action" href = "{{url_for('create_course')}}">
                 <img src = "{{url_for('static', filename = 'assets/course.svg')}}">
                 <p class = "button orange">Crea corso</p>
             </a>
@@ -128,16 +127,6 @@ Gestione account
             </select>
             
             <button type = "submit">Crea lezione</button>
-        </form>
-    {% endif %}
-
-    {% if session['role'] == 'Admin' %}
-        <form action = "{{url_for('create_course')}}" method = "post">
-            <h1>Crea corso</h1>
-            <input type = "text" name = "courseName" placeholder = "Nome corso" maxlength = "30" required>
-            <input type = "text" name = "courseYear" placeholder = "Anno Corso ({{currentYear}}-{{currentYear + 1}})" value = "{{currentYear}}-{{currentYear + 1}}" pattern = "[0-9]{4}-[0-9]{4}" minlength = "9" maxlength = "9" required>
-
-            <button type = "submit">Crea corso</button>
         </form>
     {% endif %}
 
