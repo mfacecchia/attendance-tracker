@@ -634,6 +634,8 @@ def update_user_data():
     if(session.get('role') in ['Studente', 'Insegnante'] or not request.form.get('uid')):
         if(updateDataAsUser()):
             flash('Utente modificato con successo.', 'Successo')
+        else:
+            return redirect(url_for('updateUserInfo'))
     elif(session.get('role') == 'Admin'):
         userID = updateDataAsAdmin()
         return redirect(url_for('select_user', userID = userID))
@@ -945,8 +947,6 @@ def updateDataAsUser():
     pwVerify = request.form.get('passwordVerify')
     hashedPW = ''
     queries = []
-
-    #TODO: Check for email or password field to be valid (not empty) (at least one)
     
     connection = connectToDB()
     if(not connection):
