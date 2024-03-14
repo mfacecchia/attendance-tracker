@@ -1,0 +1,29 @@
+{% extends "formTemplate.html" %}
+
+{% block title %}
+Crea lezione
+{% endblock %}
+
+{% block formAction %} {{url_for('createLesson')}} {% endblock %}
+{% block formImageSource %} {{url_for('static', filename = 'assets/teacher.svg')}} {% endblock %}
+{% block formTitle %} Crea lezione {% endblock %}
+{% block formSubtitle %} Inserisci tutti i dati richiesti per creare la lezione {% endblock %}
+{% block inputFields %}
+    <input class = "formInputBox" type = "text" name = "subject" value = "{{subject}}" placeholder = "Materia" maxlength = "30" required>
+    <textarea class = "formInputBox" type = "text" name = "description" placeholder = "Descrizione (opzionale)" maxlength = "1000">{{description}}</textarea>
+    <input class = "formInputBox" type = "date" name = "lessonDate" value = "{{selectedDate}}" required>
+    <input class = "formInputBox" type = "text" name = "room" value = "{{room}}" placeholder = "Aula (Es. A001)" pattern = "[a-zA-Z][0-9]+" minlength = "4" maxlength = "4" required>
+    <select class = "formInputBox" name = "lessonType">
+        <option value = "">-- Seleziona una tipologia --</option>
+        {% for lesson in lessonTypes %}
+            <option value = "{{lesson}}">{{lesson}}</option>
+        {% endfor %}
+    </select>
+    <select class = "formInputBox" name = "course">
+        <option value = "">-- Seleziona un corso --</option>
+        {% for course in courses %}
+            <option value = "{{course}}">{{course}}</option>
+        {% endfor %}
+    </select>
+{% endblock %}
+{% block submit %} Crea lezione {% endblock %}

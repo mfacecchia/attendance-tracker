@@ -54,7 +54,7 @@ Gestione account
             {% endif %}
             {% if session['role'] in ['Insegnante', 'Admin'] %}
                 <!-- TODO: Add create lesson route -->
-                <a class = "action" href = "">
+                <a class = "action" href = "{{url_for('createLesson')}}">
                     <img src = "{{url_for('static', filename = 'assets/teacher.svg')}}">
                     <p class = "button orange">Crea lezione</p>
                 </a>
@@ -82,29 +82,6 @@ Gestione account
                     </a>
             {% endif %}
     </section>
-
-    {% if session['role'] in ['Insegnante', 'Admin'] %}
-        <h1>Crea una lezione</h1>
-        <form action = "{{url_for('createLesson')}}" method = "post">
-            <input type = "text" name = "subject" placeholder = "Materia" required autofocus maxlength = "30">
-            <textarea name = "description" placeholder = "Descrizione (Opzionale)" maxlength = "1000"></textarea>
-            <input type = "date" name = "lessonDate" value = "{{today}}" required>
-            <input type = "text" name = "room" placeholder = "Aula (ex. A001)" required pattern = "[a-zA-Z][0-9]+" minlength = "4" maxlength = "4">
-            <select name = "lessonType">
-                <option>-- Seleziona una tipologia --</option>
-                {% for lesson in lessonTypes %}
-                    <option value = "{{lesson}}">{{ lesson }}</option>
-                {% endfor %}
-            </select>
-            <select name = "course">
-                {% for course in courses %}
-                    <option value = "{{course['nomeCorso']}} - {{course['annoCorso']}}">{{course['nomeCorso']}} - {{course['annoCorso']}}</option>
-                {% endfor %}
-            </select>
-            
-            <button type = "submit">Crea lezione</button>
-        </form>
-    {% endif %}
 
     {% if session.get('role') in ['Admin', 'Insegnante'] %}
         <h1 id = "chartTitle">Presenze studenti negli ultimi 7 giorni</h1>

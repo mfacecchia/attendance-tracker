@@ -443,35 +443,44 @@ def createUser():
 @app.route('/lesson/create', methods = ['GET', 'POST'])
 def createLesson():
     if(session.get('role') in ['Insegnante', 'Admin']):
-        if(request.form.get('lessonType') in lessonTypes and len(request.form.get('room')) == 4):
-            subject = request.form.get('subject').strip().capitalize()
-            description = request.form.get('description').strip()
-            lessonDate = request.form.get('lessonDate')
-            lessonRoom = request.form.get('room').upper()
-            lessonType = request.form.get('lessonType')
-            chosenCourseYear, chosenCourseName = request.form.get('course').split('a ')
-            if(validateCoursesSelection([chosenCourseName], [chosenCourseYear])):
-                if(validateFormInput(subject, lessonDate, lessonRoom)):
-                    connection = connectToDB()
-                    cursor = connection.cursor()
-                    cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso) values\
-                                (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'subjectName': subject, 'description': description, 'lessonDate': lessonDate, 'lessonRoom': lessonRoom, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear})
-                    connection.commit()
-                    #Getting all users attending the lesson's course and adding them all to the `Partecipazione` table with default `Presenza` value (`0` or `False`)
-                    usersList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
-                    cursor.execute('select max(idLezione) from Lezione')
-                    latestLesson = cursor.fetchone()[0]
-                    for user in usersList:
-                        cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(latestLessonID)s)', {'uid': user['userID'], 'latestLessonID': latestLesson})
+        getCourses()
+        subject = request.form.get('subject') or ''
+        description = request.form.get('description') or ''
+        lessonDate = request.form.get('lessonDate') or date.today()
+        lessonRoom = request.form.get('room') or ''
+        #Flag condition used to check if it's the first time opening the page (default bool value of `subject` if value not in form = `False`)
+        #NOTE: This condition makes the condition below not trigger the flash message
+        if(subject):
+            if(request.form.get('lessonType') in lessonTypes and len(request.form.get('room')) == 4):
+                subject = subject.strip().capitalize()
+                description = description.strip()
+                lessonRoom = lessonRoom.upper()
+                lessonType = request.form.get('lessonType')
+                chosenCourseYear, chosenCourseName = request.form.get('course').split('a ')
+                if(validateCoursesSelection([chosenCourseName], [chosenCourseYear])):
+                    if(validateFormInput(subject, lessonDate, lessonRoom)):
+                        connection = connectToDB()
+                        cursor = connection.cursor()
+                        cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso) values\
+                                    (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'subjectName': subject, 'description': description, 'lessonDate': lessonDate, 'lessonRoom': lessonRoom, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear})
                         connection.commit()
-                    connection.close()
-                    flash('Lezione creata con successo.', 'Successo')
+                        #Getting all users attending the lesson's course and adding them all to the `Partecipazione` table with default `Presenza` value (`0` or `False`)
+                        usersList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
+                        cursor.execute('select max(idLezione) from Lezione')
+                        latestLesson = cursor.fetchone()[0]
+                        for user in usersList:
+                            cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(latestLessonID)s)', {'uid': user['userID'], 'latestLessonID': latestLesson})
+                            connection.commit()
+                        connection.close()
+                        flash('Lezione creata con successo.', 'Successo')
+                        return render_template('createLessonForm.html', subject = '', description = '', selectedDate = date.today(), room = '', lessonTypes = lessonTypes, courses = courses)
+                    else:
+                        flash(commonErrorMessage, 'Errore')
                 else:
-                    flash(commonErrorMessage, 'Errore')
+                    flash('Corso non trovato.', 'Errore')
             else:
-                flash('Corso non trovato.', 'Errore')
-        else:
-            flash('Devi selezionare una tipologia di lezione e un corso valido.', 'Errore')
+                flash('Devi selezionare una tipologia di lezione e un corso valido.', 'Errore')
+        return render_template('createLessonForm.html', subject = subject, description = description, selectedDate = lessonDate, room = lessonRoom, lessonTypes = lessonTypes, courses = courses)
     else:
         flash(commonErrorMessage, 'Errore')
     return redirect(url_for('login'))
@@ -589,6 +598,7 @@ def create_course():
     if(session.get('role') == 'Admin'):
         courseName = request.form.get('courseName')
         courseYear = request.form.get('courseYear')
+        #TODO: Update this condition to match the condition format of `createLesson` function
         #If the form values are not "Falsy" then the database interaction can begin, otherwise just rendering form with empty default values
         if(courseName and courseYear):
             if(validateFormInput(courseName, courseYear)):

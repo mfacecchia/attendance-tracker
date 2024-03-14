@@ -71,7 +71,7 @@
         @apply sm:shadow-md;
     }
     .formInputBox{
-        @apply bg-transparent box-border px-2 py-2 w-full border-solid border-1.5 border-attendance-blue-700 rounded-md text-sm text-attendance-blue-700;
+        @apply appearance-none bg-transparent box-border px-2 py-2 w-full border-solid border-1.5 border-attendance-blue-700 rounded-md text-sm text-attendance-blue-700;
     }
     .formInputBox:focus{
         @apply border-2 border-blue-600;
