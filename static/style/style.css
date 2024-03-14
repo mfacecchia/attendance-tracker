@@ -546,6 +546,10 @@ video {
   --tw-bg-opacity: 1;
   background-color: rgb(206 231 255 / var(--tw-bg-opacity));
 }
+    table .button {
+  margin: 0.25rem;
+  white-space: nowrap;
+}
 
 *, ::before, ::after {
   --tw-border-spacing-x: 0;

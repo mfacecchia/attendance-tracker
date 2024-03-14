@@ -54,6 +54,9 @@
     table td{
         @apply bg-attendance-blue-100
     }
+    table .button{
+        @apply m-1 whitespace-nowrap;
+    }
 }
 
 @layer components{
