@@ -461,8 +461,8 @@ def createLesson():
                 lessonRoom = lessonRoom.upper()
                 lessonType = request.form.get('lessonType')
                 chosenCourseYear, chosenCourseName = request.form.get('course').split('a ')
-                #TODO: Update with userID check as well
-                if(validateCoursesSelection([chosenCourseName], [chosenCourseYear])):
+                #Validating course selection with additional filter for enrolled courses (only if the user role is "Insegnante")
+                if(validateCoursesSelection([chosenCourseName], [chosenCourseYear], session['role'] == 'Insegnante')):
                     if(validateFormInput(subject, lessonDate, lessonRoom)):
                         connection = connectToDB()
                         cursor = connection.cursor()
@@ -655,7 +655,6 @@ def select_user():
             return redirect(url_for('usersList'))
         elif(uid):
             selectedUser = getUserData(uid)
-            print(selectedUser)
             getCourses()
             return render_template('userInfo.html', userData = selectedUser, courses = courses, roles = roleOptions)
     return redirect(url_for('userScreening'))
@@ -995,7 +994,6 @@ def updateDataAsUser():
             return False
         queries.append(['update Credenziali set Email = %(newEmail)s where userID = %(uid)s', {'newEmail': email, 'uid': session['uid']}])
     if(pw):
-        print(pw)
         if(len(pw) >= 10 and pw == pwVerify):
             phasher = PasswordHasher()
             hashedPW = phasher.hash(pw.encode())
@@ -1012,17 +1010,26 @@ def updateDataAsUser():
     connection.close()
     return True
 
-def validateCoursesSelection(coursesNames, coursesYears):
-    '''Gets all courses names and relative years as parameters and executes a query for each item to check if the actual selection exists\n
+def validateCoursesSelection(coursesNames, coursesYears, userFilter = False):
+    '''Gets all courses names and relative years as parameters and executes a query for each item to check if the actual selection exists.\n
+    Also allows to add an additional filter for the validation based on session userID (preference passed in `userFilter` function param)\n
     Returns `False` if the DB response returns `None`, else `True` if all requests return a value'''
     connection = connectToDB()
     if not connection:
         return False
     cursor = connection.cursor()
-    for course in range(len(coursesNames)):
-        cursor.execute("select count(*)\
+    preparedQuery = "select count(*)\
                     from Corso\
-                    where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s", {'courseName': coursesNames[course], 'courseYear': coursesYears[course]})
+                    where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s"
+    if(userFilter):
+        preparedQuery = "select count(*)\
+                        from Corso\
+                        inner join Registrazione on Registrazione.idCorso = Corso.idCorso\
+                        where nomeCorso = %(courseName)s\
+                        and annoCorso = %(courseYear)s\
+                        and userID = %(uid)s"
+    for course in range(len(coursesNames)):
+        cursor.execute(preparedQuery, {'courseName': coursesNames[course], 'courseYear': coursesYears[course], 'uid': session['uid']})
         if(cursor.fetchone()[0] == 0):
             return False
     return True
@@ -1168,7 +1175,7 @@ def reformatResponse(response):
     return orderedResponse
 
 def getUserEnrolledCourses():
-    '''Executes a query and gets all courses names and years based on userID\
+    '''Executes a query and gets all courses names and years based on userID\n
         Returns a list if the query returns valid values, else `False` if the connection to the database fails'''
     connection = connectToDB()
     if not connection:
