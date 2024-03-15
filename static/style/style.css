@@ -1141,6 +1141,7 @@ input, select {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
+
 @media (min-width: 640px) {
 
   .sm\:gap-x-2 {
@@ -1148,6 +1149,7 @@ input, select {
          column-gap: 0.5rem;
   }
 }
+
 @media (min-width: 1024px) {
 
   .lg\:\!block {
