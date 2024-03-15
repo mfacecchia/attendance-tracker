@@ -441,6 +441,7 @@ def createUser():
 def createLesson():
     if(session.get('role') in ['Insegnante', 'Admin']):
         enrolledCourses = None
+        #Getting user enrolled courses if the role is `Insegnante` in order to print as selection only his own courses and not the whole list
         if(session.get('role') == 'Insegnante'):
             enrolledCourses = getUserEnrolledCourses()
             #Returned value = `False` means that the connection to the database failed
@@ -463,7 +464,8 @@ def createLesson():
                 chosenCourseYear, chosenCourseName = request.form.get('course').split('a ')
                 #Validating course selection with additional filter for enrolled courses (only if the user role is "Insegnante")
                 if(validateCoursesSelection([chosenCourseName], [chosenCourseYear], session['role'] == 'Insegnante')):
-                    if(validateFormInput(subject, lessonDate, lessonRoom)):
+                    #Checking if the textboxes contain a valid value and the date to be higher or equal than today (cannot create a lesson on dates before current date)
+                    if(validateFormInput(subject, lessonRoom) and datetime.strptime(lessonDate, '%Y-%m-%d').date() >= date.today()):
                         connection = connectToDB()
                         cursor = connection.cursor()
                         cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso) values\
@@ -480,7 +482,7 @@ def createLesson():
                         flash('Lezione creata con successo.', 'Successo')
                         return redirect(url_for('createLesson'))
                     else:
-                        flash(commonErrorMessage, 'Errore')
+                        flash("Campi form non validi. Per favore, riprova", 'Errore')
                 else:
                     flash('Corso non trovato.', 'Errore')
             else:

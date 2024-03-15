@@ -1009,7 +1009,6 @@ input, select {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
-
 @media (min-width: 640px) {
 
   .sm\:gap-x-2 {
