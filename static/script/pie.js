@@ -1,6 +1,13 @@
 var pieCanvas = document.getElementById('attendancePercentageStatistics').getContext('2d');
 const pieChartConfig = {
     type: 'pie',
+    options: {
+        plugins: {
+            legend: {
+                position: 'right'
+            }
+        },
+    }
 };
 var pieChart = new Chart(pieCanvas, pieChartConfig);
 

@@ -8,7 +8,7 @@ Gestione account
 
     <h1 class = "text-center">{{ helloMessage }}, {{ session['name'] }}!</h1>
     
-    <section class = "flex justify-center flex-wrap gap-5">
+    <section class = "flex justify-center flex-wrap gap-5 mb-14">
         <div class = "container blue mt-3">
             <div class = "w-1/2 text-center">
                 <b>{{ session['role'] }}</b>
@@ -81,7 +81,7 @@ Gestione account
     </section>
 
     {% if session.get('role') in ['Admin', 'Insegnante'] %}
-        <h1 id = "chartTitle">Presenze studenti negli ultimi 7 giorni</h1>
+        <h1 id = "chartTitle">👨‍🎓 Presenze studenti negli ultimi 7 giorni 📊</h1>
         <canvas id = "attendanceStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
         <button class = "updateRange" value = '7'>7 Giorni</button>
         <button class = "updateRange" value = '14'>14 Giorni</button>
@@ -89,14 +89,14 @@ Gestione account
     {% endif %}
     
     {% if session.get('role') == 'Studente' %}
-        <h1 id = "percChartTitle">Percentuale presenze negli ultimi 7 giorni</h1>
+        <h1 class = "text-center" id = "percChartTitle">👨‍🎓 Percentuale presenze negli ultimi 7 giorni 🥧</h1>
         <canvas id = "attendancePercentageStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
-        <button class = "percUpdateRange" value = '7'>7 Giorni</button>
-        <button class = "percUpdateRange" value = '14'>14 Giorni</button>
-        <button class = "percUpdateRange" value = '30'>1 Mese</button>
+        <div class = "flex flex-wrap gap-2 justify-center items-center">
+            <button class = "button percUpdateRange" value = '7'>7 Giorni</button>
+            <button class = "button percUpdateRange" value = '14'>14 Giorni</button>
+            <button class = "button percUpdateRange" value = '30'>1 Mese</button>
+        </div>
     {% endif %}
-
-    <a href = "{{ url_for('logout') }}">Logout</a>
 
     <!-- NOTE: Script declaration -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -121,7 +121,7 @@ Gestione account
                     data: {'range': range},
                     success: function(response){
                         updateBarChart(response);
-                        document.querySelector('#chartTitle').textContent = `Presenze studenti negli ultimi ${range} giorni`;
+                        document.querySelector('#chartTitle').textContent = `👨‍🎓 Presenze studenti negli ultimi ${range} giorni 📊`;
                     },
                 });
             }
@@ -148,7 +148,7 @@ Gestione account
                     data: {'range': range},
                     success: function(response){
                         updatePieChart(response);
-                        document.querySelector('#percChartTitle').textContent = `Percentuale presenze negli ultimi ${range} giorni`
+                        document.querySelector('#percChartTitle').textContent = `👨‍🎓 Percentuale presenze negli ultimi ${range} giorni 🥧`
                     }
                 })
             }

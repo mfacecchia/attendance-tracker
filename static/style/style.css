@@ -550,6 +550,9 @@ video {
   margin: 0.25rem;
   white-space: nowrap;
 }
+    canvas {
+  max-width: 600px;
+}
 
 *, ::before, ::after {
   --tw-border-spacing-x: 0;
@@ -913,6 +916,9 @@ input, select {
 .relative {
   position: relative;
 }
+.mb-14 {
+  margin-bottom: 3.5rem;
+}
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -966,6 +972,9 @@ input, select {
 }
 .justify-center {
   justify-content: center;
+}
+.gap-2 {
+  gap: 0.5rem;
 }
 .gap-5 {
   gap: 1.25rem;

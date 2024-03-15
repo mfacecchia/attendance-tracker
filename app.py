@@ -495,11 +495,12 @@ def createLesson():
 @app.route('/lesson/list')
 def lessonsList():
     scheduledLessons = getLessonsList()
-    if(session.get('role') in ['Admin', 'Insegnante']):
+    if(session.get('name')):
         return render_template('lessons.html',
                                 scheduledLessons = scheduledLessons,
                                 today = date.today().strftime('%d/%m/%Y'))
-    return render_template('login')
+    flash('Devi prima fare il login.', 'Errore')
+    return redirect(url_for('login'))
 
 @app.route('/lesson', methods = ['GET'])
 def manageLesson():
