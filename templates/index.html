@@ -1,3 +1,52 @@
 {% extends "template.html" %}
 
 {% block bodyProperties %} style = "padding-right: 0; padding-left: 0" {% endblock %}
+
+{% block content %}
+    <section class = "h-96 flex items-center overflow-hidden">
+        <div class = "ml-5 text-right uppercase font-bold space-y-1">
+            <h1 class = "text-3xl">Monitora</h1>
+            <h1 class = "text-3xl">Crea</h1>
+            <h1 class = "text-3xl">Gestisci</h1>
+            <h1 class = "text-3xl">Semplifica</h1>
+        </div>
+        <img src = "{{url_for('static', filename = 'assets/analytics.svg')}}">
+    </section>
+    <div class = "w-9/12 h-2 bg-attendance-blue-100 rounded-full"></div>
+    <p class = "inline-block w-9/12 mx-auto mt-3 mb-7 text-center">Un nuovo modo, più semplice ed efficace per la gestione delle attività scolastiche.</p>
+    <h1 class = "mb-5 text-3xl">Scopri le funzionalità</h1>
+    <section class = "appFunctionalities">
+        <div class = "functionality">
+            <img src = "{{url_for('static', filename = 'assets/teacher.svg')}}">
+            <h1>Crea e gestisci le lezioni</h1>
+            <p>Con il nostro potente tool, la creazione e la gestione delle lezioni non è mai stata così semplice! Crea le tue lezioni con un click e visualizza tutte le lezioni programmate nella dashboard utente!</p>
+        </div>
+        <hr>
+        <div class = "functionality">
+            <img src = "{{url_for('static', filename = 'assets/attendance.svg')}}">
+            <h1>Gestisci le presenze</h1>
+            <p>Visualizza con facilità l'andamento delle presenze di studenti e insegnanti con un grafico, suddiviso per corso e data della lezione!</p>
+        </div>
+        <hr>
+        <div class = "functionality">
+            <img src = "{{url_for('static', filename = 'assets/course.svg')}}">
+            <h1>Gestisci i corsi</h1>
+            <p>Crea, elimina e gestisci tutti i tuoi corsi. Inserisci e rimuovi gli studenti con rapidità!</p>
+        </div>
+        <hr>
+        <div class = "functionality">
+            <div class = "flex gap-x-5">
+                <img src = "{{url_for('static', filename = 'assets/google.svg')}}">
+                <img src = "{{url_for('static', filename = 'assets/github.svg')}}">
+            </div>
+            <h1>Connetti i tuoi account</h1>
+            <p>Connetti il tuo account ai servizi di Google e GitHub per un accesso più rapido e sicuro!</p>
+        </div>
+    </section>
+    <section class = "joinUs">
+        <h1>Che aspetti?</h1>
+        <p>Unisciti a noi e gestisci subito la tua scuola con facilità!</p>
+
+        <a class = "button orange scale-110" href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&pp=ygUXbmV2ZXIgZ29ubmEgZ2l2ZSB5b3UgdXA%3D">Unisciti</a>
+    </section>
+{% endblock %}
