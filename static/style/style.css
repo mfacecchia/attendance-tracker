@@ -920,6 +920,9 @@ input, select {
   margin-top: 1.25rem;
   margin-bottom: 1.25rem;
 }
+.mb-10 {
+  margin-bottom: 2.5rem;
+}
 .mb-14 {
   margin-bottom: 3.5rem;
 }
@@ -946,9 +949,6 @@ input, select {
 }
 .mt-5 {
   margin-top: 1.25rem;
-}
-.mb-10 {
-  margin-bottom: 2.5rem;
 }
 .block {
   display: block;
@@ -1012,6 +1012,9 @@ input, select {
 }
 .p-1 {
   padding: 0.25rem;
+}
+.p-0 {
+  padding: 0px;
 }
 .text-center {
   text-align: center;
