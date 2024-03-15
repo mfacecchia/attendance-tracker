@@ -57,9 +57,9 @@
     table .button{
         @apply m-1 whitespace-nowrap;
     }
-    canvas{
+    /* canvas{
         @apply max-w-[600px];
-    }
+    } */
 }
 
 @layer components{

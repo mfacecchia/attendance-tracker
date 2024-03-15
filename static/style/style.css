@@ -550,9 +550,9 @@ video {
   margin: 0.25rem;
   white-space: nowrap;
 }
-    canvas {
-  max-width: 600px;
-}
+    /* canvas{
+        @apply max-w-[600px];
+    } */
 
 *, ::before, ::after {
   --tw-border-spacing-x: 0;
@@ -916,6 +916,10 @@ input, select {
 .relative {
   position: relative;
 }
+.my-5 {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
 .mb-14 {
   margin-bottom: 3.5rem;
 }
@@ -943,6 +947,9 @@ input, select {
 .mt-5 {
   margin-top: 1.25rem;
 }
+.mb-10 {
+  margin-bottom: 2.5rem;
+}
 .block {
   display: block;
 }
@@ -951,6 +958,9 @@ input, select {
 }
 .table {
   display: table;
+}
+.\!hidden {
+  display: none !important;
 }
 .hidden {
   display: none;
@@ -1027,5 +1037,20 @@ input, select {
   .sm\:gap-x-2 {
     -moz-column-gap: 0.5rem;
          column-gap: 0.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+
+  .lg\:\!block {
+    display: block !important;
+  }
+
+  .lg\:flex {
+    display: flex;
+  }
+
+  .lg\:hidden {
+    display: none;
   }
 }
