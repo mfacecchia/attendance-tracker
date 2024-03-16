@@ -145,7 +145,8 @@
         @apply w-full flex flex-col justify-center items-center gap-y-3 mb-5 text-center;
     }
     .functionality + hr{
-        @apply w-9/12 h-[1px] border-none bg-attendance-orange rounded-full
+        @apply w-9/12 h-[1px] border-none bg-attendance-orange rounded-full;
+        @apply sm:h-[2px];
     }
     .functionality img{
         @apply h-24;
@@ -164,5 +165,17 @@
     }
     .joinUs a{
         @apply mt-10
+    }
+    .landingSlogan{
+        @apply h-[450px] flex items-center overflow-hidden;
+        @apply sm:h-[700px];
+    }
+    .landingSlogan div{
+        @apply ml-5 text-right uppercase font-bold space-y-1;
+        @apply sm:ml-7;
+    }
+    .landingSlogan div h1{
+        @apply text-3xl;
+        @apply sm:text-4xl;
     }
 }

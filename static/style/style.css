@@ -941,6 +941,12 @@ input, select {
   --tw-bg-opacity: 1;
   background-color: rgb(181 99 40 / var(--tw-bg-opacity));
 }
+@media (min-width: 640px) {
+
+  .functionality + hr {
+    height: 2px;
+  }
+}
 .functionality img {
   height: 6rem;
 }
@@ -960,6 +966,48 @@ input, select {
 }
 .joinUs a {
   margin-top: 2.5rem;
+}
+.landingSlogan {
+  display: flex;
+  height: 450px;
+  align-items: center;
+  overflow: hidden;
+}
+@media (min-width: 640px) {
+
+  .landingSlogan {
+    height: 700px;
+  }
+}
+.landingSlogan div {
+  margin-left: 1.25rem;
+}
+.landingSlogan div > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
+}
+.landingSlogan div {
+  text-align: right;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+@media (min-width: 640px) {
+
+  .landingSlogan div {
+    margin-left: 1.75rem;
+  }
+}
+.landingSlogan div h1 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+@media (min-width: 640px) {
+
+  .landingSlogan div h1 {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
 }
 .visible {
   visibility: visible;
@@ -1002,9 +1050,6 @@ input, select {
 .mb-7 {
   margin-bottom: 1.75rem;
 }
-.ml-5 {
-  margin-left: 1.25rem;
-}
 .mt-1 {
   margin-top: 0.25rem;
 }
@@ -1043,9 +1088,6 @@ input, select {
 }
 .h-24 {
   height: 6rem;
-}
-.h-96 {
-  height: 24rem;
 }
 .w-1\/2 {
   width: 50%;
@@ -1098,22 +1140,11 @@ input, select {
 .gap-y-3 {
   row-gap: 0.75rem;
 }
-.space-y-1 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-y-reverse: 0;
-  margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
-}
-.overflow-hidden {
-  overflow: hidden;
-}
 .rounded {
   border-radius: 0.25rem;
 }
 .rounded-full {
   border-radius: 9999px;
-}
-.border {
-  border-width: 1px;
 }
 .bg-attendance-blue-100 {
   --tw-bg-opacity: 1;
@@ -1124,9 +1155,6 @@ input, select {
 }
 .text-center {
   text-align: center;
-}
-.text-right {
-  text-align: right;
 }
 .text-3xl {
   font-size: 1.875rem;
@@ -1140,20 +1168,13 @@ input, select {
   font-size: 0.75rem;
   line-height: 1rem;
 }
-.font-bold {
-  font-weight: 700;
-}
 .font-semibold {
   font-weight: 600;
-}
-.uppercase {
-  text-transform: uppercase;
 }
 .text-blue-600 {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
-
 @media (min-width: 640px) {
 
   .sm\:gap-x-2 {
@@ -1161,7 +1182,6 @@ input, select {
          column-gap: 0.5rem;
   }
 }
-
 @media (min-width: 1024px) {
 
   .lg\:\!block {
