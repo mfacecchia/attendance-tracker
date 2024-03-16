@@ -9,7 +9,7 @@
     }
     p, a{
         @apply text-base leading-normal;
-        @apply xl:text-xl
+        @apply xl:text-xl;
     }
     label{
         @apply xl:text-lg
@@ -19,6 +19,8 @@
     }
     nav{
         @apply w-full box-border p-3 bg-slate-200/70 backdrop-blur-2xl flex justify-between items-center gap-x-3 fixed top-0 left-0 z-50;
+        @apply xl:px-7;
+        @apply 2xl:px-10;
     }
     nav img{
         @apply h-6 drop-shadow-2xl;
@@ -26,6 +28,7 @@
     }
     footer{
         @apply absolute bottom-0 left-0 w-full box-border py-3 bg-slate-100 flex flex-col items-center gap-y-5 text-slate-400 mt-auto;
+        @apply 2xl:py-7
     }
     footer a, footer p{
         @apply text-slate-600;
@@ -163,6 +166,7 @@
     }
     .functionality img{
         @apply h-24;
+        @apply 2xl:h-32
     }
     .functionality h1{
         @apply font-bold;
@@ -194,6 +198,7 @@
         @apply sm:text-4xl;
         @apply md:text-5xl;
         @apply xl:text-6xl;
+        @apply 2xl:text-7xl
     }
     #mainDashboardSection{
         @apply flex justify-center items-end flex-wrap gap-5 mb-14;

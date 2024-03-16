@@ -443,6 +443,20 @@ video {
   -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
           backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
 }
+    @media (min-width: 1280px) {
+
+  nav {
+    padding-left: 1.75rem;
+    padding-right: 1.75rem;
+  }
+}
+    @media (min-width: 1536px) {
+
+  nav {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
     nav img {
   height: 1.5rem;
   --tw-drop-shadow: drop-shadow(0 25px 25px rgb(0 0 0 / 0.15));
@@ -471,6 +485,13 @@ video {
   padding-bottom: 0.75rem;
   --tw-text-opacity: 1;
   color: rgb(148 163 184 / var(--tw-text-opacity));
+}
+    @media (min-width: 1536px) {
+
+  footer {
+    padding-top: 1.75rem;
+    padding-bottom: 1.75rem;
+  }
 }
     footer a, footer p {
   --tw-text-opacity: 1;
@@ -1022,6 +1043,12 @@ input, select {
 .functionality img {
   height: 6rem;
 }
+@media (min-width: 1536px) {
+
+  .functionality img {
+    height: 8rem;
+  }
+}
 .functionality h1 {
   font-weight: 700;
 }
@@ -1106,6 +1133,13 @@ input, select {
 
   .landingSlogan div h1 {
     font-size: 3.75rem;
+    line-height: 1;
+  }
+}
+@media (min-width: 1536px) {
+
+  .landingSlogan div h1 {
+    font-size: 4.5rem;
     line-height: 1;
   }
 }
@@ -1287,6 +1321,7 @@ input, select {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
+
 @media (min-width: 640px) {
 
   .sm\:gap-x-2 {
@@ -1294,12 +1329,14 @@ input, select {
          column-gap: 0.5rem;
   }
 }
+
 @media (min-width: 768px) {
 
   .md\:mb-11 {
     margin-bottom: 2.75rem;
   }
 }
+
 @media (min-width: 1024px) {
 
   .lg\:\!block {
@@ -1318,6 +1355,7 @@ input, select {
     flex-wrap: nowrap !important;
   }
 }
+
 @media (min-width: 1280px) {
 
   .xl\:text-5xl {
