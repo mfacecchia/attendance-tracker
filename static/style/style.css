@@ -392,36 +392,34 @@ video {
 [hidden] {
   display: none;
 }
-    body {
-  position: relative;
-  box-sizing: border-box;
-  display: flex;
-  min-height: 100vh;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
-  padding-top: 5rem;
-  padding-bottom: 12rem;
-}
-    @media (min-width: 1024px) {
-
-  body {
-    padding-left: 2.75rem;
-    padding-right: 2.75rem;
-    padding-top: 10rem;
-  }
-}
     h1 {
   font-size: 1.5rem;
   line-height: 2rem;
   line-height: 1.25;
 }
+    @media (min-width: 1280px) {
+
+  h1 {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+}
     p, a {
   font-size: 1rem;
   line-height: 1.5rem;
   line-height: 1.5;
+}
+    @media (min-width: 1280px) {
+
+  p, a {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  label {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
 }
     h1, p, th, td {
   --tw-text-opacity: 1;
@@ -450,6 +448,12 @@ video {
   --tw-drop-shadow: drop-shadow(0 25px 25px rgb(0 0 0 / 0.15));
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
+    @media (min-width: 1280px) {
+
+  nav img {
+    height: 2rem;
+  }
+}
     footer {
   position: absolute;
   bottom: 0px;
@@ -475,6 +479,13 @@ video {
     footer a, footer span {
   font-size: 0.875rem;
   line-height: 1.25rem;
+}
+    @media (min-width: 1280px) {
+
+  footer a, footer span {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
 }
     .messages {
   position: fixed;
@@ -526,6 +537,13 @@ video {
     .messages p {
   font-size: 0.875rem;
   line-height: 1.25rem;
+}
+    @media (min-width: 1280px) {
+
+  .messages p {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
 }
     .tableContainer {
   width: 100%;
@@ -700,6 +718,34 @@ video {
     max-width: 1536px;
   }
 }
+body {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  padding-top: 5rem;
+  padding-bottom: 12rem;
+}
+@media (min-width: 1024px) {
+
+  body {
+    padding-left: 2.75rem;
+    padding-right: 2.75rem;
+    padding-top: 10rem;
+  }
+}
+@media (min-width: 1280px) {
+
+  body {
+    padding-left: 3.5rem;
+    padding-right: 3.5rem;
+  }
+}
 form img {
   height: 1.75rem;
 }
@@ -749,14 +795,18 @@ form img {
   --tw-border-opacity: 1;
   border-color: rgb(0 39 85 / var(--tw-border-opacity));
   background-color: transparent;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding: 0.5rem;
   font-size: 0.875rem;
   line-height: 1.25rem;
   --tw-text-opacity: 1;
   color: rgb(0 39 85 / var(--tw-text-opacity));
+}
+@media (min-width: 1280px) {
+
+  .formInputBox {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
 }
 .formInputBox:focus {
   border-width: 2px;
@@ -870,6 +920,13 @@ input, select {
   --tw-text-opacity: 1;
   color: rgb(0 39 85 / var(--tw-text-opacity));
 }
+@media (min-width: 1280px) {
+
+  .button {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+}
 .button.dark-blue {
   --tw-bg-opacity: 1;
   background-color: rgb(0 39 85 / var(--tw-bg-opacity));
@@ -972,6 +1029,13 @@ input, select {
   font-size: 0.875rem;
   line-height: 1.25rem;
 }
+@media (min-width: 1280px) {
+
+  .functionality p {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+}
 .joinUs {
   gap: 0px;
 }
@@ -985,6 +1049,7 @@ input, select {
 .landingSlogan {
   display: flex;
   height: 450px;
+  width: 100%;
   align-items: center;
   overflow: hidden;
 }
@@ -992,6 +1057,12 @@ input, select {
 
   .landingSlogan {
     height: 700px;
+  }
+}
+@media (min-width: 1280px) {
+
+  .landingSlogan {
+    justify-content: flex-end;
   }
 }
 .landingSlogan div {
@@ -1028,6 +1099,13 @@ input, select {
 
   .landingSlogan div h1 {
     font-size: 3rem;
+    line-height: 1;
+  }
+}
+@media (min-width: 1280px) {
+
+  .landingSlogan div h1 {
+    font-size: 3.75rem;
     line-height: 1;
   }
 }
@@ -1203,7 +1281,6 @@ input, select {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
-
 @media (min-width: 640px) {
 
   .sm\:gap-x-2 {
@@ -1211,14 +1288,12 @@ input, select {
          column-gap: 0.5rem;
   }
 }
-
 @media (min-width: 768px) {
 
   .md\:mb-11 {
     margin-bottom: 2.75rem;
   }
 }
-
 @media (min-width: 1024px) {
 
   .lg\:\!block {
@@ -1235,5 +1310,17 @@ input, select {
 
   .lg\:\!flex-nowrap {
     flex-wrap: nowrap !important;
+  }
+}
+@media (min-width: 1280px) {
+
+  .xl\:text-5xl {
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  .xl\:text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
 }
