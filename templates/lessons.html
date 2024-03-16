@@ -25,7 +25,7 @@ Lezioni programmate
                             <p>{{lesson['Materia']}}</p>
                             <p>Aula {{lesson['aula']}}</p>
                         </td>
-                        <td>{{lesson['Descrizione']}}</td>
+                        <td><p>{{lesson['Descrizione']}}</p></td>
                         {% if session['role'] in ['Admin', 'Insegnante'] %}
                             <td>
                                 {% if lesson['dataLezione'] == today %}

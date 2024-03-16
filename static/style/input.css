@@ -7,7 +7,7 @@
         @apply text-2xl leading-tight;
         @apply xl:text-4xl;
     }
-    p, a{
+    p, a, b, th{
         @apply text-base leading-normal;
         @apply xl:text-xl;
     }
@@ -105,6 +105,7 @@
     }
     .container{
         @apply min-w-56 w-full max-w-[500px] border border-slate-100 bg-slate-100 rounded-md box-border p-2 space-y-1 flex justify-between items-center gap-5;
+        @apply 2xl:gap-7;
     }
     .container.blue{
         @apply bg-attendance-blue-100
@@ -141,6 +142,7 @@
     }
     .next-lesson{
         @apply w-1/2 h-52 rounded-md overflow-hidden bg-white/30;
+        @apply 2xl:h-64;
     }
     .next-lesson .button{
         @apply p-1 text-xs;
@@ -152,7 +154,8 @@
         @apply h-1/2;
     }
     .lesson-description{
-        @apply box-border px-2 text-sm flex flex-col justify-center;
+        @apply box-border px-2 text-sm flex flex-col justify-center h-[45%];
+        @apply 2xl:text-base
     }
     .appFunctionalities, .joinUs{
         @apply w-9/12 mx-auto my-5 flex flex-col gap-5 items-center justify-center text-center;
