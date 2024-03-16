@@ -145,7 +145,7 @@
         @apply w-full flex flex-col justify-center items-center gap-y-3 mb-5 text-center;
     }
     .functionality + hr{
-        @apply w-9/12 h-[1px] border-none bg-attendance-orange rounded-full;
+        @apply w-9/12 h-[1px] border-none bg-attendance-orange rounded-full mb-5;
         @apply sm:h-[2px];
     }
     .functionality img{
@@ -177,5 +177,6 @@
     .landingSlogan div h1{
         @apply text-3xl;
         @apply sm:text-4xl;
+        @apply md:text-5xl;
     }
 }
