@@ -1117,6 +1117,12 @@ input, select {
   justify-content: center;
   gap: 1.25rem;
 }
+@media (min-width: 1280px) {
+
+  #mainDashboardSection {
+    margin-top: 0.75rem;
+  }
+}
 .break {
   width: 0px;
   flex-basis: 100%;

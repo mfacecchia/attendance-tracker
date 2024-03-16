@@ -196,7 +196,8 @@
         @apply xl:text-6xl;
     }
     #mainDashboardSection{
-        @apply flex justify-center items-end flex-wrap gap-5 mb-14
+        @apply flex justify-center items-end flex-wrap gap-5 mb-14;
+        @apply xl:mt-3;
     }
     .break{
         @apply basis-full w-0;
