@@ -697,7 +697,7 @@ def supportPage():
 
 @app.route('/terms-and-conditions')
 def termsPage():
-    return "Terms and conditions page"
+    return render_template('termsAndConditions.html')
 
 @app.route('/privacy')
 def privacyPage():

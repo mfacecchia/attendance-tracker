@@ -961,6 +961,9 @@ input, select {
 .joinUs a {
   margin-top: 2.5rem;
 }
+.visible {
+  visibility: visible;
+}
 .static {
   position: static;
 }
