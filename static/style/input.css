@@ -5,6 +5,7 @@
 @layer base{
     body{
         @apply min-h-screen flex flex-col items-center justify-center relative pt-20 pb-48 px-5 box-border;
+        @apply lg:pt-40
     }
     h1{
         @apply text-2xl leading-tight;

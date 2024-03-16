@@ -67,8 +67,8 @@ def login():
     if(session.get('name')):
         return redirect(url_for('userScreening'))
     #Checking if form was submitted to begin input validation, otherwise rendering the page
-    if(request.form.get('email') and request.form.get('password')):
-        email = request.form.get('email')
+    if(request.form.get('Email') and request.form.get('password')):
+        email = request.form.get('Email')
         pw = request.form.get('password')
         
         connection = connectToDB()

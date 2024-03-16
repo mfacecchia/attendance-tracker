@@ -405,6 +405,12 @@ video {
   padding-top: 5rem;
   padding-bottom: 12rem;
 }
+    @media (min-width: 1024px) {
+
+  body {
+    padding-top: 10rem;
+  }
+}
     h1 {
   font-size: 1.5rem;
   line-height: 2rem;
@@ -1198,14 +1204,6 @@ input, select {
 
   .md\:mb-11 {
     margin-bottom: 2.75rem;
-  }
-
-  .md\:\!block {
-    display: block !important;
-  }
-
-  .md\:flex {
-    display: flex;
   }
 }
 
