@@ -1109,6 +1109,9 @@ input, select {
 .flex-wrap {
   flex-wrap: wrap;
 }
+.items-end {
+  align-items: flex-end;
+}
 .items-center {
   align-items: center;
 }
@@ -1175,13 +1178,23 @@ input, select {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
+
 @media (min-width: 640px) {
+
+  .sm\:\!block {
+    display: block !important;
+  }
+
+  .sm\:flex {
+    display: flex;
+  }
 
   .sm\:gap-x-2 {
     -moz-column-gap: 0.5rem;
          column-gap: 0.5rem;
   }
 }
+
 @media (min-width: 1024px) {
 
   .lg\:\!block {
