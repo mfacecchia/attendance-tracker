@@ -19,8 +19,9 @@ Crea utente
             <option value = "{{role}}">{{role}}</option>
         {% endfor %}
     </select>
+    <p>Seleziona almeno un corso tra i seguenti</p>
     {% for course in courses %}
-        <label>
+        <label class = "formInputBox">
             <input type = "checkbox" name = "course" value = "{{course}}">
             {{course}}
         </label>
