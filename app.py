@@ -687,9 +687,9 @@ def logout():
         flash("Logout effettuato con successo.", 'Successo')
     return redirect(url_for('login'))
 
-@app.route('/info')
+@app.route('/cookie-policy')
 def informationPage():
-    return "Information Page"
+    return render_template('cookiePolicy.html')
 
 @app.route('/support')
 def supportPage():

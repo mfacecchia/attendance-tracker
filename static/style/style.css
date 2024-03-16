@@ -1112,6 +1112,9 @@ input, select {
 .rounded-full {
   border-radius: 9999px;
 }
+.border {
+  border-width: 1px;
+}
 .bg-attendance-blue-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(206 231 255 / var(--tw-bg-opacity));
