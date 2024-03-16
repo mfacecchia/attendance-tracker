@@ -11,11 +11,15 @@ Gestione account
     <section id = "mainDashboardSection" {% if session['role'] == 'Studente' %} class = "lg:!flex-nowrap" {% endif %}>
         <div class = "container blue mt-3">
             <div class = "w-1/2 text-center h-52 relative flex flex-col justify-center
-                        2xl:w-3/4 2xl:h-64">
+                        sm:w-3/4
+                        2xl:h-64">
                 <b>{{ session['role'] }}</b>
                 <p class = "mt-1 mb-2">Ultima volta online: {{session['lastLogin']}}</p>
-                <a class = "button dark-blue p-1 text-xs w-full
-                            2xl:px-5 2xl:bottom-[10px] 2xl:absolute" href = "{{url_for('updateUserInfo')}}">Modifica account</a>
+                <a class = "button dark-blue p-1 text-xs w-full absolute bottom-[9px]
+                            sm:bottom-[8px]
+                            md:bottom-2
+                            xl:bottom-[9px]
+                            2xl:px-5 2xl:bottom-[10px]" href = "{{url_for('updateUserInfo')}}">Modifica account</a>
             </div>
             <div class = "next-lesson">
                 {% if session['role'] in ['Admin', 'Insegnante'] %}
@@ -47,6 +51,7 @@ Gestione account
                 <img src = "{{url_for('static', filename = 'assets/course.svg')}}">
                 <p class = "button orange">Crea corso</p>
             </a>
+            <!-- TODO: Add breakpoint for 900px -->
             <div class = "hidden md:block break"></div>
             <a class = "action" href = "{{url_for('usersList')}}">
                 <img src = "{{url_for('static', filename = 'assets/users.svg')}}">
