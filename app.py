@@ -691,10 +691,6 @@ def logout():
 def informationPage():
     return render_template('cookiePolicy.html')
 
-@app.route('/support')
-def supportPage():
-    return "Support Page"
-
 @app.route('/terms-and-conditions')
 def termsPage():
     return render_template('termsAndConditions.html')
