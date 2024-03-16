@@ -179,4 +179,7 @@
         @apply sm:text-4xl;
         @apply md:text-5xl;
     }
+    #mainDashboardSection{
+        @apply flex justify-center items-end flex-wrap gap-5 mb-14
+    }
 }

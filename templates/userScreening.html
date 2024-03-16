@@ -8,7 +8,7 @@ Gestione account
 
     <h1 class = "text-center">{{ helloMessage }}, {{ session['name'] }}!</h1>
     
-    <section class = "flex justify-center items-end flex-wrap gap-5 mb-14">
+    <section id = "mainDashboardSection">
         <div class = "container blue mt-3">
             <div class = "w-1/2 text-center">
                 <b>{{ session['role'] }}</b>
@@ -159,4 +159,20 @@ Gestione account
             }
         </script>
     {% endif %}
+    <script>
+        //Getting the first action object in order to move it based on screen width (needs to be moved on the right side if the screen is 768px or above)
+        var firstChild = document.querySelector('#mainDashboardSection > .action:first-of-type');
+        cloneFirstChild()
+        window.addEventListener('resize', cloneFirstChild)
+
+        function cloneFirstChild(){
+            if(window.screen.width >= 768){
+                //Manipulating the `mainDashboardSection` node in order to move the first action block before the `container` class
+                firstChild.parentNode.insertBefore(firstChild, document.querySelector('.container'));
+            }
+            else{
+                firstChild.parentNode.insertBefore(firstChild, document.querySelector('.container').nextSibling)
+            }
+        }
+    </script>
 {% endblock %}

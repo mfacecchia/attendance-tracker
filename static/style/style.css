@@ -1017,6 +1017,14 @@ input, select {
     line-height: 1;
   }
 }
+#mainDashboardSection {
+  margin-bottom: 3.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1.25rem;
+}
 .visible {
   visibility: visible;
 }
@@ -1039,9 +1047,6 @@ input, select {
 }
 .mb-10 {
   margin-bottom: 2.5rem;
-}
-.mb-14 {
-  margin-bottom: 3.5rem;
 }
 .mb-2 {
   margin-bottom: 0.5rem;
@@ -1069,9 +1074,6 @@ input, select {
 }
 .mt-5 {
   margin-top: 1.25rem;
-}
-.mb-11 {
-  margin-bottom: 2.75rem;
 }
 .block {
   display: block;
@@ -1120,9 +1122,6 @@ input, select {
 .flex-wrap {
   flex-wrap: wrap;
 }
-.items-end {
-  align-items: flex-end;
-}
 .items-center {
   align-items: center;
 }
@@ -1131,9 +1130,6 @@ input, select {
 }
 .gap-2 {
   gap: 0.5rem;
-}
-.gap-5 {
-  gap: 1.25rem;
 }
 .gap-x-1 {
   -moz-column-gap: 0.25rem;
@@ -1202,6 +1198,14 @@ input, select {
 
   .md\:mb-11 {
     margin-bottom: 2.75rem;
+  }
+
+  .md\:\!block {
+    display: block !important;
+  }
+
+  .md\:flex {
+    display: flex;
   }
 }
 
