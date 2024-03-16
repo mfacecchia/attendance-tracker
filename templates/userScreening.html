@@ -8,7 +8,7 @@ Gestione account
 
     <h1 class = "text-center">{{ helloMessage }}, {{ session['name'] }}!</h1>
     
-    <section id = "mainDashboardSection">
+    <section id = "mainDashboardSection" {% if session['role'] == 'Studente' %} class = "lg:!flex-nowrap" {% endif %}>
         <div class = "container blue mt-3">
             <div class = "w-1/2 text-center">
                 <b>{{ session['role'] }}</b>
@@ -45,6 +45,7 @@ Gestione account
                 <img src = "{{url_for('static', filename = 'assets/course.svg')}}">
                 <p class = "button orange">Crea corso</p>
             </a>
+            <div class = "break"></div>
             <a class = "action" href = "{{url_for('usersList')}}">
                 <img src = "{{url_for('static', filename = 'assets/users.svg')}}">
                 <p class = "button orange">Lista utenti</p>

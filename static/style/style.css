@@ -408,6 +408,8 @@ video {
     @media (min-width: 1024px) {
 
   body {
+    padding-left: 2.75rem;
+    padding-right: 2.75rem;
     padding-top: 10rem;
   }
 }
@@ -514,6 +516,12 @@ video {
   --tw-backdrop-blur: blur(16px);
   -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
           backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+    @media (min-width: 1024px) {
+
+  .messages {
+    width: 33.333333%;
+  }
 }
     .messages p {
   font-size: 0.875rem;
@@ -1031,6 +1039,10 @@ input, select {
   justify-content: center;
   gap: 1.25rem;
 }
+.break {
+  width: 0px;
+  flex-basis: 100%;
+}
 .visible {
   visibility: visible;
 }
@@ -1219,5 +1231,9 @@ input, select {
 
   .lg\:hidden {
     display: none;
+  }
+
+  .lg\:\!flex-nowrap {
+    flex-wrap: nowrap !important;
   }
 }

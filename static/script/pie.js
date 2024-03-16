@@ -50,7 +50,7 @@ function updatePieChart(apiData){
 function resizeChart(){
     //Matrix containing every breakpoint to check for and the relative scale to apply to the chart
     //FIXME: Update chart aspect ratio values
-    let breakpoints = [[0, 1], [640, 1.2], [768, 1.4], [1024, 1.6], [1280, 1.8], [1536, 3], [9999]];
+    let breakpoints = [[0, 1], [640, 1.2], [768, 1], [1024, 1], [1280, 1.8], [1536, 3], [9999]];
     //`breakpoints.every()` stops whenever the executed function returns `false`, in order to not overwhelm the user CPU
     breakpoints.every((breakpoint, index) => {
         //Iterating through each breakpoint and comparing those values with the client's brower size
