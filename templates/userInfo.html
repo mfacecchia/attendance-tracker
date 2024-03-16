@@ -23,8 +23,9 @@ Modifica utente
                 {% endif %}
             {% endfor %}
         </select>
+        <p>Seleziona almeno un corso tra i seguenti</p>
         {% for course in courses %}
-            <label>
+            <label class = "formInputBox">
                 {% if course in userData['nomeCorso'] %}
                     <input type = "checkbox" name = "course" value = "{{course}}" checked>
                 {% else %}
