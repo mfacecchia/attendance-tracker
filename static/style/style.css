@@ -967,6 +967,9 @@ input, select {
 .relative {
   position: relative;
 }
+.isolate {
+  isolation: isolate;
+}
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -1022,6 +1025,9 @@ input, select {
 }
 .table {
   display: table;
+}
+.contents {
+  display: contents;
 }
 .\!hidden {
   display: none !important;

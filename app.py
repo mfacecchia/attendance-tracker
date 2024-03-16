@@ -701,7 +701,7 @@ def termsPage():
 
 @app.route('/privacy')
 def privacyPage():
-    return "Privacy page"
+    return render_template('privacyPolicy.html')
 
 
 def connectToDB():
