@@ -780,7 +780,7 @@ form img {
   display: flex;
   width: 100%;
   min-width: 14rem;
-  max-width: 500px;
+  max-width: 800px;
   flex-direction: column;
   align-items: center;
   justify-content: center;

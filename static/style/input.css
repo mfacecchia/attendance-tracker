@@ -84,7 +84,7 @@
         @apply bg-blue-500;
     }
     .formContainer{
-        @apply m-auto min-w-56 w-full max-w-[500px] flex flex-col justify-center items-center gap-y-3 box-border px-5 py-11 bg-attendance-blue-100 rounded-2xl shadow-sm;
+        @apply m-auto min-w-56 w-full max-w-[800px] flex flex-col justify-center items-center gap-y-3 box-border px-5 py-11 bg-attendance-blue-100 rounded-2xl shadow-sm;
         @apply sm:shadow-md;
     }
     .formInputBox{
