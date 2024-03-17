@@ -19,7 +19,16 @@ Crea lezione
             <option value = "{{lesson}}">{{lesson}}</option>
         {% endfor %}
     </select>
+    {% if session['role'] == 'Admin' %}
+        <select class = "formInputBox" name = "assignedTeacher">
+            <option value = "">-- Seleziona un insegnante --</option>
+            {% for teacher in teachersList %}
+                <option value = "{{teacher['id']}}">{{teacher['Nome']}}</option>
+            {% endfor %}
+        </select>
+    {% endif %}
     <select class = "formInputBox" name = "course">
+        <!-- TODO: Dinamically update options based on selected teacher -->
         <option value = "">-- Seleziona un corso --</option>
         {% for course in courses %}
             <option value = "{{course}}">{{course}}</option>

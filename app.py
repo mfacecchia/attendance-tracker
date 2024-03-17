@@ -327,6 +327,7 @@ def userScreening():
                             where Utente.userID = %(uid)s', {'uid': session['uid']})
             response = getValuesFromQuery(cursor)
             connection.close()
+        #FIXME: Manage `None` response
         #Getting the first lesson data only
         scheduledLessons = getLessonsList()[0]
         return render_template('userScreening.html',
@@ -453,23 +454,26 @@ def createLesson():
         description = request.form.get('description') or ''
         lessonDate = request.form.get('lessonDate') or date.today()
         lessonRoom = request.form.get('room') or ''
+        assignedTeacher = request.form.get('assignedTeacher') if session['role'] == 'Admin' else session['uid']
+        teachersList = getTeachersList()
         #Flag condition used to check if it's the first time opening the page (default bool value of `subject` if value not in form = `False`)
         #NOTE: This condition makes the condition below not trigger the flash message
         if(subject):
-            if(request.form.get('lessonType') in lessonTypes and len(request.form.get('room')) == 4):
+            #Validating lesson type, lesson room and assigned teacher to have the right values. In particular, the assigned teacher validation happens by looping though each list user ID obtained from `getTeachersList()` function
+            if(request.form.get('lessonType') in lessonTypes and len(lessonRoom) == 4 and int(assignedTeacher) in [teacher['id'] for teacher in teachersList]):
                 subject = subject.strip().capitalize()
                 description = description.strip()
                 lessonRoom = lessonRoom.upper()
                 lessonType = request.form.get('lessonType')
                 chosenCourseYear, chosenCourseName = request.form.get('course').split('a ')
-                #Validating course selection with additional filter for enrolled courses (only if the user role is "Insegnante")
-                if(validateCoursesSelection([chosenCourseName], [chosenCourseYear], session['role'] == 'Insegnante')):
+                #Validating course selection with additional filter for enrolled courses (based on selected assigned teacher userID)
+                if(validateCoursesSelection([chosenCourseName], [chosenCourseYear], assignedTeacher)):
                     #Checking if the textboxes contain a valid value and the date to be higher or equal than today (cannot create a lesson on dates before current date)
                     if(validateFormInput(subject, lessonRoom) and datetime.strptime(lessonDate, '%Y-%m-%d').date() >= date.today()):
                         connection = connectToDB()
                         cursor = connection.cursor()
-                        cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso) values\
-                                    (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'subjectName': subject, 'description': description, 'lessonDate': lessonDate, 'lessonRoom': lessonRoom, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear})
+                        cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso, idInsegnante) values\
+                                    (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s), %(teacherID)s)', {'subjectName': subject, 'description': description, 'lessonDate': lessonDate, 'lessonRoom': lessonRoom, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear, 'teacherID': assignedTeacher})
                         connection.commit()
                         #Getting all users attending the lesson's course and adding them all to the `Partecipazione` table with default `Presenza` value (`0` or `False`)
                         usersList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
@@ -484,10 +488,10 @@ def createLesson():
                     else:
                         flash("Campi form non validi. Per favore, riprova", 'Errore')
                 else:
-                    flash('Corso non trovato.', 'Errore')
+                    flash('Corso non trovato per l\'insegnante selezionato. Per favore, riprova', 'Errore')
             else:
                 flash('Devi selezionare una tipologia di lezione e un corso valido.', 'Errore')
-        return render_template('createLessonForm.html', subject = subject, description = description, selectedDate = lessonDate, room = lessonRoom, lessonTypes = lessonTypes, courses = enrolledCourses if enrolledCourses else courses)
+        return render_template('createLessonForm.html', subject = subject, description = description, selectedDate = lessonDate, room = lessonRoom, lessonTypes = lessonTypes, courses = enrolledCourses if enrolledCourses else courses, teachersList = teachersList)
     else:
         flash(commonErrorMessage, 'Errore')
     return redirect(url_for('login'))
@@ -1009,9 +1013,9 @@ def updateDataAsUser():
     connection.close()
     return True
 
-def validateCoursesSelection(coursesNames, coursesYears, userFilter = False):
+def validateCoursesSelection(coursesNames, coursesYears, userFilter = None):
     '''Gets all courses names and relative years as parameters and executes a query for each item to check if the actual selection exists.\n
-    Also allows to add an additional filter for the validation based on session userID (preference passed in `userFilter` function param)\n
+    Also allows to add an additional filter for the validation based on chosen userID to be checked (preference passed in `userFilter` function param)\n
     Returns `False` if the DB response returns `None`, else `True` if all requests return a value'''
     connection = connectToDB()
     if not connection:
@@ -1028,7 +1032,7 @@ def validateCoursesSelection(coursesNames, coursesYears, userFilter = False):
                         and annoCorso = %(courseYear)s\
                         and userID = %(uid)s"
     for course in range(len(coursesNames)):
-        cursor.execute(preparedQuery, {'courseName': coursesNames[course], 'courseYear': coursesYears[course], 'uid': session['uid']})
+        cursor.execute(preparedQuery, {'courseName': coursesNames[course], 'courseYear': coursesYears[course], 'uid': userFilter})
         if(cursor.fetchone()[0] == 0):
             return False
     return True
@@ -1199,6 +1203,20 @@ def getUserEnrolledCourses():
         course['nomeCorso'] = f"{course['annoCorso']}a {course['nomeCorso']}"
         responseList.append(course['nomeCorso'])
     return responseList
+
+def getTeachersList():
+    '''Executes a query and returns a list of all teachers IDs, names and surnames'''
+    connection = connectToDB()
+    if not connection:
+        return False
+    cursor = connection.cursor()
+    cursor.execute('select userID, Nome, Cognome from Utente where Tipologia = "Insegnante"')
+    response = getValuesFromQuery(cursor)
+    responseList = []
+    for user in response:
+        responseList.append({'id': user['userID'], 'Nome': f"{user['Nome']} {user['Cognome']}"})
+    return responseList
+
 
 if __name__ == "__main__":
     app.run(debug = True)
