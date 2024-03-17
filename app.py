@@ -1098,9 +1098,10 @@ def getLessonsList():
     cursor = connection.cursor()
     #Default query for all user types
     preparedQuery = [
-        'select idLezione, Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso, annoCorso\
+        'select distinct(Materia), Lezione.idLezione, Descrizione, dataLezione, aula, Tipologia, nomeCorso, annoCorso, Presenza\
         from Lezione\
         inner join Corso on Corso.idCorso = Lezione.idCorso\
+        inner join Partecipazione on Partecipazione.idLezione = Lezione.idLezione\
         where dataLezione >= %(today)s', {'today': date.today()}
     ]
     #Adding course filter for students and teachers

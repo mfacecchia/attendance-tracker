@@ -30,8 +30,16 @@ Gestione account
                     {% else %}
                     <div class = "top-box">
                         <img src = "{{url_for('static', filename = 'assets/attendance.svg')}}">
-                        <!-- TODO: Add attendance check for lesson (student only) -->
-                        <p class = "button orange">Presente</p>
+                        {% if scheduledLessons %}
+                            {% if scheduledLessons['Presenza'] %}
+                                <!-- TODO: Remove animation from button -->
+                                <p class = "button dark-blue">Presente</p>
+                            {% else %}
+                                <p class = "button orange">Assente</p>
+                            {% endif %}
+                        {% else %}
+                            <p class = "button orange">Nessuna info</p>
+                        {% endif %}
                     </div>
                 {% endif %}
                 <div class = "lesson-description">
