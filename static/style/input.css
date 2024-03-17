@@ -66,9 +66,9 @@
     table .button{
         @apply m-1 whitespace-nowrap;
     }
-    /* canvas{
-        @apply max-w-[600px];
-    } */
+    #attendancePercentageStatistics{
+        @apply max-w-[800px];
+    }
 }
 
 @layer components{

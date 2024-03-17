@@ -9,10 +9,11 @@ const pieChartConfig = {
                     font: {
                         size: 14
                     },
+                    textAlign: 'left'
                 }
             }
         },
-        aspectRatio: 1
+        aspectRatio: 1.3
     }
 };
 var pieChart = new Chart(pieCanvas, pieChartConfig);
@@ -49,14 +50,14 @@ function updatePieChart(apiData){
 //Resiezes the pie chart based on the some set breakponts
 function resizeChart(){
     //Matrix containing every breakpoint to check for and the relative scale to apply to the chart
-    //FIXME: Update chart aspect ratio values
-    let breakpoints = [[0, 1], [640, 1.2], [768, 1], [1024, 1], [1280, 1.8], [1536, 3], [9999]];
+    let breakpoints = [[0, 1.3, 12], [640, 1.4, 16], [768, 1.5, 17], [1024, 1.7, 20], [1280, 1.8, 20], [1536, 2, 20], [1920, 2.4, 20], [3840, 5, 30], [9999]];
     //`breakpoints.every()` stops whenever the executed function returns `false`, in order to not overwhelm the user CPU
     breakpoints.every((breakpoint, index) => {
         //Iterating through each breakpoint and comparing those values with the client's brower size
         if(window.screen.width >= breakpoint[0] && window.screen.width < breakpoints[index + 1][0]){
             //Applying the object defined value and updating the chartm then quitting the loop
             pieChart.options.aspectRatio = breakpoint[1];
+            pieChart.options.plugins.legend.labels.font.size = breakpoint[2]
             return false
         }
         else{

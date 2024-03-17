@@ -603,9 +603,9 @@ video {
   margin: 0.25rem;
   white-space: nowrap;
 }
-    /* canvas{
-        @apply max-w-[600px];
-    } */
+    #attendancePercentageStatistics {
+  max-width: 800px;
+}
 
 *, ::before, ::after {
   --tw-border-spacing-x: 0;
@@ -1384,10 +1384,6 @@ input, select {
 
   .md\:mb-11 {
     margin-bottom: 2.75rem;
-  }
-
-  .md\:block {
-    display: block;
   }
 }
 
