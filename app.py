@@ -476,6 +476,7 @@ def createLesson():
                                     (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s), %(teacherID)s)', {'subjectName': subject, 'description': description, 'lessonDate': lessonDate, 'lessonRoom': lessonRoom, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear, 'teacherID': assignedTeacher})
                         connection.commit()
                         #Getting all users attending the lesson's course and adding them all to the `Partecipazione` table with default `Presenza` value (`0` or `False`)
+                        #FIXME: Set all users except administrators
                         usersList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
                         cursor.execute('select max(idLezione) from Lezione')
                         latestLesson = cursor.fetchone()[0]
@@ -519,6 +520,7 @@ def manageLesson():
         cursor = connection.cursor()
         #Validating lesson (can only select same date lessons)
         cursor.execute('select dataLezione from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
+        #FIXME: Manage `noneType` error
         response = cursor.fetchone()[0]
         if(response != date.today()):
             return redirect(url_for('userScreening'))
@@ -535,6 +537,12 @@ def manageLesson():
         #Converting all gotten dates to a more user friendly format
         for lessonDate in response:
             lessonDate['dataLezione'] = lessonDate['dataLezione'].strftime('%d/%m/%Y')
+        #Updating teacher attendance
+        if(session['role'] == 'Insegnante'):
+            cursor.execute('update Partecipazione set Presenza = 1\
+                            where idLezione = %(lessonID)s\
+                            and userID = %(uid)s', {'lessonID': lessonID, 'uid': session['uid']})
+            connection.commit()
         connection.close()
         return render_template('manageLesson.html', lessonInfo = response)
     else:
@@ -1136,7 +1144,7 @@ def b64_encode_decode(string:str, encode = True):
             return False
 
 def selectUsersFromCourse(courseName, courseYear):
-    '''Executes a query and returns the count of students attending a defined course\
+    '''Executes a query and returns the count of users attending a defined course\n
         Returns a list of dictionaries'''
     connection = connectToDB()
     cursor = connection.cursor()
