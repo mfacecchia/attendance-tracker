@@ -1073,12 +1073,16 @@ def getLessonsList():
     #Adding course filter for students and teachers
     if(session.get('role') in ['Studente', 'Insegnante']):
         preparedQuery[0] += ' and Lezione.idCorso in (\
-                            select idCorso\
-                            from Registrazione\
-                            inner join Utente on Utente.userID = Registrazione.userID\
-                            where Utente.userID = %(userID)s\
-                        )'
+                                select idCorso\
+                                from Registrazione\
+                                inner join Utente on Utente.userID = Registrazione.userID\
+                                where Utente.userID = %(userID)s\
+                            )'
         preparedQuery[1].setdefault('userID', session['uid'])
+    #Adding assigned lessons filter for teachers
+    if(session.get('role') == 'Insegnante'):
+        preparedQuery[0] += ' and idInsegnante = %(teacherID)s'
+        preparedQuery[1].setdefault('teacherID', session['uid'])
     #Adding the last SQL directives
     preparedQuery[0] += ' order by dataLezione, Materia asc'
     cursor.execute(*preparedQuery)
@@ -1153,12 +1157,15 @@ def getLessonsAttendancesCount(range = 7):
     #Adding course filter for students and teachers
     if(session.get('role') in ['Studente', 'Insegnante']):
         preparedQuery[0] += ' and Lezione.idCorso in (\
-                            select idCorso\
-                            from Registrazione\
-                            inner join Utente on Utente.userID = Registrazione.userID\
-                            where Utente.userID = %(userID)s\
-                        )'
+                                select idCorso\
+                                from Registrazione\
+                                inner join Utente on Utente.userID = Registrazione.userID\
+                                where Utente.userID = %(userID)s\
+                            )'
         preparedQuery[1].setdefault('userID', session['uid'])
+    if(session.get('role') == 'Insegnante'):
+        preparedQuery[0] += ' and idInsegnante = %(teacherID)s'
+        preparedQuery[1].setdefault('teacherID', session['uid'])
     #Adding the last SQL directives
     preparedQuery[0] += ' group by nomeCorso, dataLezione, Materia order by dataLezione'
     cursor.execute(*preparedQuery)
