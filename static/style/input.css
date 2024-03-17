@@ -28,7 +28,7 @@
     }
     footer{
         @apply absolute bottom-0 left-0 w-full box-border py-3 bg-slate-100 flex flex-col items-center gap-y-5 text-slate-400 mt-auto;
-        @apply 2xl:py-7
+        @apply md:py-7
     }
     footer a, footer p{
         @apply text-slate-600;
@@ -128,8 +128,10 @@
         @apply p-1;
     }
     .button{
-        @apply px-5 py-1.5 rounded-md bg-attendance-blue-100 text-attendance-blue-700 font-medium text-sm text-center uppercase;
-        @apply xl:text-base
+        @apply px-5 py-1.5 rounded-md bg-attendance-blue-100 text-attendance-blue-700 font-medium text-sm text-center uppercase transition-transform duration-100 ease-in-out;
+        @apply xl:text-base;
+        @apply hover:scale-95;
+        @apply active:scale-90;
     }
     .button.dark-blue{
         @apply bg-attendance-blue-700 text-white;
@@ -168,8 +170,8 @@
         @apply sm:h-[2px];
     }
     .functionality img{
-        @apply h-24;
-        @apply 2xl:h-32
+        @apply h-20;
+        @apply 2xl:h-28
     }
     .functionality h1{
         @apply font-bold;

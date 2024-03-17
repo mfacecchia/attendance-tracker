@@ -486,7 +486,7 @@ video {
   --tw-text-opacity: 1;
   color: rgb(148 163 184 / var(--tw-text-opacity));
 }
-    @media (min-width: 1536px) {
+    @media (min-width: 768px) {
 
   footer {
     padding-top: 1.75rem;
@@ -952,6 +952,9 @@ input, select {
   text-transform: uppercase;
   --tw-text-opacity: 1;
   color: rgb(0 39 85 / var(--tw-text-opacity));
+  transition-property: transform;
+  transition-duration: 100ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 @media (min-width: 1280px) {
 
@@ -959,6 +962,16 @@ input, select {
     font-size: 1rem;
     line-height: 1.5rem;
   }
+}
+.button:hover {
+  --tw-scale-x: .95;
+  --tw-scale-y: .95;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.button:active {
+  --tw-scale-x: .9;
+  --tw-scale-y: .9;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 .button.dark-blue {
   --tw-bg-opacity: 1;
@@ -1067,12 +1080,12 @@ input, select {
   }
 }
 .functionality img {
-  height: 6rem;
+  height: 5rem;
 }
 @media (min-width: 1536px) {
 
   .functionality img {
-    height: 8rem;
+    height: 7rem;
   }
 }
 .functionality h1 {
@@ -1216,6 +1229,9 @@ input, select {
 .mb-10 {
   margin-bottom: 2.5rem;
 }
+.mb-11 {
+  margin-bottom: 2.75rem;
+}
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -1228,11 +1244,11 @@ input, select {
 .mb-5 {
   margin-bottom: 1.25rem;
 }
-.mb-7 {
-  margin-bottom: 1.75rem;
-}
 .mt-1 {
   margin-top: 0.25rem;
+}
+.mt-11 {
+  margin-top: 2.75rem;
 }
 .mt-2 {
   margin-top: 0.5rem;
@@ -1382,8 +1398,8 @@ input, select {
     bottom: 0.5rem;
   }
 
-  .md\:mb-11 {
-    margin-bottom: 2.75rem;
+  .md\:w-1\/4 {
+    width: 25%;
   }
 }
 
@@ -1417,6 +1433,10 @@ input, select {
 
   .xl\:bottom-\[9px\] {
     bottom: 9px;
+  }
+
+  .xl\:w-1\/5 {
+    width: 20%;
   }
 
   .xl\:text-5xl {
