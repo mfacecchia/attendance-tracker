@@ -74,7 +74,7 @@ function updateBarChart(apiData){
 //Resiezes the bar chart legend font size based on the some set breakponts
 function resizeChart(){
     //Matrix containing every breakpoint to check for and the relative scale to apply to the chart
-    let breakpoints = [[1024, 14], [1280, 16], [1536, 18], [1920, 20], [3840, 30], [9999]];
+    let breakpoints = [[1024, 13], [1280, 14], [1536, 15], [1920, 15], [3840, 20], [9999]];
     //`breakpoints.every()` stops whenever the executed function returns `false`, in order to not overwhelm the user CPU
     breakpoints.every((breakpoint, index) => {
         //Iterating through each breakpoint and comparing those values with the client's brower size
