@@ -125,7 +125,9 @@
         @apply text-xs;
     }
     .action .button{
-        @apply p-1;
+        @apply p-1 transition-none;
+        @apply hover:scale-100;
+        @apply active:scale-100;
     }
     .button{
         @apply px-5 py-1.5 rounded-md bg-attendance-blue-100 text-attendance-blue-700 font-medium text-sm text-center uppercase transition-transform duration-100 ease-in-out;
