@@ -28,11 +28,10 @@ Gestione account
                         <p class = "button orange">Registra presenze</p>
                     </a>
                     {% else %}
-                    <div class = "top-box">
+                    <div class = "top-box no-anim">
                         <img src = "{{url_for('static', filename = 'assets/attendance.svg')}}">
                         {% if scheduledLessons %}
                             {% if scheduledLessons['Presenza'] %}
-                                <!-- TODO: Remove animation from button -->
                                 <p class = "button dark-blue">Presente</p>
                             {% else %}
                                 <p class = "button orange">Assente</p>

@@ -154,6 +154,11 @@
     .top-box{
         @apply flex flex-col justify-center items-center gap-2 w-full h-1/2 bg-white box-border p-2;
     }
+    .no-anim .button{
+        @apply transition-none;
+        @apply hover:scale-100;
+        @apply active:scale-100;
+    }
     .top-box img{
         @apply h-1/2;
     }
