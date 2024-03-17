@@ -23,7 +23,7 @@ Gestione account
             </div>
             <div class = "next-lesson">
                 {% if session['role'] in ['Admin', 'Insegnante'] %}
-                    <a class = "top-box" href = "{{url_for('manageLesson', id = scheduledLessons['idLezione'])}}">
+                    <a class = "top-box" href = "{{url_for('manageLesson', id = scheduledLessons['idLezione'] if scheduledLessons else 0)}}">
                         <img src = "{{url_for('static', filename = 'assets/attendance.svg')}}">
                         <p class = "button orange">Registra presenze</p>
                     </a>
@@ -36,9 +36,13 @@ Gestione account
                 {% endif %}
                 <div class = "lesson-description">
                     <b class = "text-sm">Prossima lezione:</b>
-                    <p class = "text-sm">{{scheduledLessons['Materia']}}</p>
-                    <p class = "text-sm">Aula {{scheduledLessons['aula']}}</p>
-                    <a class = "button dark-blue mt-2 2xl:mt-auto" href = "{{url_for('lessonsList')}}">Vedi tutte</a>
+                    {% if scheduledLessons %}
+                        <p class = "text-sm">{{scheduledLessons['Materia']}}</p>
+                        <p class = "text-sm">Aula {{scheduledLessons['aula']}}</p>
+                        <a class = "button dark-blue mt-2 2xl:mt-auto" href = "{{url_for('lessonsList')}}">Vedi tutte</a>
+                    {% else %}
+                        <p class = "text-sm">Nessuna lezione programmata</p>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -327,9 +327,12 @@ def userScreening():
                             where Utente.userID = %(uid)s', {'uid': session['uid']})
             response = getValuesFromQuery(cursor)
             connection.close()
-        #FIXME: Manage `None` response
-        #Getting the first lesson data only
-        scheduledLessons = getLessonsList()[0]
+        #Managing indexError (returning valuef rom `getLessonsList` is a list, so that would be impossible to obtain the `0` index value if it's empty)
+        try:
+            #Getting the first lesson data only
+            scheduledLessons = getLessonsList()[0]
+        except IndexError:
+            scheduledLessons = None
         return render_template('userScreening.html',
                             session = session,
                             helloMessage = getCustomMessage(),
@@ -520,8 +523,12 @@ def manageLesson():
         cursor = connection.cursor()
         #Validating lesson (can only select same date lessons)
         cursor.execute('select dataLezione from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
-        #FIXME: Manage `noneType` error
-        response = cursor.fetchone()[0]
+        #Managing possible `NoneType` if the lesson gets suddenly removed
+        try:
+            response = cursor.fetchone()[0]
+        except TypeError:
+            flash('Lezione non trovata.', 'Errore')
+            return redirect(url_for('userScreening'))
         if(response != date.today()):
             return redirect(url_for('userScreening'))
         cursor.execute('select Utente.userID, Nome, Cognome, Materia, dataLezione, Lezione.idLezione, Presenza\
