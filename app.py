@@ -682,6 +682,13 @@ def update_user_data():
         flash(commonErrorMessage, 'Errore')
     return(redirect(url_for('userScreening')))
 
+@app.route('/user/courses', methods = ['GET'])
+def userEnrolledCourses():
+    '''API returning a list of all selected teacher's enrolled courses\n
+    Takes as parameter the teacher's user id'''
+    selectedUserID = request.args.get('uid')
+    return jsonify(getUserEnrolledCourses(selectedUserID))
+
 @app.route('/user/logout')
 def logout():
     #Checking if session exists before clearing it
@@ -1184,7 +1191,7 @@ def reformatResponse(response):
         orderedResponse.append({'nomeCorso': f"{col['annoCorso']}a {col['nomeCorso']}", 'dataLezione': col['dataLezione'].strftime('%d/%m/%Y'), 'conteggioPresenze': col['conteggioPresenze']})
     return orderedResponse
 
-def getUserEnrolledCourses():
+def getUserEnrolledCourses(uid = None):
     '''Executes a query and gets all courses names and years based on userID\n
         Returns a list if the query returns valid values, else `False` if the connection to the database fails'''
     connection = connectToDB()
@@ -1195,7 +1202,7 @@ def getUserEnrolledCourses():
                     from Corso\
                     inner join Registrazione on Corso.idCorso = Registrazione.idCorso\
                     inner join Utente on Registrazione.userID = Utente.userID\
-                    where Utente.userID = %(uid)s', {'uid': session['uid']})
+                    where Utente.userID = %(uid)s', {'uid': uid if uid else session['uid']})
     response = getValuesFromQuery(cursor)
     responseList = []
     connection.close()
