@@ -94,10 +94,10 @@
     .formInputBox:focus{
         @apply border-2 border-blue-600;
     }
-    input::placeholder.formInputBox{
-        @apply text-slate-600;
+    input::placeholder.formInputBox, textarea::placeholder.formInputBox{
+        @apply text-slate-500;
     }
-    input, select{
+    input, select, textarea{
         @apply outline-none;
     }
     input[type='checkbox']{

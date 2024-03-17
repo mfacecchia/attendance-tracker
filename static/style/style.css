@@ -840,15 +840,15 @@ form img {
   --tw-border-opacity: 1;
   border-color: rgb(37 99 235 / var(--tw-border-opacity));
 }
-input.formInputBox::-moz-placeholder {
+input.formInputBox::-moz-placeholder, textarea.formInputBox::-moz-placeholder {
   --tw-text-opacity: 1;
-  color: rgb(71 85 105 / var(--tw-text-opacity));
+  color: rgb(100 116 139 / var(--tw-text-opacity));
 }
-input.formInputBox::placeholder {
+input.formInputBox::placeholder, textarea.formInputBox::placeholder {
   --tw-text-opacity: 1;
-  color: rgb(71 85 105 / var(--tw-text-opacity));
+  color: rgb(100 116 139 / var(--tw-text-opacity));
 }
-input, select {
+input, select, textarea {
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
@@ -1386,7 +1386,6 @@ input, select {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
-
 @media (min-width: 640px) {
 
   .sm\:bottom-\[8px\] {
@@ -1402,7 +1401,6 @@ input, select {
          column-gap: 0.5rem;
   }
 }
-
 @media (min-width: 768px) {
 
   .md\:bottom-2 {
@@ -1413,14 +1411,12 @@ input, select {
     width: 25%;
   }
 }
-
 @media (min-width: 900px) {
 
   .md2\:block {
     display: block;
   }
 }
-
 @media (min-width: 1024px) {
 
   .lg\:\!block {
@@ -1439,7 +1435,6 @@ input, select {
     flex-wrap: nowrap !important;
   }
 }
-
 @media (min-width: 1280px) {
 
   .xl\:bottom-\[9px\] {
@@ -1460,7 +1455,6 @@ input, select {
     line-height: 1.25rem;
   }
 }
-
 @media (min-width: 1536px) {
 
   .\32xl\:bottom-\[10px\] {
