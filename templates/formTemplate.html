@@ -1,0 +1,20 @@
+{% extends "template.html" %}
+
+{% block content %}
+    <form action = "{% block formAction %} {% endblock %}" method = "post" class = "formContainer">
+        <div class = "flex flex-col justify-center text-center">
+            {% block formImage %}
+                <img class = "h-24 mb-4" src = "{% block formImageSource %} {{url_for('static', filename = 'assets/update-password.svg')}} {% endblock %}">
+            {% endblock %}
+            <h1 class = "font-semibold">{% block formTitle %} Form title {% endblock %}</h1>
+            <p>{% block formSubtitle %} Form subtitle {% endblock %}</p>
+        </div>
+        {% block inputFields %}
+            <input class = "formInputBox" type = "text" placeholder = "Example text input">
+        {% endblock %}
+        <button class = "button dark-blue" type = "submit" name = "{% block buttonName %}{% endblock %}" value = "{% block buttonValue %}{% endblock %}">{% block submit %} Submit {% endblock %}</button>
+        {% block resetButton %}
+            <button class = "button slate" type = "reset">{% block reset %} Cancella {% endblock %}</button>
+        {% endblock %}
+    </form>
+{% endblock %}

@@ -11,10 +11,21 @@ const barChartConfig = {
                     precision: 0,
                 },
             }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    font: {
+                        size: 14
+                    }
+                }
+            }
         }
     }
 }
 var barChart = new Chart(barCanvas, barChartConfig);
+resizeChart()
+window.addEventListener('resize', resizeChart)
 
 function updateBarChart(apiData){
     //All courses names obtained from the API Response
@@ -58,4 +69,23 @@ function updateBarChart(apiData){
     barChart.data.labels = [...coursesDates];
     barChart.data.datasets = chartDatasets;
     barChart.update();
+}
+
+//Resiezes the bar chart legend font size based on the some set breakponts
+function resizeChart(){
+    //Matrix containing every breakpoint to check for and the relative scale to apply to the chart
+    let breakpoints = [[1024, 14], [1280, 16], [1536, 18], [1920, 20], [3840, 30], [9999]];
+    //`breakpoints.every()` stops whenever the executed function returns `false`, in order to not overwhelm the user CPU
+    breakpoints.every((breakpoint, index) => {
+        //Iterating through each breakpoint and comparing those values with the client's brower size
+        if(window.screen.width >= breakpoint[0] && window.screen.width < breakpoints[index + 1][0]){
+            //Applying the object defined value and updating the chartm then quitting the loop
+            barChart.options.plugins.legend.labels.font.size = breakpoint[1]
+            return false
+        }
+        else{
+            return true
+        }
+    });
+    barChart.update()
 }

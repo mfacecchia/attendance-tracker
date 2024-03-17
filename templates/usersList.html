@@ -1,19 +1,32 @@
-{% extends "index.html" %}
+{% extends "template.html" %}
 
 {% block title %}
 Lista utenti
 {% endblock %}
 
 {% block content %}
-    <h1>Clicca sul bottone per modificare i dati dell'utente</h1>
-    {% for user in users %}
-        <p>{{user['Nome']}} {{user['Cognome']}}, {{user['Tipologia']}} ({{user['annoCorso']}}a {{user['nomeCorso']}})</p>
-        <form action = "{{url_for('select_user')}}" method = "post">
-            <input type = "text" name = "userID" readonly hidden value = "{{user['userID']}}">
-            <button type = "submit" name = "submitButton" value = "Edit">Modifica</button>
-            <button type = "submit" name = "submitButton" value = "Remove">Elimina Utente</button>
-        </form>
-        <br><br>
-    {% endfor %}
-    <a href = "{{url_for('userScreening')}}">Torna indietro</a>
+    <div class = "tableContainer">
+        <table>
+            <tr>
+                <th>Studente</th>
+                <th>Gestione</th>
+            </tr>
+            {% for user in users %}
+                <tr>
+                    <td>
+                        <b>{{user['Tipologia']}}</b>
+                        <p>{{user['Nome']}}</p>
+                        <p>{{user['Cognome']}}</p>
+                    </td>
+                    <td>
+                        <form action = "{{url_for('select_user')}}" method = "post">
+                            <input type = "text" name = "userID" readonly hidden value = "{{user['userID']}}">                
+                            <button class = "button dark-blue" type = "submit" name = "submitButton" value = "Edit">Modifica</button>
+                            <button class = "button orange" type = "submit" name = "submitButton" value = "Remove">Elimina</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
 {% endblock %}

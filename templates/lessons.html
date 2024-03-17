@@ -1,0 +1,41 @@
+{% extends "template.html" %}
+
+{% block title %}
+Lezioni programmate
+{% endblock %}
+
+{% block content %}
+    {% if not scheduledLessons %}
+        <p>Nessuna lezione programmata</p>    
+    {% else %}
+        <div class = "tableContainer">
+            <table>
+                <tr>
+                    <th>Lezione</th>
+                    <th>Descrizione</th>
+                    {% if session['role'] in ['Admin', 'Insegnante'] %}
+                        <th>Gestione</th>
+                    {% endif %}
+                </tr>
+                {% for lesson in scheduledLessons %}
+                    <tr>
+                        <td>
+                            <b>{{lesson['nomeCorso']}}</b>
+                            <p>{{lesson['dataLezione']}}</p>
+                            <p>{{lesson['Materia']}}</p>
+                            <p>Aula {{lesson['aula']}}</p>
+                        </td>
+                        <td><p>{{lesson['Descrizione']}}</p></td>
+                        {% if session['role'] in ['Admin', 'Insegnante'] %}
+                            <td>
+                                {% if lesson['dataLezione'] == today %}
+                                    <a class = "button orange" href = "{{url_for('manageLesson', id = lesson['idLezione'])}}">Apri lezione</a>
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}
