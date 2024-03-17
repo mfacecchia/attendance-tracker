@@ -479,13 +479,20 @@ def createLesson():
                                     (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s), %(teacherID)s)', {'subjectName': subject, 'description': description, 'lessonDate': lessonDate, 'lessonRoom': lessonRoom, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear, 'teacherID': assignedTeacher})
                         connection.commit()
                         #Getting all users attending the lesson's course and adding them all to the `Partecipazione` table with default `Presenza` value (`0` or `False`)
-                        #FIXME: Set all users except administrators
                         usersList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
                         cursor.execute('select max(idLezione) from Lezione')
                         latestLesson = cursor.fetchone()[0]
                         for user in usersList:
                             cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(latestLessonID)s)', {'uid': user['userID'], 'latestLessonID': latestLesson})
                             connection.commit()
+                        #Removing all other teachers from the lesson attendance count and leaving just the assigned teacher
+                        cursor.execute('delete Partecipazione\
+                                        from Partecipazione\
+                                        inner join Utente on Utente.userID = Partecipazione.userID\
+                                        where Utente.userID != %(teacherUID)s\
+                                        and Tipologia = "Insegnante"\
+                                        and Partecipazione.idLezione = %(lessonID)s', {'teacherUID': assignedTeacher, 'lessonID': latestLesson})
+                        connection.commit()
                         connection.close()
                         flash('Lezione creata con successo.', 'Successo')
                         return redirect(url_for('createLesson'))
@@ -1159,7 +1166,8 @@ def selectUsersFromCourse(courseName, courseYear):
                     from Corso\
                     inner join Registrazione on Registrazione.idCorso = Corso.idCorso\
                     inner join Utente on Utente.userID = Registrazione.userID\
-                    where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s', {'courseName': courseName, 'courseYear': courseYear})
+                    where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s\
+                    and Utente.Tipologia in ("Studente", "Insegnante")', {'courseName': courseName, 'courseYear': courseYear})
     response = getValuesFromQuery(cursor)
     connection.close()
     return response
