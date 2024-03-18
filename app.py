@@ -513,12 +513,13 @@ def lessonsList():
     if(session.get('name')):
         try:
             page = int(request.args.get('page')) or 1
+        #Returning to page 1 if the page requedted in the URL is malformed (example chars instead of numbers)
         except ValueError:
             page = 1
-            #TODO: Redirect with correct URL
+            return redirect(url_for('lessonsList', page = page))
         #Correcting the `page` parameter if the input value is lower or equal than 0
         if(page <= 0):
-            page *= -1
+            page = 1
             #Redirecting to same URL with correct `page` param
             return redirect(url_for('lessonsList', page = page))
         #Showing 10 elements per page
