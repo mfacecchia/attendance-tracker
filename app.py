@@ -517,17 +517,25 @@ def lessonsList():
     flash('Devi prima fare il login.', 'Errore')
     return redirect(url_for('login'))
 
-@app.route('/lesson', methods = ['GET'])
+@app.route('/lesson', methods = ['GET', 'POST'])
 def manageLesson():
     if(session.get('role') in ['Admin', 'Insegnante']):
         try:
-            lessonID = int(request.args.get('id'))
+            lessonID = int(request.form.get('lessonID'))
         except ValueError:
+            flash('Lezione non trovata.', 'Errore')
             return redirect(url_for('lessonsList'))
         connection = connectToDB()
         if not connection:
             return redirect(url_for('index'))
         cursor = connection.cursor()
+        #Checking the user required action and removing the selected lesson from the database if the submit button's value is `Remove`
+        if(request.form.get('submitButton') == 'Remove'):
+            cursor.execute('delete from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
+            connection.commit()
+            flash('Lezione eliminata con successo.', 'Successo')
+            return redirect(url_for('lessonsList'))
+        #Proceeding with entering the lesson management page if the user clicked on the `Manage` button
         #Validating lesson (can only select same date lessons)
         cursor.execute('select dataLezione from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
         #Managing possible `NoneType` if the lesson gets suddenly removed
