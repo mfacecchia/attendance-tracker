@@ -476,7 +476,7 @@ def createLesson():
                         connection = connectToDB()
                         cursor = connection.cursor()
                         cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso, idInsegnante) values\
-                                    (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s), %(teacherID)s)', {'subjectName': subject, 'description': description, 'lessonDate': lessonDate, 'lessonRoom': lessonRoom, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear, 'teacherID': assignedTeacher})
+                                        (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s), %(teacherID)s)', {'subjectName': subject, 'description': description, 'lessonDate': lessonDate, 'lessonRoom': lessonRoom, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear, 'teacherID': assignedTeacher})
                         connection.commit()
                         #Getting all users attending the lesson's course and adding them all to the `Partecipazione` table with default `Presenza` value (`0` or `False`)
                         usersList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
@@ -1092,7 +1092,7 @@ def getLessonsList():
     cursor = connection.cursor()
     #Default query for all user types
     preparedQuery = [
-        'select distinct(Materia), Lezione.idLezione, Descrizione, dataLezione, aula, Tipologia, nomeCorso, annoCorso, Presenza\
+        'select Lezione.idLezione, Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso, annoCorso, Presenza\
         from Lezione\
         inner join Corso on Corso.idCorso = Lezione.idCorso\
         inner join Partecipazione on Partecipazione.idLezione = Lezione.idLezione\
@@ -1112,7 +1112,8 @@ def getLessonsList():
         preparedQuery[0] += ' and idInsegnante = %(teacherID)s'
         preparedQuery[1].setdefault('teacherID', session['uid'])
     #Adding the last SQL directives
-    preparedQuery[0] += ' order by dataLezione, Materia asc'
+    preparedQuery[0] += ' group by Lezione.idLezione\
+                        order by dataLezione, Materia asc'
     cursor.execute(*preparedQuery)
     response = getValuesFromQuery(cursor)
     #Converting all gotten dates to a more user friendly format
