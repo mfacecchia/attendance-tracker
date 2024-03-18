@@ -542,8 +542,9 @@ def lessonsList():
 def manageLesson():
     if(session.get('role') in ['Admin', 'Insegnante']):
         try:
-            lessonID = int(request.form.get('lessonID'))
-        except ValueError:
+            #Getting the lesson id value from the  lessons list as `POST` and from the register attendances function as `GET`
+            lessonID = int(request.values.get('id'))
+        except (ValueError, TypeError):
             flash('Lezione non trovata.', 'Errore')
             return redirect(url_for('lessonsList'))
         connection = connectToDB()

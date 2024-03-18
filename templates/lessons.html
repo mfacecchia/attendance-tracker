@@ -25,7 +25,7 @@ Lezioni programmate
                     <td><p>{{lesson['Descrizione']}}</p></td>
                     {% if session['role'] in ['Admin', 'Insegnante'] %}
                         <form action = "{{url_for('manageLesson')}}" method = "post">
-                            <input type = "text" name = "lessonID" readonly hidden value = "{{lesson['idLezione']}}">
+                            <input type = "text" name = "id" readonly hidden value = "{{lesson['idLezione']}}">
                             <td>
                                 {% if lesson['dataLezione'] == today %}
                                     <button class = "button dark-blue" type = "submit" name = "submitButton" value = "Manage">Apri lezione</button>
