@@ -582,14 +582,10 @@ def registerAttendances():
 @app.route('/lesson/attendances', methods = ['GET'])
 def getAttendancesCount():
     '''API that returns the list of all attended courses attendances count'''
-    #TODO: Remove condition
-    if(session.get('role') in ['Admin', 'Insegnante']):
-        try:
-            return getLessonsAttendancesCount(int(request.args.get('range')))
-        except ValueError:
-            return getLessonsAttendancesCount()
-    else:
-        return []
+    try:
+        return getLessonsAttendancesCount(int(request.args.get('range')))
+    except ValueError:
+        return getLessonsAttendancesCount()
 
 @app.route('/lesson/attendances/percentage', methods = ['GET'])
 def getAttendancesPercentage():
