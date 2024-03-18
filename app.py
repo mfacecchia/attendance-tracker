@@ -507,10 +507,20 @@ def createLesson():
         flash(commonErrorMessage, 'Errore')
     return redirect(url_for('login'))
 
-@app.route('/lesson/list')
+@app.route('/lesson/list', methods = ['GET'])
 def lessonsList():
-    scheduledLessons = getLessonsList()
     if(session.get('name')):
+        try:
+            page = int(request.args.get('page')) or 1
+        except ValueError:
+            page = 1
+        #Correcting the `page` parameter if the input value is lower or equal than 0
+        if(page <= 0):
+            page *= -1
+            #Redirecting to same URL with correct `page` param
+            return redirect(url_for('lessonsList', page = page))
+        #Showing 10 elements per page
+        scheduledLessons = getLessonsList(10, page)
         return render_template('lessons.html',
                                 scheduledLessons = scheduledLessons,
                                 today = date.today().strftime('%d/%m/%Y'))
@@ -1093,7 +1103,7 @@ def deleteUser(uid):
     connection.commit()
     connection.close()
 
-def getLessonsList():
+def getLessonsList(limit = None, page = 1):
     connection = connectToDB()
     if(not connection):
         return False
@@ -1122,6 +1132,12 @@ def getLessonsList():
     #Adding the last SQL directives
     preparedQuery[0] += ' group by Lezione.idLezione\
                         order by dataLezione, Materia asc'
+    #Calculating the starting and ending limit for SQL query and returning the data relative to selected page
+    if(limit):
+        startLimit = limit * page - limit
+        preparedQuery[0] += " limit %(startLimit)s, %(nOfElements)s"
+        preparedQuery[1].setdefault('startLimit', startLimit)
+        preparedQuery[1].setdefault('nOfElements', limit)
     cursor.execute(*preparedQuery)
     response = getValuesFromQuery(cursor)
     #Converting all gotten dates to a more user friendly format

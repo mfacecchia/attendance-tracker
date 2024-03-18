@@ -46,7 +46,7 @@ Gestione account
                     {% if scheduledLessons %}
                         <p class = "text-sm">{{scheduledLessons['Materia']}}</p>
                         <p class = "text-sm">Aula {{scheduledLessons['aula']}}</p>
-                        <a class = "button dark-blue mt-2 2xl:mt-auto" href = "{{url_for('lessonsList')}}">Vedi tutte</a>
+                        <a class = "button dark-blue mt-2 2xl:mt-auto" href = "{{url_for('lessonsList', page = 1)}}">Vedi tutte</a>
                     {% else %}
                         <p class = "text-sm">Nessuna lezione programmata</p>
                     {% endif %}
