@@ -100,11 +100,11 @@ Gestione account
 
     {% if session.get('role') in ['Admin', 'Insegnante'] %}
         <h1 class = "text-center" id = "chartTitle">👨‍🎓 Presenze studenti negli ultimi 7 giorni 📊</h1>
-        <canvas class = "!hidden my-5 mb-10 lg:!block" id = "attendanceStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
+        <canvas class = "!hidden mt-5 mb-10 lg:!block" id = "attendanceStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
         <div class = "container my-5 text-center lg:hidden">
             <p>Per vedere questo grafico apri la pagina su un Tablet, laptop o PC Desktop</p>
         </div>
-        <div class = "hidden flex-wrap gap-2 justify-center items-center lg:flex">
+        <div class = "hidden mb-16 flex-wrap gap-2 justify-center items-center lg:flex">
             <button class = "button updateRange" value = '7'>7 Giorni</button>
             <button class = "button updateRange" value = '14'>14 Giorni</button>
             <button class = "button updateRange" value = '30'>1 Mese</button>

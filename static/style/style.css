@@ -1283,6 +1283,9 @@ input, select, textarea {
 .mt-5 {
   margin-top: 1.25rem;
 }
+.mb-16 {
+  margin-bottom: 4rem;
+}
 .block {
   display: block;
 }
@@ -1399,6 +1402,7 @@ input, select, textarea {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
+
 @media (min-width: 640px) {
 
   .sm\:bottom-\[8px\] {
@@ -1414,6 +1418,7 @@ input, select, textarea {
          column-gap: 0.5rem;
   }
 }
+
 @media (min-width: 768px) {
 
   .md\:bottom-2 {
@@ -1424,12 +1429,14 @@ input, select, textarea {
     width: 25%;
   }
 }
+
 @media (min-width: 900px) {
 
   .md2\:block {
     display: block;
   }
 }
+
 @media (min-width: 1024px) {
 
   .lg\:\!block {
@@ -1448,6 +1455,7 @@ input, select, textarea {
     flex-wrap: nowrap !important;
   }
 }
+
 @media (min-width: 1280px) {
 
   .xl\:bottom-\[9px\] {
@@ -1468,6 +1476,7 @@ input, select, textarea {
     line-height: 1.25rem;
   }
 }
+
 @media (min-width: 1536px) {
 
   .\32xl\:bottom-\[10px\] {
