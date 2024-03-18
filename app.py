@@ -11,6 +11,7 @@ from datetime import datetime, date, timedelta
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from binascii import Error as conversionError
 from os import environ
+from math import ceil
 
 app = Flask(__name__)
 oauth = OAuth(app)
@@ -330,7 +331,7 @@ def userScreening():
         #Managing indexError (returning valuef rom `getLessonsList` is a list, so that would be impossible to obtain the `0` index value if it's empty)
         try:
             #Getting the first lesson data only
-            scheduledLessons = getLessonsList()[0]
+            scheduledLessons = getLessonsList()[0][0]
         except IndexError:
             scheduledLessons = None
         return render_template('userScreening.html',
@@ -520,12 +521,14 @@ def lessonsList():
             #Redirecting to same URL with correct `page` param
             return redirect(url_for('lessonsList', page = page))
         #Showing 10 elements per page
-        scheduledLessons = getLessonsList(10, page)
-        #TODO: Add total pages count through a `select count(*)` query
+        scheduledLessons, totalLessons = getLessonsList(10, page)
+        #Calculating the total number of pages based on the total number of lessons
+        totalPages = ceil(totalLessons / 10)
         return render_template('lessons.html',
                                 scheduledLessons = scheduledLessons,
                                 today = date.today().strftime('%d/%m/%Y'),
-                                page = page
+                                page = page,
+                                totalPages = totalPages
                             )
     flash('Devi prima fare il login.', 'Errore')
     return redirect(url_for('login'))
@@ -1107,6 +1110,8 @@ def deleteUser(uid):
     connection.close()
 
 def getLessonsList(limit = None, page = 1):
+    '''Executes a query and returns all the upcoming lessons based on user type and enrolled courses filters\n
+    Takes as parameters a `limit` variable used to limit the number of results and a `page` variable used to get the next `limit`ed results'''
     connection = connectToDB()
     if(not connection):
         return False
@@ -1135,14 +1140,19 @@ def getLessonsList(limit = None, page = 1):
     #Adding the last SQL directives
     preparedQuery[0] += ' group by Lezione.idLezione\
                         order by dataLezione, Materia asc'
+    #Executing the query in order to obtain the total number of lessons and their relative data and eventually executing it again if it needs to be limited
+    cursor.execute(*preparedQuery)
+    response = getValuesFromQuery(cursor)
+    totalLessons = len(response)
     #Calculating the starting and ending limit for SQL query and returning the data relative to selected page
     if(limit):
+        #TODO: Don't execute the query again but limit the responses range based on the already obtained list
         startLimit = limit * page - limit
         preparedQuery[0] += " limit %(startLimit)s, %(nOfElements)s"
         preparedQuery[1].setdefault('startLimit', startLimit)
         preparedQuery[1].setdefault('nOfElements', limit)
-    cursor.execute(*preparedQuery)
-    response = getValuesFromQuery(cursor)
+        cursor.execute(*preparedQuery)
+        response = getValuesFromQuery(cursor)
     #Converting all gotten dates to a more user friendly format
     for lesson in response:
         lesson['dataLezione'] = lesson['dataLezione'].strftime('%d/%m/%Y')
@@ -1150,7 +1160,7 @@ def getLessonsList(limit = None, page = 1):
         lesson['nomeCorso'] = f"{lesson['annoCorso']}a {lesson['nomeCorso']}"
         lesson.pop('annoCorso')
     connection.close()
-    return response
+    return [response, totalLessons]
 
 def verifyUserExistence(userEmail, userID = None):
     '''Verifies if the user exists before sending the recover password email.\n
