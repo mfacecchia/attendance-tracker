@@ -521,9 +521,12 @@ def lessonsList():
             return redirect(url_for('lessonsList', page = page))
         #Showing 10 elements per page
         scheduledLessons = getLessonsList(10, page)
+        #TODO: Add total pages count through a `select count(*)` query
         return render_template('lessons.html',
                                 scheduledLessons = scheduledLessons,
-                                today = date.today().strftime('%d/%m/%Y'))
+                                today = date.today().strftime('%d/%m/%Y'),
+                                page = page
+                            )
     flash('Devi prima fare il login.', 'Errore')
     return redirect(url_for('login'))
 
