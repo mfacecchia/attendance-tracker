@@ -515,6 +515,7 @@ def lessonsList():
             page = int(request.args.get('page')) or 1
         except ValueError:
             page = 1
+            #TODO: Redirect with correct URL
         #Correcting the `page` parameter if the input value is lower or equal than 0
         if(page <= 0):
             page *= -1
@@ -524,6 +525,9 @@ def lessonsList():
         scheduledLessons, totalLessons = getLessonsList(10, page)
         #Calculating the total number of pages based on the total number of lessons
         totalPages = ceil(totalLessons / 10)
+        #Redirecting to last page if the chosen page contains no lessons (e.g. empty list)
+        if not scheduledLessons:
+            return redirect(url_for('lessonsList', page = totalPages))
         return render_template('lessons.html',
                                 scheduledLessons = scheduledLessons,
                                 today = date.today().strftime('%d/%m/%Y'),
