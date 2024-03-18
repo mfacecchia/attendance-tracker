@@ -63,7 +63,7 @@ Gestione account
                 <p class = "button orange">Crea corso</p>
             </a>
             <div class = "hidden md2:block break"></div>
-            <a class = "action" href = "{{url_for('usersList')}}">
+            <a class = "action" href = "{{url_for('usersList', page = 1)}}">
                 <img src = "{{url_for('static', filename = 'assets/users.svg')}}">
                 <p class = "button orange">Lista utenti</p>
             </a>

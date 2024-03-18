@@ -514,7 +514,7 @@ def lessonsList():
         try:
             page = int(request.args.get('page')) or 1
         #Returning to page 1 if the page requedted in the URL is malformed (example chars instead of numbers)
-        except ValueError:
+        except (ValueError, TypeError):
             page = 1
             return redirect(url_for('lessonsList', page = page))
         #Correcting the `page` parameter if the input value is lower or equal than 0
@@ -686,11 +686,32 @@ def updateUserInfo():
         flash('Devi prima fare il login.', 'Errore')
         return redirect(url_for('login'))
 
-@app.route('/user/list')
+@app.route('/user/list', methods = ['GET'])
 def usersList():
     if(session.get('role') == 'Admin'):
-        usersList = getUsersList()
-        return render_template('usersList.html', users = usersList)
+        #TODO: Make page validation in a function
+        try:
+            page = int(request.args.get('page')) or 1
+        #Returning to page 1 if the page requedted in the URL is malformed (example chars instead of numbers or `page` param not provided in URL)
+        except (ValueError, TypeError):
+            page = 1
+            return redirect(url_for('usersList', page = page))
+        #Correcting the `page` parameter if the input value is lower or equal than 0
+        if(page <= 0):
+            page = 1
+            #Redirecting to same URL with correct `page` param
+            return redirect(url_for('usersList', page = page))
+        #Calculating the total number of pages based on the total number of lessons
+        usersList, totalUsers = getUsersList(10, page)
+        totalPages = ceil(totalUsers / 10)
+        #Redirecting to last page if the chosen page contains no lessons (e.g. empty list)
+        if not usersList:
+            return redirect(url_for('usersList', page = totalPages))
+        return render_template('usersList.html',
+                                users = usersList,
+                                page = page,
+                                totalPages = totalPages
+                            )
 
 @app.route('/user/select', methods = ['GET', 'POST'])
 def select_user():
@@ -929,7 +950,7 @@ def validateFormInput(*args):
             return False
     return True
 
-def getUsersList():
+def getUsersList(limit = None, page = 1):
     '''Obtains all users from the database and returns a matrix'''
     connection = connectToDB()
     if(not connection):
@@ -941,8 +962,14 @@ def getUsersList():
                     inner join Corso on Registrazione.idCorso = Corso.idCorso\
                     group by(userID)")
     usersList = getValuesFromQuery(cursor)
+    totalUsers = len(usersList)
     connection.close()
-    return usersList
+    if(limit):
+        endLimit = limit * page
+        startLimit = endLimit - limit
+        #Modelling the list in order to return only the needed range of lessons
+        usersList = usersList[startLimit:endLimit]
+    return [usersList, totalUsers]
 
 def getUserData(uid):
     connection = connectToDB()
