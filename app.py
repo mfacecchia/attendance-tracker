@@ -1140,19 +1140,16 @@ def getLessonsList(limit = None, page = 1):
     #Adding the last SQL directives
     preparedQuery[0] += ' group by Lezione.idLezione\
                         order by dataLezione, Materia asc'
-    #Executing the query in order to obtain the total number of lessons and their relative data and eventually executing it again if it needs to be limited
+    #Executing the query in order to obtain the total number of lessons and their relative data and eventually modifying the list if it needs to be limited
     cursor.execute(*preparedQuery)
     response = getValuesFromQuery(cursor)
     totalLessons = len(response)
     #Calculating the starting and ending limit for SQL query and returning the data relative to selected page
     if(limit):
-        #TODO: Don't execute the query again but limit the responses range based on the already obtained list
-        startLimit = limit * page - limit
-        preparedQuery[0] += " limit %(startLimit)s, %(nOfElements)s"
-        preparedQuery[1].setdefault('startLimit', startLimit)
-        preparedQuery[1].setdefault('nOfElements', limit)
-        cursor.execute(*preparedQuery)
-        response = getValuesFromQuery(cursor)
+        endLimit = limit * page
+        startLimit = endLimit - limit
+        #Modelling the list in order to return only the needed range of lessons
+        response = response[startLimit:endLimit]
     #Converting all gotten dates to a more user friendly format
     for lesson in response:
         lesson['dataLezione'] = lesson['dataLezione'].strftime('%d/%m/%Y')
