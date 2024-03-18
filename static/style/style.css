@@ -756,14 +756,14 @@ body {
   padding-left: 1.25rem;
   padding-right: 1.25rem;
   padding-top: 5rem;
-  padding-bottom: 12rem;
+  padding-bottom: 14rem;
 }
 @media (min-width: 1024px) {
 
   body {
     padding-left: 2.75rem;
     padding-right: 2.75rem;
-    padding-top: 10rem;
+    padding-top: 9rem;
   }
 }
 @media (min-width: 1280px) {
@@ -1425,7 +1425,6 @@ input, select, textarea {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
-
 @media (min-width: 640px) {
 
   .sm\:bottom-\[8px\] {
@@ -1441,7 +1440,6 @@ input, select, textarea {
          column-gap: 0.5rem;
   }
 }
-
 @media (min-width: 768px) {
 
   .md\:bottom-2 {
@@ -1452,14 +1450,12 @@ input, select, textarea {
     width: 25%;
   }
 }
-
 @media (min-width: 900px) {
 
   .md2\:block {
     display: block;
   }
 }
-
 @media (min-width: 1024px) {
 
   .lg\:\!block {
@@ -1478,7 +1474,6 @@ input, select, textarea {
     flex-wrap: nowrap !important;
   }
 }
-
 @media (min-width: 1280px) {
 
   .xl\:bottom-\[9px\] {
@@ -1499,7 +1494,6 @@ input, select, textarea {
     line-height: 1.25rem;
   }
 }
-
 @media (min-width: 1536px) {
 
   .\32xl\:bottom-\[10px\] {
