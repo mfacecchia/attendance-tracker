@@ -5,41 +5,52 @@ Lezioni programmate
 {% endblock %}
 
 {% block content %}
-    {% if not scheduledLessons %}
-        <p>Nessuna lezione programmata</p>    
-    {% else %}
-        <div class = "tableContainer">
-            <table>
-                <tr>
-                    <th>Lezione</th>
-                    <th>Descrizione</th>
-                    {% if session['role'] in ['Admin', 'Insegnante'] %}
-                        <th>Gestione</th>
-                    {% endif %}
-                </tr>
-                {% for lesson in scheduledLessons %}
+    <section class = "flex flex-col justify-center items-center min-h-screen w-full">
+        {% if not scheduledLessons %}
+            <p>Nessuna lezione trovata</p>    
+        {% else %}
+            <div class = "tableContainer">
+                <table>
                     <tr>
-                        <td>
-                            <b>{{lesson['nomeCorso']}}</b>
-                            <p>{{lesson['dataLezione']}}</p>
-                            <p>{{lesson['Materia']}}</p>
-                            <p>Aula {{lesson['aula']}}</p>
-                        </td>
-                        <td><p>{{lesson['Descrizione']}}</p></td>
+                        <th>Lezione</th>
+                        <th>Descrizione</th>
                         {% if session['role'] in ['Admin', 'Insegnante'] %}
-                            <form action = "{{url_for('manageLesson')}}" method = "post">
-                                <input type = "text" name = "lessonID" readonly hidden value = "{{lesson['idLezione']}}">
-                                <td>
-                                    {% if lesson['dataLezione'] == today %}
-                                        <button class = "button dark-blue" type = "submit" name = "submitButton" value = "Manage">Apri lezione</button>
-                                        {% endif %}
-                                    <button class = "button orange" type = "submit" name = "submitButton" value = "Remove">Elimina</button>
-                                </td>
-                            </form>
+                            <th>Gestione</th>
                         {% endif %}
-                    </td>
-                {% endfor %}
-            </table>
-        </div>
-    {% endif %}
+                    </tr>
+                    {% for lesson in scheduledLessons %}
+                        <tr>
+                            <td>
+                                <b>{{lesson['nomeCorso']}}</b>
+                                <p>{{lesson['dataLezione']}}</p>
+                                <p>{{lesson['Materia']}}</p>
+                                <p>Aula {{lesson['aula']}}</p>
+                            </td>
+                            <td><p>{{lesson['Descrizione']}}</p></td>
+                            {% if session['role'] in ['Admin', 'Insegnante'] %}
+                                <form action = "{{url_for('manageLesson')}}" method = "post">
+                                    <input type = "text" name = "lessonID" readonly hidden value = "{{lesson['idLezione']}}">
+                                    <td>
+                                        {% if lesson['dataLezione'] == today %}
+                                            <button class = "button dark-blue" type = "submit" name = "submitButton" value = "Manage">Apri lezione</button>
+                                            {% endif %}
+                                        <button class = "button orange" type = "submit" name = "submitButton" value = "Remove">Elimina</button>
+                                    </td>
+                                </form>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endif %}
+        <form class = "tablePagesForm" action = "{{url_for('lessonsList')}}" method = 'get'>
+            <a href = "{{url_for('lessonsList', page = page - 1 if page - 1 > 0 else 1)}}">
+                <img class = "rotate-180" src = "{{url_for('static', filename = 'assets/arrow.svg')}}">
+            </a>
+            <input class = "formInputBox w-11 text-center" type = "text" name = "page" value = "{{page}}" pattern = "[0-9]+">
+            <a href = "{{url_for('lessonsList', page = page + 1)}}">
+                <img src = "{{url_for('static', filename = 'assets/arrow.svg')}}">
+            </a>
+        </form>
+    </section>
 {% endblock %}

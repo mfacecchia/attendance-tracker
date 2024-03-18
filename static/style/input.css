@@ -219,4 +219,13 @@
     .break{
         @apply basis-full w-0;
     }
+    .tablePagesForm{
+        @apply flex items-center gap-5 h-11 mt-5;
+    }
+    .tablePagesForm a{
+        @apply h-1/2;
+    }
+    .tablePagesForm a img{
+        @apply h-full;
+    }
 }
