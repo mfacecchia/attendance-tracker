@@ -111,8 +111,8 @@ Gestione account
         </div>
     {% endif %}
     
-    {% if session.get('role') == 'Studente' %}
-        <h1 class = "text-center" id = "percChartTitle">👨‍🎓 Percentuale presenze negli ultimi 7 giorni 🥧</h1>
+    {% if session.get('role') in ['Studente', 'Insegnante'] %}
+        <h1 class = "text-center" id = "percChartTitle">👨‍🏫 Percentuale presenze negli ultimi 7 giorni 👨‍🎓</h1>
         <canvas id = "attendancePercentageStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
         <div class = "flex flex-wrap gap-2 justify-center items-center">
             <button class = "button percUpdateRange" value = '7'>7 Giorni</button>
@@ -151,7 +151,7 @@ Gestione account
         </script>
     {% endif %}
 
-    {% if session.get('role') == 'Studente' %}
+    {% if session.get('role') in ['Studente', 'Insegnante'] %}
         <script src = "{{url_for('static', filename = 'script/pie.js')}}"></script>
         <script>
             updatePieChartRange()
@@ -171,7 +171,7 @@ Gestione account
                     data: {'range': range},
                     success: function(response){
                         updatePieChart(response);
-                        document.querySelector('#percChartTitle').textContent = `👨‍🎓 Percentuale presenze negli ultimi ${range} giorni 🥧`
+                        document.querySelector('#percChartTitle').textContent = `👨‍🏫 Percentuale presenze negli ultimi ${range} giorni 👨‍🎓`
                     }
                 })
             }
