@@ -17,4 +17,7 @@
             <button class = "button slate" type = "reset">{% block reset %} Cancella {% endblock %}</button>
         {% endblock %}
     </form>
+    {% block backButton %}
+        <a class = "button dark-blue mt-7" href = "{% block backButtonURL %}{{url_for('userScreening')}}{% endblock %}">Torna indietro</a>
+    {% endblock %}
 {% endblock %}

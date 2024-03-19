@@ -17,6 +17,7 @@ app = Flask(__name__)
 oauth = OAuth(app)
 
 app.config['SECRET_KEY'] = environ['FLASK_SECRET']
+#TODO: Remove session type
 app.config['SESSION_TYPE'] = 'filesystem'
 
 app.config['MAIL_SERVER'] = environ['MAIL_SERVER']
