@@ -1,0 +1,25 @@
+{% extends "template.html" %}
+
+{% block content %}
+    {% block table %}{% endblock %}
+    {% block pages %}
+        <form class = "tablePagesForm" action = "{{url_for(url)}}" method = 'get'>
+            <a href = "{{url_for(url, page = 1)}}">
+                <img class = "rotate-180" src = "{{url_for('static', filename = 'assets/double-arrow.svg')}}">
+            </a>
+            <a href = "{{url_for(url, page = page - 1 if page - 1 > 0 else totalPages)}}">
+                <img class = "rotate-180" src = "{{url_for('static', filename = 'assets/arrow.svg')}}">
+            </a>
+            <input class = "formInputBox w-11 text-center" type = "text" name = "page" value = "{{page}}" pattern = "[0-9]+">
+            <a href = "{{url_for(url, page = page + 1 if page + 1 <= totalPages else 1)}}">
+                <img src = "{{url_for('static', filename = 'assets/arrow.svg')}}">
+            </a>
+            <a href = "{{url_for(url, page = totalPages)}}">
+                <img src = "{{url_for('static', filename = 'assets/double-arrow.svg')}}">
+            </a>
+        </form>
+    {% endblock %}
+    {% block backButton %}
+        <a class = "button dark-blue mt-7" href = "{% block backButtonURL %}{{url_for('userScreening')}}{% endblock %}">Torna indietro</a>
+    {% endblock %}
+{% endblock %}
