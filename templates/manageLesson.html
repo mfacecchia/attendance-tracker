@@ -1,5 +1,6 @@
 {% extends "template.html" %}
 
+{% block bodyProperties %}onload = "getCheckboxes()"{% endblock %}
 {% block content %}
     <h1 class = "text-center mb-5">👨‍🏫 Lezione di {{lessonInfo[0]['Materia']}} del {{lessonInfo[0]['dataLezione']}} 📚</h1>
     <form class = "tableContainer flex flex-col items-center" action = "{{url_for('registerAttendances')}}" method = "post">
@@ -33,36 +34,8 @@
         <button class = "button mt-5" type = "submit" name = "registerAttendance" value = "{{lessonInfo[0]['idLezione']}}">Registra lezioni</button>
     </form>
     <a class = "button dark-blue mt-7" href = "{{url_for('lessonsList')}}">Torna indietro</a>
-    <!-- TODO: Move this to external script -->
-    <script>
-        //Getting all checkboxes from table
-        checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        
-        //Updating the parents' values (label wrapping all checkboxes) and setting an event listener for each checkbox
-        checkboxes.forEach(checkbox => {
-            updateButtonStyle(checkbox.value, checkbox.checked);
-            checkbox.addEventListener('change', updateButtonStyling);
-        })
+{% endblock %}
 
-        function updateButtonStyling(event){
-            //Passing as functions parameters the value (repesenting the same value of label's ID) and a boolean value representing the checkbox state
-            updateButtonStyle(event.target.value, event.target.checked);
-        }
-        
-        //Updates the button background color and text by manipulating classes
-        function updateButtonStyle(element, present = false){
-            var label = document.getElementById(element)
-            //If the checked value is `True` the button becomes blue and updates the label text (childNode 2)
-            if(present){
-                label.classList.add('dark-blue');
-                label.classList.remove('orange');
-                label.childNodes[2].textContent = 'Presente';
-            }
-            else{
-                label.classList.add('orange');
-                label.classList.remove('dark-blue');
-                label.childNodes[2].textContent = 'Assente';
-            }
-        }
-    </script>
+{% block script %}
+    <script src = "../static/script/formsManagement.js"></script>
 {% endblock %}

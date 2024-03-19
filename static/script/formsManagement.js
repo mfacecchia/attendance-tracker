@@ -1,3 +1,35 @@
+function getCheckboxes(){
+    //Getting all checkboxes from the table
+    let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            
+    //Updating the parents' values (label wrapping all checkboxes) and setting an event listener for each checkbox
+    checkboxes.forEach(checkbox => {
+        updateButtonStyle(checkbox.value, checkbox.checked);
+        checkbox.addEventListener('change', updateAttendancesStatus);
+    });
+}
+
+function updateAttendancesStatus(event){
+    //Passing as functions parameters the value (repesenting the same value of label's ID) and a boolean value representing the checkbox state
+    updateButtonStyle(event.target.value, event.target.checked);
+}
+
+//Updates the button background color and text by manipulating classes
+function updateButtonStyle(element, present = false){
+    var label = document.getElementById(element)
+    //If the checked value is `True` the button becomes blue and updates the label text (childNode 2)
+    if(present){
+        label.classList.add('dark-blue');
+        label.classList.remove('orange');
+        label.childNodes[2].textContent = 'Presente';
+    }
+    else{
+        label.classList.add('orange');
+        label.classList.remove('dark-blue');
+        label.childNodes[2].textContent = 'Assente';
+    }
+}
+
 function getTeacherID(){
     //Returns the selected teacher value from `select option` DOM element
     let select = document.getElementsByName('assignedTeacher')[0]
