@@ -511,17 +511,9 @@ def createLesson():
 @app.route('/lesson/list', methods = ['GET'])
 def lessonsList():
     if(session.get('name')):
-        try:
-            page = int(request.args.get('page')) or 1
-        #Returning to page 1 if the page requedted in the URL is malformed (example chars instead of numbers)
-        except (ValueError, TypeError):
-            page = 1
-            return redirect(url_for('lessonsList', page = page))
-        #Correcting the `page` parameter if the input value is lower or equal than 0
-        if(page <= 0):
-            page = 1
-            #Redirecting to same URL with correct `page` param
-            return redirect(url_for('lessonsList', page = page))
+        page = validatePageInput()
+        if not page:
+            return redirect(url_for('lessonsList', page = 1))
         #Showing 10 elements per page
         scheduledLessons, totalLessons = getLessonsList(10, page)
         #Calculating the total number of pages based on the total number of lessons
@@ -690,18 +682,10 @@ def updateUserInfo():
 @app.route('/user/list', methods = ['GET'])
 def usersList():
     if(session.get('role') == 'Admin'):
-        #TODO: Make page validation in a function
-        try:
-            page = int(request.args.get('page')) or 1
-        #Returning to page 1 if the page requedted in the URL is malformed (example chars instead of numbers or `page` param not provided in URL)
-        except (ValueError, TypeError):
-            page = 1
-            return redirect(url_for('usersList', page = page))
-        #Correcting the `page` parameter if the input value is lower or equal than 0
-        if(page <= 0):
-            page = 1
-            #Redirecting to same URL with correct `page` param
-            return redirect(url_for('usersList', page = page))
+        #Validating the page value passed as GET parameter and redirecting with the correct page value if needed
+        page = validatePageInput()
+        if not page:
+            return redirect(url_for('usersList', page = 1))
         #Calculating the total number of pages based on the total number of lessons
         usersList, totalUsers = getUsersList(10, page)
         totalPages = ceil(totalUsers / 10)
@@ -1310,6 +1294,18 @@ def getTeachersList():
         responseList.append({'id': user['userID'], 'Nome': f"{user['Nome']} {user['Cognome']}"})
     return responseList
 
+def validatePageInput():
+    '''Gets from the URL the `page` parameter and validates it based on some basic controls\n
+    Returns `page` if the value is correct, otherwise `False` if it's not valid'''
+    try:
+        page = int(request.args.get('page')) or 1
+    #Returning to page 1 if the page requedted in the URL is malformed (example chars instead of numbers or `page` param not provided in URL)
+    except (ValueError, TypeError):
+        return False
+    #Correcting the `page` parameter if the input value is lower or equal than 0
+    if(page <= 0):
+        return False
+    return page
 
 if __name__ == "__main__":
     app.run(debug = True)
