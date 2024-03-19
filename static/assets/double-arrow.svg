@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 552.86 533.33">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #002755;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 66.67px;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g id="SVGRepo_iconCarrier" data-name="SVGRepo iconCarrier">
+      <path class="cls-1" d="M33.33,33.33L243.1,243.1c13.02,13.02,13.02,34.12,0,47.14L33.33,500"/>
+      <path class="cls-1" d="M300,33.33l209.76,209.76c13.02,13.02,13.02,34.12,0,47.14l-209.76,209.76"/>
+    </g>
+  </g>
+</svg>
