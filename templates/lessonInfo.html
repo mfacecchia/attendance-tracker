@@ -22,22 +22,24 @@ Modifica lezione
             {% endif %}
         {% endfor %}
     </select>
-    <select class = "formInputBox" name = "assignedTeacher" onchange = "getTeacherCourses()">
-        {{formField('option', value = lesson['idInsegnante'], placeholder = lesson['Nome'])}}
-        {% for teacher in teachersList %}
-            {% if teacher['idInsegnante'] != teacher['id'] %}
-                {{formField('option', value = teacher['id'], placeholder = teacher['Nome'])}}
-            {% endif %}
-        {% endfor %}
-    </select>
-    <select class = "formInputBox" name = "course">
-        {{formField('option', value = lesson['nomeCorso'], placeholder = lesson['nomeCorso'])}}
-        {% for course in courses %}
-            {% if course != lesson['nomeCorso'] %}
-                {{formField('option', value = course, placeholder = course)}}
-            {% endif %}
-        {% endfor %}
-    </select>
+    {% if session['role'] == 'Admin' %}
+        <select class = "formInputBox" name = "assignedTeacher" onchange = "getTeacherCourses()">
+            {{formField('option', value = lesson['idInsegnante'], placeholder = lesson['Nome'])}}
+            {% for teacher in teachersList %}
+                {% if lesson['idInsegnante'] != teacher['id'] %}
+                    {{formField('option', value = teacher['id'], placeholder = teacher['Nome'])}}
+                {% endif %}
+            {% endfor %}
+        </select>
+    {% endif %}
+        <select class = "formInputBox" name = "course">
+            {{formField('option', value = lesson['nomeCorso'], placeholder = lesson['nomeCorso'])}}
+            {% for course in courses %}
+                {% if course != lesson['nomeCorso'] %}
+                    {{formField('option', value = course, placeholder = course)}}
+                {% endif %}
+            {% endfor %}
+        </select>
 {% endblock %}
 
 {% block buttonName %}id{% endblock %}

@@ -532,7 +532,7 @@ def lessonsList():
 
 @app.route('/lesson', methods = ['GET', 'POST'])
 def manageLesson():
-    if(session.get('role') == 'Admin'):
+    if(session.get('role') in ['Admin', 'Insegnante']):
         try:
             #Getting the lesson id value from the  lessons list as `POST` and from the register attendances function as `GET`
             lessonID = int(request.values.get('id'))
@@ -553,14 +553,15 @@ def manageLesson():
         if(buttonAction == 'Edit'):
             lessonInfo = getLessonInfo(lessonID)
             teachersList = getTeachersList()
-            getCourses()
+            enrolledCourses = getUserEnrolledCourses(lessonInfo['idInsegnante'])
             if not lessonInfo or not teachersList:
                 return redirect(url_for('index'))
             return render_template('lessonInfo.html',
+                                    session = session,
                                     lesson = lessonInfo,
                                     lessonTypes = lessonTypes,
                                     teachersList = teachersList,
-                                    courses = courses
+                                    courses = enrolledCourses
                                     )
         #Proceeding with entering the lesson management page if the user clicked on the `Manage` button
         #Validating lesson (can only select same date lessons)
@@ -599,9 +600,68 @@ def manageLesson():
 
 @app.route('/lesson/update', methods = ['POST'])
 def update_lesson_data():
-    #NOTE: Placeholder return
-    #TODO: Add form management and lesson data update
-    return redirect(url_for('index'))
+    if(session.get('role') in ['Admin', 'Insegnante']):
+        lessonID = request.form.get('id')
+        subject = request.form.get('subject').strip().capitalize()
+        description = request.form.get('description').strip()
+        lessonDate = request.form.get('lessonDate') or date.today()
+        lessonRoom = request.form.get('room').upper()
+        assignedTeacher = request.form.get('assignedTeacher') if session['role'] == 'Admin' else session['uid']
+        lessonType = request.form.get('lessonType')
+        chosenCourseYear, chosenCourseName = request.form.get('course').split('a ')
+        teachersList = getTeachersList()
+        #Validating input fields to be in the expected range of options
+        if(lessonType in lessonTypes and len(lessonRoom) == 4 and int(assignedTeacher) in [teacher['id'] for teacher in teachersList]):
+            #Validating course selection with additional filter for enrolled courses (based on selected assigned teacher userID)
+            if(validateCoursesSelection([chosenCourseName], [chosenCourseYear], assignedTeacher)):
+                #Checking if the textboxes contain a valid value and the date to be higher or equal than today (cannot create a lesson on dates before current date)
+                if(validateFormInput(subject, lessonRoom) and datetime.strptime(lessonDate, '%Y-%m-%d').date() >= date.today()):
+                    connection = connectToDB()
+                    if not connection:
+                        return redirect(url_for('index'))
+                    cursor = connection.cursor()
+                    #Checking if the chosen leson still exists in the database (possible deletion in the meantime)
+                    cursor.execute('select count(*) from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
+                    if(not cursor.fetchone()[0]):
+                        flash('Nessuna lezione trovata.', 'Errore')
+                        return redirect(url_for('lessonsList'))
+                    #Checking if the chosen lesson's assigned teacher is different than the previously defined one
+                    teacherChanged = int(assignedTeacher) != getLessonInfo(lessonID)['idInsegnante']
+                    #Updating all lesson's data
+                    cursor.execute('update Lezione\
+                                    set Materia = %(subject)s,\
+                                    Descrizione = %(description)s,\
+                                    dataLezione = %(lessonDate)s,\
+                                    aula = %(room)s,\
+                                    idInsegnante = %(teacherID)s,\
+                                    Tipologia = %(lessonType)s,\
+                                    idCorso = (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s)\
+                                    where idLezione = %(lessonID)s', {'subject': subject, 'description': description, 'lessonDate': lessonDate, 'room': lessonRoom, 'teacherID': assignedTeacher, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear, 'lessonID': lessonID})
+                    connection.commit()
+                    #Updating the lesson's attendance field in the `Partecipazione` DB table if the `teacherChanged` value is `True`
+                    if(teacherChanged):
+                        #Removing the previous teacher's attendance value at first
+                        cursor.execute('delete Partecipazione\
+                                        from Partecipazione\
+                                        inner join Utente on Utente.userID = Partecipazione.userID\
+                                        where idLezione = %(lessonID)s\
+                                        and Tipologia = "Insegnante"', {'lessonID': lessonID})
+                        connection.commit()
+                        #Then inserting the newest row in the table
+                        cursor.execute('insert into Partecipazione(userID, idLezione) values(%(teacherID)s, %(lessonID)s)', {'teacherID': assignedTeacher, 'lessonID': lessonID})
+                        connection.commit()
+                    flash('Lezione modificata con successo.', 'Successo')
+                #NOTE: Error message in case the form's textboxes are empty or does not satify the expected data type
+                else:
+                    flash("Campi form non validi. Per favore, riprova", 'Errore')
+            #NOTE: Error message in case the chosen course does not exist for the chosen assigned teacher
+            else:
+                flash('Corso non trovato per l\'insegnante selezionato. Per favore, riprova', 'Errore')
+        #NOTE: Error message in case the form's input values are not in the expexted array of possible values
+        else:
+            flash('Devi selezionare una tipologia di lezione e un corso valido.', 'Errore')
+        return redirect(url_for('lessonsList'))
+    return redirect(url_for('login'))
 
 @app.route('/lesson/register-attendance', methods = ['GET', 'POST'])
 def registerAttendances():
@@ -1282,6 +1342,7 @@ def reformatResponse(response):
 
 def getUserEnrolledCourses(uid = None):
     '''Executes a query and gets all courses names and years based on userID\n
+        If `uid` parameter is not passed, the default value will be `session['uid']`\n
         Returns a list if the query returns valid values, else `False` if the connection to the database fails'''
     connection = connectToDB()
     if not connection:
