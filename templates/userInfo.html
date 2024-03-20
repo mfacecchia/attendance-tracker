@@ -10,7 +10,7 @@ Modifica utente
 {% block formSubtitle %} Inserisci i dati che desideri modificare nei campi sottostanti {% endblock %}
 {% block inputFields %}
     {% if userData is defined %}
-        <input class = "formInputBox" type = "name" name = "fname" value = "{{userData['Nome']}}" placeholder = "Nome" required maxlength = '20'>
+        <input class = "formInputBox" type = "text" name = "fname" value = "{{userData['Nome']}}" placeholder = "Nome" required maxlength = '20'>
         <input class = "formInputBox" type = "text" name = "lname" value = "{{userData['Cognome']}}" placeholder = "Cognome" required maxlength = "20">
         <input class = "formInputBox" type = "email" name = "email" value = "{{userData['Email']}}" placeholder = "Email" required maxlength = "40">
         <input class = "formInputBox" type = "password" name = "password" placeholder = "Password" minlength = "10">
