@@ -532,7 +532,7 @@ def lessonsList():
 
 @app.route('/lesson', methods = ['GET', 'POST'])
 def manageLesson():
-    if(session.get('role') in ['Admin', 'Insegnante']):
+    if(session.get('role') == 'Admin'):
         try:
             #Getting the lesson id value from the  lessons list as `POST` and from the register attendances function as `GET`
             lessonID = int(request.values.get('id'))

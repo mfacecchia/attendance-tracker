@@ -22,7 +22,7 @@ Modifica lezione
             {% endif %}
         {% endfor %}
     </select>
-    <select class = "formInputBox" name = "assignedTeacher">
+    <select class = "formInputBox" name = "assignedTeacher" onchange = "getTeacherCourses()">
         {{formField('option', value = lesson['idInsegnante'], placeholder = lesson['Nome'])}}
         {% for teacher in teachersList %}
             {% if teacher['idInsegnante'] != teacher['id'] %}
@@ -43,3 +43,8 @@ Modifica lezione
 {% block buttonName %}id{% endblock %}
 {% block buttonValue %}{{lesson['idLezione']}}{% endblock %}
 {% block submit %} Modifica {% endblock %}
+
+{% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src = "../static/script/formsManagement.js"></script>
+{% endblock %}
