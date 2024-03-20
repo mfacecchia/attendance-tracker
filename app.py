@@ -485,6 +485,7 @@ def createLesson():
                         for user in usersList:
                             cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(latestLessonID)s)', {'uid': user['userID'], 'latestLessonID': latestLesson})
                             connection.commit()
+                        #TODO: Just add all the students and then the teacher instead of removing them later on
                         #Removing all other teachers from the lesson attendance count and leaving just the assigned teacher
                         cursor.execute('delete Partecipazione\
                                         from Partecipazione\
@@ -542,12 +543,25 @@ def manageLesson():
         if not connection:
             return redirect(url_for('index'))
         cursor = connection.cursor()
+        buttonAction = request.form.get('submitButton')
         #Checking the user required action and removing the selected lesson from the database if the submit button's value is `Remove`
-        if(request.form.get('submitButton') == 'Remove'):
+        if(buttonAction == 'Remove'):
             cursor.execute('delete from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
             connection.commit()
             flash('Lezione eliminata con successo.', 'Successo')
             return redirect(url_for('lessonsList'))
+        if(buttonAction == 'Edit'):
+            lessonInfo = getLessonInfo(lessonID)
+            teachersList = getTeachersList()
+            getCourses()
+            if not lessonInfo or not teachersList:
+                return redirect(url_for('index'))
+            return render_template('lessonInfo.html',
+                                    lesson = lessonInfo,
+                                    lessonTypes = lessonTypes,
+                                    teachersList = teachersList,
+                                    courses = courses
+                                    )
         #Proceeding with entering the lesson management page if the user clicked on the `Manage` button
         #Validating lesson (can only select same date lessons)
         cursor.execute('select dataLezione from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
@@ -582,6 +596,12 @@ def manageLesson():
         return render_template('manageLesson.html', lessonInfo = response)
     else:
         return redirect(url_for('userScreening'))
+
+@app.route('/lesson/update', methods = ['POST'])
+def update_lesson_data():
+    #NOTE: Placeholder return
+    #TODO: Add form management and lesson data update
+    return redirect(url_for('index'))
 
 @app.route('/lesson/register-attendance', methods = ['GET', 'POST'])
 def registerAttendances():
@@ -1305,6 +1325,26 @@ def validatePageInput():
     if(page <= 0):
         return False
     return page
+
+def getLessonInfo(lessonID):
+    connection = connectToDB()
+    if not connection:
+        return False
+    cursor = connection.cursor()
+    cursor.execute('select Lezione.idLezione, Materia, Descrizione, dataLezione, aula, Lezione.Tipologia, idInsegnante, Nome, Cognome, nomeCorso, annoCorso\
+                    from Lezione\
+                    inner join Partecipazione on Partecipazione.idLezione = Lezione.idLezione\
+                    inner join Utente on Utente.userID = Partecipazione.userID\
+                    inner join Corso on Corso.idCorso = Lezione.idCorso\
+                    where Lezione.idLezione = %(lessonID)s\
+                    and Utente.Tipologia = "Insegnante"', {'lessonID': lessonID})
+    response = getValuesFromQuery(cursor)
+    response[0]['Nome'] = f"{response[0]['Nome']} {response[0]['Cognome']}"
+    response[0].pop('Cognome')
+    response[0]['nomeCorso'] = f"{response[0]['annoCorso']}a {response[0]['nomeCorso']}"
+    response[0].pop('annoCorso')
+    connection.close()
+    return response[0]
 
 if __name__ == "__main__":
     app.run(debug = True)

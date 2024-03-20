@@ -1,0 +1,45 @@
+{% extends "formTemplate.html" %}
+{% from "macros.html" import formField %}
+
+{% block title %}
+Modifica lezione
+{% endblock %}
+
+{% block formAction %} {{url_for('update_lesson_data')}} {% endblock %}
+{% block formImageSource %} {{url_for('static', filename = 'assets/teacher.svg')}} {% endblock %}
+{% block formTitle %} Modifica dati lezione {% endblock %}
+{% block formSubtitle %} Inserisci i dati che desideri modificare nei campi sottostanti {% endblock %}
+{% block inputFields %}
+    {{formField('text', 'subject', lesson["Materia"], 'Materia', True, 20)}}
+    {{formField('textarea', 'description', lesson["Descrizione"], 'Descrizione (opzionale)', 1000)}}
+    {{formField('date', 'lessonDate', lesson["dataLezione"], isRequired = True)}}
+    {{formField('text', 'room', lesson["aula"], 'Aula (Es. A001)', True, 4, 4, "[a-zA-Z][0-9]+")}}
+    <select class = "formInputBox" name = "lessonType">
+        {{formField('option', value = lesson['Tipologia'], placeholder = lesson['Tipologia'])}}
+        {% for lessonType in lessonTypes %}
+            {% if lessonType != lesson['Tipologia'] %}
+                {{formField('option', value = lessonType, placeholder = lessonType)}}
+            {% endif %}
+        {% endfor %}
+    </select>
+    <select class = "formInputBox" name = "assignedTeacher">
+        {{formField('option', value = lesson['idInsegnante'], placeholder = lesson['Nome'])}}
+        {% for teacher in teachersList %}
+            {% if teacher['idInsegnante'] != teacher['id'] %}
+                {{formField('option', value = teacher['id'], placeholder = teacher['Nome'])}}
+            {% endif %}
+        {% endfor %}
+    </select>
+    <select class = "formInputBox" name = "course">
+        {{formField('option', value = lesson['nomeCorso'], placeholder = lesson['nomeCorso'])}}
+        {% for course in courses %}
+            {% if course != lesson['nomeCorso'] %}
+                {{formField('option', value = course, placeholder = course)}}
+            {% endif %}
+        {% endfor %}
+    </select>
+{% endblock %}
+
+{% block buttonName %}id{% endblock %}
+{% block buttonValue %}{{lesson['idLezione']}}{% endblock %}
+{% block submit %} Modifica {% endblock %}
