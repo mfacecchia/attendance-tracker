@@ -31,8 +31,20 @@ Lezioni programmate
                                 {% if lesson['dataLezione'] == today %}
                                     <button class = "button dark-blue" type = "submit" name = "submitButton" value = "Manage">Apri lezione</button>
                                 {% endif %}
-                                <button class = "button orange" type = "submit" name = "submitButton" value = "Remove">Elimina</button>
+                                <button class = "button orange" type = "button" onclick = "document.getElementById('removeLessonModal{{lesson.idLezione}}').showModal();">Elimina</button>
                             </td>
+
+                            <dialog id = "removeLessonModal{{lesson['idLezione']}}">
+                                <h1>Attenzione</h1>
+                                <div>
+                                    <p>Stai per eliminare la lezione di {{ lesson['Materia'] }} del {{ lesson['dataLezione'] }}.</p>
+                                    <p>Sei sicuro/a?</p>
+                                </div>
+                                <form method = "dialog">
+                                    <button class = "button dark-blue" type = "button" onclick = "this.parentNode.close();">No, torna indietro</button>
+                                    <button class = "button orange" type = "submit" name = "submitButton" value = "Remove">Sì, sono sicuro/a</button>
+                                </form>
+                            </dialog>
                         </form>
                     {% endif %}
                 </td>
