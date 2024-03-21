@@ -1183,7 +1183,7 @@ def validateCoursesSelection(coursesNames, coursesYears, userFilter = None):
 def getCustomMessage():
     '''Returns a custom message based on the system clock time to be printed out in the user screening page'''
     #Matrix with all the times ranges and the relative printout message
-    timesRange = [[0,5, '🌙 Buona notte'],[6,12, '👨‍🏫 Buon giorno'],[13,18, '📚 Buon pomeriggio'],[19,24, '☕️ Buona sera']]
+    timesRange = [[0,5, '🌙 Buonanotte'],[6,12, '👨‍🏫 Buongiorno'],[13,18, '📚 Buon pomeriggio'],[19,24, '☕️ Buona sera']]
     currentTime = int(datetime.now().strftime('%H'))
     #Iterating through all the list elements and checking the current time range location to obtain the right message
     for timeRange in timesRange:
