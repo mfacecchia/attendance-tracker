@@ -735,7 +735,7 @@ def create_course():
                     if(not connection):
                         return redirect(url_for('index'))
                     cursor = connection.cursor()
-                    cursor.execute('insert into Corso(nomeCorso, annoCorso) values(%(courseName)s, %(courseYear)s)', {'courseName': courseName.capitalize(), 'courseYear': courseYear})
+                    cursor.execute('insert into Corso(nomeCorso, annoCorso) values(%(courseName)s, %(courseYear)s)', {'courseName': courseName.strip().capitalize(), 'courseYear': courseYear})
                     connection.commit()
                     connection.close()
                     flash('Corso creato con successo.', 'Successo')
