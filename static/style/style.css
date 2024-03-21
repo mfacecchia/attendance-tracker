@@ -606,6 +606,22 @@ video {
     #attendancePercentageStatistics {
   max-width: 800px;
 }
+    dialog > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1.25rem * var(--tw-space-y-reverse));
+}
+    dialog {
+  border-radius: 0.375rem;
+  background-color: rgb(255 255 255 / 0.8);
+  padding: 2.75rem;
+  --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  --tw-backdrop-blur: blur(12px);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+          backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
 
 *, ::before, ::after {
   --tw-border-spacing-x: 0;
@@ -1425,7 +1441,6 @@ input, select, textarea {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
-
 @media (min-width: 640px) {
 
   .sm\:bottom-\[8px\] {
@@ -1441,7 +1456,6 @@ input, select, textarea {
          column-gap: 0.5rem;
   }
 }
-
 @media (min-width: 768px) {
 
   .md\:bottom-2 {
@@ -1452,14 +1466,12 @@ input, select, textarea {
     width: 25%;
   }
 }
-
 @media (min-width: 900px) {
 
   .md2\:block {
     display: block;
   }
 }
-
 @media (min-width: 1024px) {
 
   .lg\:\!block {
@@ -1478,7 +1490,6 @@ input, select, textarea {
     flex-wrap: nowrap !important;
   }
 }
-
 @media (min-width: 1280px) {
 
   .xl\:bottom-\[9px\] {
@@ -1499,7 +1510,6 @@ input, select, textarea {
     line-height: 1.25rem;
   }
 }
-
 @media (min-width: 1536px) {
 
   .\32xl\:bottom-\[10px\] {
