@@ -70,7 +70,7 @@
         @apply max-w-[800px];
     }
     dialog{
-        @apply p-11 space-y-5 rounded-md shadow-md bg-white/80 backdrop-blur-md;
+        @apply p-11 space-y-5 rounded-md shadow-md bg-white/80 backdrop-blur-md text-center;
     }
 }
 
