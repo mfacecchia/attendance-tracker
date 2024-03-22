@@ -1,6 +1,7 @@
 from flask import Flask, render_template, url_for, request, redirect, session,flash, jsonify
 from werkzeug import exceptions as flaskExceptions
 from flask_mail import Mail, Message, BadHeaderError
+from flask_wtf import CSRFProtect
 from argon2 import PasswordHasher, exceptions
 import mysql.connector
 from authlib.integrations.flask_client import OAuth
@@ -15,6 +16,8 @@ from math import ceil
 
 app = Flask(__name__)
 oauth = OAuth(app)
+#CSRF key for pages without WTForms
+csrf = CSRFProtect(app)
 
 app.config['SECRET_KEY'] = environ['FLASK_SECRET']
 
@@ -1409,3 +1412,4 @@ def getLessonInfo(lessonID):
 
 if __name__ == "__main__":
     app.run(debug = True)
+    csrf.init_app(app)
