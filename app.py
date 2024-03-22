@@ -13,7 +13,7 @@ from base64 import urlsafe_b64encode, urlsafe_b64decode
 from binascii import Error as conversionError
 from os import environ
 from math import ceil
-from forms import LoginForm
+import forms
 
 app = Flask(__name__)
 oauth = OAuth(app)
@@ -72,7 +72,7 @@ def login():
     #Redirecting to user screening page if the user is already logged in
     if(session.get('name')):
         return redirect(url_for('userScreening'))
-    form = LoginForm()
+    form = forms.LoginForm()
     #Checking if form was submitted and all the form values and thr CSRF token are correct and valid in order to start login process
     if(form.validate_on_submit()):
         email = form.email.data
