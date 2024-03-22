@@ -732,30 +732,26 @@ def getAttendancesPercentage():
 @app.route('/course/create', methods = ['GET', 'POST'])
 def create_course():
     if(session.get('role') == 'Admin'):
-        courseName = request.form.get('courseName') or ''
-        courseYear = request.form.get('courseYear') or ''
-        #Flag variable used to not trigger the condition below and avoid error printout at first page load without form submission
-        if(courseName):
-            if(validateFormInput(courseName, courseYear)):
-                if(not validateCoursesSelection([courseName], [courseYear])):
-                    connection = connectToDB()
-                    if(not connection):
-                        return redirect(url_for('index'))
-                    cursor = connection.cursor()
-                    cursor.execute('insert into Corso(nomeCorso, annoCorso) values(%(courseName)s, %(courseYear)s)', {'courseName': courseName.strip().capitalize(), 'courseYear': courseYear})
-                    connection.commit()
-                    connection.close()
-                    flash('Corso creato con successo.', 'Successo')
-                    return redirect(url_for('create_course'))
-                #Rendering auto compiled form with the already obtained values
-                else:
-                    flash('Questo corso è già esistente.', 'Errore')
+        form = forms.CourseCreationForm()
+        if(form.validate_on_submit()):
+            courseName = form.courseName.data
+            courseYear = form.courseYear.data
+            if(not validateCoursesSelection([courseName], [courseYear])):
+                connection = connectToDB()
+                if(not connection):
+                    return redirect(url_for('index'))
+                cursor = connection.cursor()
+                cursor.execute('insert into Corso(nomeCorso, annoCorso) values(%(courseName)s, %(courseYear)s)', {'courseName': courseName.strip().capitalize(), 'courseYear': courseYear})
+                connection.commit()
+                connection.close()
+                flash('Corso creato con successo.', 'Successo')
+            #Rendering auto compiled form with the already obtained values
             else:
-                flash(commonErrorMessage, 'Errore')
-        return render_template('createCourseForm.html', courseName = courseName, courseYear = courseYear)
+                flash('Questo corso è già esistente.', 'Errore')
+        return render_template('createCourseForm.html', form = form)
     else:
         flash(commonErrorMessage, 'Errore')
-    return redirect(url_for('userScreening'))
+        return redirect(url_for('userScreening'))
 
 @app.route('/user/info')
 def updateUserInfo():
