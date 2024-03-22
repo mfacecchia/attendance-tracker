@@ -736,18 +736,23 @@ def create_course():
         if(form.validate_on_submit()):
             courseName = form.courseName.data
             courseYear = form.courseYear.data
-            if(not validateCoursesSelection([courseName], [courseYear])):
-                connection = connectToDB()
-                if(not connection):
-                    return redirect(url_for('index'))
-                cursor = connection.cursor()
+            connection = connectToDB()
+            if(not connection):
+                return redirect(url_for('index'))
+            cursor = connection.cursor()
+            try:
                 cursor.execute('insert into Corso(nomeCorso, annoCorso) values(%(courseName)s, %(courseYear)s)', {'courseName': courseName.strip().capitalize(), 'courseYear': courseYear})
                 connection.commit()
-                connection.close()
-                flash('Corso creato con successo.', 'Successo')
-            #Rendering auto compiled form with the already obtained values
-            else:
+            #Managing unique constraint SQL error
+            except mysql.connector.IntegrityError:
                 flash('Questo corso è già esistente.', 'Errore')
+            else:
+                flash('Corso creato con successo.', 'Successo')
+            finally:
+                connection.close()
+        #Alternative error message printout if the input values are not valid
+        elif(form.errors):
+            flash('I campi inseriti non sono validi. Per favore, riprova', 'Errore')
         return render_template('createCourseForm.html', form = form)
     else:
         flash(commonErrorMessage, 'Errore')

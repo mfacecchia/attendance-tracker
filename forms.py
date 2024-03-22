@@ -13,5 +13,5 @@ class LoginForm(FlaskForm):
 
 class CourseCreationForm(FlaskForm):
     courseName = StringField(name = 'courseName', validators = [InputRequired(), Length(max = 30)], render_kw = {'placeholder': 'Nome Corso', 'class': defaultFormsClass})
-    courseYear = StringField(name = 'courseYear', validators = [InputRequired(), Regexp('[1-5]')], render_kw = {'placeholder': 'Anno Corso', 'class': defaultFormsClass})
+    courseYear = StringField(name = 'courseYear', validators = [InputRequired(), Regexp('[1-5]'), Length(max = 1)], render_kw = {'placeholder': 'Anno Corso', 'class': defaultFormsClass})
     submitForm = SubmitField('Crea corso', render_kw = {'class': f"{defaultButtonClass} dark-blue"})
