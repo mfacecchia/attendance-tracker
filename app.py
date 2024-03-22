@@ -13,11 +13,14 @@ from base64 import urlsafe_b64encode, urlsafe_b64decode
 from binascii import Error as conversionError
 from os import environ
 from math import ceil
+from forms import LoginForm
 
 app = Flask(__name__)
 oauth = OAuth(app)
 #CSRF key for pages without WTForms
 csrf = CSRFProtect(app)
+
+#TODO: Manage Error 400
 
 app.config['SECRET_KEY'] = environ['FLASK_SECRET']
 
@@ -69,10 +72,11 @@ def login():
     #Redirecting to user screening page if the user is already logged in
     if(session.get('name')):
         return redirect(url_for('userScreening'))
-    #Checking if form was submitted to begin input validation, otherwise rendering the page
-    if(request.form.get('Email') and request.form.get('password')):
-        email = request.form.get('Email')
-        pw = request.form.get('password')
+    form = LoginForm()
+    #Checking if form was submitted and all the form values and thr CSRF token are correct and valid in order to start login process
+    if(form.validate_on_submit()):
+        email = form.email.data
+        pw = form.password.data
         
         connection = connectToDB()
         if(not connection):
@@ -86,7 +90,7 @@ def login():
         response = getValuesFromQuery(cursor)
         if(len(response) == 0):
             flash("Account non trovato", 'Errore')
-            return render_template('login.html', emailField = email)
+            return render_template('login.html', form = form)
         phasher = PasswordHasher()
         try:
             #Verifying the hashed password gotten from the database with the user input one in the form
@@ -96,7 +100,7 @@ def login():
         except exceptions.VerifyMismatchError:
             #Sending an error message to back to the login page in order to display why the login didn't happen
             flash('La password non è corretta. Per favore, riprova', 'Errore')
-            return render_template('login.html', emailField = email)
+            return render_template('login.html', form = form)
         else:
             #Dinamically changing session permanent state based on form checkbox
             if(request.form.get('remember')):
@@ -121,7 +125,7 @@ def login():
                 return redirect(url_for('userScreening'))
         finally:
             connection.close()
-    return(render_template('login.html'))
+    return(render_template('login.html', form = form))
 
 @app.route('/forgot-password', methods = ['GET', 'POST'])
 def forgotPassword():
