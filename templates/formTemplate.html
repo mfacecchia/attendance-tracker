@@ -3,6 +3,8 @@
 
 {% block content %}
     <form action = "{% block formAction %} {% endblock %}" method = "post" class = "formContainer">
+        {{ form.csrf_token }}
+
         <div class = "flex flex-col justify-center text-center">
             {% block formImage %}
                 <img class = "h-24 mb-4" src = "{% block formImageSource %} {{url_for('static', filename = 'assets/update-password.svg')}} {% endblock %}">
@@ -13,7 +15,7 @@
         {% block inputFields %}
             <input class = "formInputBox" type = "text" placeholder = "Example text input">
         {% endblock %}
-        <button class = "button dark-blue" type = "submit" name = "{% block buttonName %}{% endblock %}" value = "{% block buttonValue %}{% endblock %}">{% block submit %} Submit {% endblock %}</button>
+        {{ form.submitForm }}
         {% block resetButton %}
             <button class = "button slate" type = "reset">{% block reset %} Cancella {% endblock %}</button>
         {% endblock %}
