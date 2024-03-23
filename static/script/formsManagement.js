@@ -65,3 +65,19 @@ function updateCoursesSelection(response){
         coursesSelect.options.add(option);
     });
 }
+
+
+//Shows a confirmation checkbox if the the user selects "Admin" as the new user role
+function adminRoleChosen(){
+    let chosenRole = document.querySelector('#role').value;
+    let pwVerificationLabel = document.querySelector('#adminVerification');
+    let pwVerificationCheckbox = pwVerificationLabel.childNodes[1];
+    if(chosenRole == 'Admin'){
+        pwVerificationLabel.style.display = 'block';
+        pwVerificationCheckbox.checked = false;
+    }
+    else{
+        pwVerificationLabel.style.display = 'none';
+        pwVerificationCheckbox.checked = true;
+    }
+}

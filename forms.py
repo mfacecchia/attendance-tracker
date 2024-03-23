@@ -1,13 +1,13 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, EmailField, PasswordField, BooleanField, SelectField, SubmitField, TextAreaField, DateField, ValidationError
-from wtforms.validators import InputRequired, Length, Regexp, DataRequired
+from wtforms import StringField, EmailField, PasswordField, BooleanField, SelectField, SubmitField, TextAreaField, DateField, ValidationError, SelectMultipleField
+from wtforms.validators import InputRequired, Length, Regexp, DataRequired, EqualTo
 from datetime import date
-from app import validateCoursesSelection
 
 defaultFormsClass = 'formInputBox'
 defaultButtonClass = 'button'
 defaultSubmitButtonClasses = 'button dark-blue'
 
+#TODO: Add custom messages to output as flash messages
 class LoginForm(FlaskForm):
     email = EmailField(name = 'Email', validators = [InputRequired()], render_kw = {'placeholder': 'Email', 'class': defaultFormsClass, 'autofocus': True})
     password = PasswordField(name = 'password', validators = [InputRequired()], render_kw = {'placeholder': 'Password', 'class': defaultFormsClass})
@@ -37,3 +37,13 @@ class LessonCreationForm_Teacher(FlaskForm):
 #Adding the assigned teacher field from the administrator (inherited class from the teacher's one)
 class LessonCreationForm_Admin(LessonCreationForm_Teacher):
     assignedTeacher = SelectField(name = 'assignedTeacher', validators = [InputRequired()], choices = [('', '-- Seleziona un insegnante --')], render_kw = {'class': defaultFormsClass, 'onchange': 'getTeacherCourses()'})
+
+class UserCreationForm(FlaskForm):
+    fname = StringField(name = 'fname', validators = [InputRequired(), Length(max = 20)], render_kw = {'placeholder': 'Nome', 'class': defaultFormsClass})
+    lname = StringField(name = 'lname', validators = [InputRequired(), Length(max = 20)], render_kw = {'placeholder': 'Cognome', 'class': defaultFormsClass})
+    email = EmailField(name = 'email', validators = [InputRequired(), Length(max = 40)], render_kw = {'placeholder': 'Email', 'class': defaultFormsClass})
+    password = PasswordField(name = 'password', validators = [InputRequired(), Length(min = 10)], render_kw = {'placeholder': 'Password', 'class': defaultFormsClass})
+    password_verify = PasswordField(name = 'password_verify', validators = [InputRequired(), Length(min = 10), EqualTo('password')], render_kw = {'placeholder': 'Password', 'class': defaultFormsClass})
+    role = SelectField(name = 'role', choices = [('Studente', 'Studente'), ('Insegnante', 'Insegnante'), ('Admin', 'Admin')], render_kw = {'class': defaultFormsClass, 'onchange': 'adminRoleChosen()'})
+    adminVerification = BooleanField('Sei sicuro di voler creare un utente di tipo ADMIN?', validators = [DataRequired()], name = 'adminVerificationCheckbox', default = True)
+    submitForm = SubmitField('Crea account', render_kw  = {'class': defaultSubmitButtonClasses})
