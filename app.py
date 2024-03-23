@@ -502,18 +502,17 @@ def createLesson():
                 usersList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
                 cursor.execute('select max(idLezione) from Lezione')
                 latestLesson = cursor.fetchone()[0]
+                #Adding all students and the assigned teacher to the `Partecipazione` table
                 for user in usersList:
-                    cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(latestLessonID)s)', {'uid': user['userID'], 'latestLessonID': latestLesson})
-                    connection.commit()
-                #TODO: Just add all the students and then the teacher instead of removing them later on
-                #Removing all other teachers from the lesson attendance count and leaving just the assigned teacher
-                cursor.execute('delete Partecipazione\
-                                from Partecipazione\
-                                inner join Utente on Utente.userID = Partecipazione.userID\
-                                where Utente.userID != %(teacherUID)s\
-                                and Tipologia = "Insegnante"\
-                                and Partecipazione.idLezione = %(lessonID)s', {'teacherUID': assignedTeacher, 'lessonID': latestLesson})
-                connection.commit()
+                    #Checking if the iterated user role is "Studente" or if the UID matches the selected lesson's assigned teacher id before adding the row
+                    if(user['Tipologia'] == 'Studente' or user['userID'] == int(assignedTeacher)):
+                        cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(latestLessonID)s)',
+                                        {
+                                            'uid': user['userID'],
+                                            'latestLessonID': latestLesson
+                                        }
+                                    )
+                        connection.commit()
                 connection.close()
                 flash('Lezione creata con successo.', 'Successo')
             else:
@@ -1307,7 +1306,7 @@ def selectUsersFromCourse(courseName, courseYear):
         Returns a list of dictionaries'''
     connection = connectToDB()
     cursor = connection.cursor()
-    cursor.execute('select Utente.userID\
+    cursor.execute('select Utente.userID, Utente.Tipologia\
                     from Corso\
                     inner join Registrazione on Registrazione.idCorso = Corso.idCorso\
                     inner join Utente on Utente.userID = Registrazione.userID\
