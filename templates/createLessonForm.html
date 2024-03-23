@@ -4,35 +4,23 @@
 Crea lezione
 {% endblock %}
 
+{% if session.role == 'Admin' %}
+    {% block bodyProperties %} onload = "getTeacherCourses()" {% endblock %}
+{% endif %}
 {% block formAction %} {{url_for('createLesson')}} {% endblock %}
 {% block formImageSource %} {{url_for('static', filename = 'assets/teacher.svg')}} {% endblock %}
 {% block formTitle %} Crea lezione {% endblock %}
 {% block formSubtitle %} Inserisci tutti i dati richiesti per creare la lezione {% endblock %}
 {% block inputFields %}
-    <input class = "formInputBox" type = "text" name = "subject" value = "{{subject}}" placeholder = "Materia" maxlength = "30" required>
-    <textarea class = "formInputBox" type = "text" name = "description" placeholder = "Descrizione (opzionale)" maxlength = "1000">{{description}}</textarea>
-    <input class = "formInputBox" type = "date" name = "lessonDate" value = "{{selectedDate}}" required>
-    <input class = "formInputBox" type = "text" name = "room" value = "{{room}}" placeholder = "Aula (Es. A001)" pattern = "[a-zA-Z][0-9]+" minlength = "4" maxlength = "4" required>
-    <select class = "formInputBox" name = "lessonType">
-        <option value = "">-- Seleziona una tipologia --</option>
-        {% for lesson in lessonTypes %}
-            <option value = "{{lesson}}">{{lesson}}</option>
-        {% endfor %}
-    </select>
-    {% if session['role'] == 'Admin' %}
-        <select class = "formInputBox" name = "assignedTeacher" onchange = "getTeacherCourses()">
-            <option value = "">-- Seleziona un insegnante --</option>
-            {% for teacher in teachersList %}
-                <option value = "{{teacher['id']}}">{{teacher['Nome']}}</option>
-            {% endfor %}
-        </select>
+    {{ form.subject }}
+    {{ form.description }}
+    {{ form.lessonDate }}
+    {{ form.room }}
+    {{ form.lessonType }}
+    {% if session.role == 'Admin' %}
+        {{ form.assignedTeacher }}
     {% endif %}
-    <select class = "formInputBox" name = "course">
-        <option value = "">-- Seleziona un corso --</option>
-        {% for course in courses %}
-            <option value = "{{course}}">{{course}}</option>
-        {% endfor %}
-    </select>
+    {{ form.course }}
 {% endblock %}
 {% block submit %} Crea lezione {% endblock %}
 

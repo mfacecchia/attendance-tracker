@@ -53,7 +53,6 @@ function getTeacherCourses(){
 
 function updateCoursesSelection(response){
     let coursesSelect = document.getElementsByName('course')[0];
-
     //Clearing `select` options and adding all API obtained courses as possible options
     $(coursesSelect).empty();
     let option = document.createElement('option');

@@ -451,69 +451,80 @@ def createUser():
 @app.route('/lesson/create', methods = ['GET', 'POST'])
 def createLesson():
     if(session.get('role') in ['Insegnante', 'Admin']):
+        form = forms.LessonCreationForm_Admin()
         enrolledCourses = None
-        #Getting user enrolled courses if the role is `Insegnante` in order to print as selection only his own courses and not the whole list
+        #Getting user enrolled courses if the role is `Insegnante` in order to output as selection only his own courses and not the whole list
         if(session.get('role') == 'Insegnante'):
+            form = forms.LessonCreationForm_Teacher()
             enrolledCourses = getUserEnrolledCourses()
             #Returned value = `False` means that the connection to the database failed
             if enrolledCourses is False:
                 return redirect(url_for('index'))
+            form.course.choices = [(course, course) for course in enrolledCourses]
         else:
-            getCourses()
-        subject = request.form.get('subject') or ''
-        description = request.form.get('description') or ''
-        lessonDate = request.form.get('lessonDate') or date.today()
-        lessonRoom = request.form.get('room') or ''
-        assignedTeacher = request.form.get('assignedTeacher') if session['role'] == 'Admin' else session['uid']
-        teachersList = getTeachersList()
-        #Flag condition used to check if it's the first time opening the page (default bool value of `subject` if value not in form = `False`)
-        #NOTE: This condition makes the condition below not trigger the flash message
-        if(subject):
-            #Validating lesson type, lesson room and assigned teacher to have the right values. In particular, the assigned teacher validation happens by looping though each list user ID obtained from `getTeachersList()` function
-            if(request.form.get('lessonType') in lessonTypes and len(lessonRoom) == 4 and int(assignedTeacher) in [teacher['id'] for teacher in teachersList]):
-                subject = subject.strip().capitalize()
-                description = description.strip()
-                lessonRoom = lessonRoom.upper()
-                lessonType = request.form.get('lessonType')
-                chosenCourseYear, chosenCourseName = request.form.get('course').split('a ')
-                #Validating course selection with additional filter for enrolled courses (based on selected assigned teacher userID)
-                if(validateCoursesSelection([chosenCourseName], [chosenCourseYear], assignedTeacher)):
-                    #Checking if the textboxes contain a valid value and the date to be higher or equal than today (cannot create a lesson on dates before current date)
-                    if(validateFormInput(subject, lessonRoom) and datetime.strptime(lessonDate, '%Y-%m-%d').date() >= date.today()):
-                        connection = connectToDB()
-                        cursor = connection.cursor()
-                        cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso, idInsegnante) values\
-                                        (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s), %(teacherID)s)', {'subjectName': subject, 'description': description, 'lessonDate': lessonDate, 'lessonRoom': lessonRoom, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear, 'teacherID': assignedTeacher})
-                        connection.commit()
-                        #Getting all users attending the lesson's course and adding them all to the `Partecipazione` table with default `Presenza` value (`0` or `False`)
-                        usersList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
-                        cursor.execute('select max(idLezione) from Lezione')
-                        latestLesson = cursor.fetchone()[0]
-                        for user in usersList:
-                            cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(latestLessonID)s)', {'uid': user['userID'], 'latestLessonID': latestLesson})
-                            connection.commit()
-                        #TODO: Just add all the students and then the teacher instead of removing them later on
-                        #Removing all other teachers from the lesson attendance count and leaving just the assigned teacher
-                        cursor.execute('delete Partecipazione\
-                                        from Partecipazione\
-                                        inner join Utente on Utente.userID = Partecipazione.userID\
-                                        where Utente.userID != %(teacherUID)s\
-                                        and Tipologia = "Insegnante"\
-                                        and Partecipazione.idLezione = %(lessonID)s', {'teacherUID': assignedTeacher, 'lessonID': latestLesson})
-                        connection.commit()
-                        connection.close()
-                        flash('Lezione creata con successo.', 'Successo')
-                        return redirect(url_for('createLesson'))
-                    else:
-                        flash("Campi form non validi. Per favore, riprova", 'Errore')
-                else:
-                    flash('Corso non trovato per l\'insegnante selezionato. Per favore, riprova', 'Errore')
+            #Getting all teachers list and appending all the elements as tuples in the list
+            teachersList = getTeachersList()
+            form.assignedTeacher.choices[1:] = [(teacher['id'], teacher['Nome']) for teacher in teachersList]
+        if(form.validate_on_submit()):
+            subject = form.subject.data
+            description = form.description.data
+            lessonDate = form.lessonDate.data
+            lessonRoom = form.room.data
+            assignedTeacher = form.assignedTeacher.data if session['role'] == 'Admin' else session['uid']
+            lessonType = request.form.get('lessonType')
+            chosenCourseYear, chosenCourseName = form.course.data.split('a ')
+            #Validating course selection with additional filter for enrolled courses (based on selected assigned teacher userID)
+            if(validateCoursesSelection([chosenCourseName], [chosenCourseYear], assignedTeacher)):
+                #Checking if the textboxes contain a valid value and the date to be higher or equal than today (cannot create a lesson on dates before current date)
+                connection = connectToDB()
+                cursor = connection.cursor()
+                try:
+                    cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso, idInsegnante) values\
+                                    (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s), %(teacherID)s)',
+                                    {
+                                        'subjectName': subject.strip().capitalize(),
+                                        'description': description.strip(),
+                                        'lessonDate': lessonDate,
+                                        'lessonRoom': lessonRoom.upper(),
+                                        'lessonType': lessonType,
+                                        'courseName': chosenCourseName,
+                                        'courseYear': chosenCourseYear,
+                                        'teacherID': assignedTeacher
+                                    }
+                                )
+                    connection.commit()
+                except mysql.connector.IntegrityError:
+                    flash('I campi inseriti non sono validi. Per favore, riprova', 'Errore')
+                    connection.close()
+                    return render_template('createLessonForm.html',
+                                            form = form)
+                #Getting all users attending the lesson's course and adding them all to the `Partecipazione` table with default `Presenza` value (`0` or `False`)
+                usersList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
+                cursor.execute('select max(idLezione) from Lezione')
+                latestLesson = cursor.fetchone()[0]
+                for user in usersList:
+                    cursor.execute('insert into Partecipazione(userID, idLezione) values(%(uid)s, %(latestLessonID)s)', {'uid': user['userID'], 'latestLessonID': latestLesson})
+                    connection.commit()
+                #TODO: Just add all the students and then the teacher instead of removing them later on
+                #Removing all other teachers from the lesson attendance count and leaving just the assigned teacher
+                cursor.execute('delete Partecipazione\
+                                from Partecipazione\
+                                inner join Utente on Utente.userID = Partecipazione.userID\
+                                where Utente.userID != %(teacherUID)s\
+                                and Tipologia = "Insegnante"\
+                                and Partecipazione.idLezione = %(lessonID)s', {'teacherUID': assignedTeacher, 'lessonID': latestLesson})
+                connection.commit()
+                connection.close()
+                flash('Lezione creata con successo.', 'Successo')
             else:
-                flash('Devi selezionare una tipologia di lezione e un corso valido.', 'Errore')
-        return render_template('createLessonForm.html', subject = subject, description = description, selectedDate = lessonDate, room = lessonRoom, lessonTypes = lessonTypes, courses = enrolledCourses if enrolledCourses else courses, teachersList = teachersList)
+                flash('Corso non trovato per l\'insegnante selezionato. Per favore, riprova', 'Errore')
+        elif(form.errors):
+            flash('I campi inseriti non sono validi. Per favore, riprova', 'Errore')
+        return render_template('createLessonForm.html',
+                                form = form)
     else:
         flash(commonErrorMessage, 'Errore')
-    return redirect(url_for('login'))
+        return redirect(url_for('userScreening'))
 
 @app.route('/lesson/list', methods = ['GET'])
 def lessonsList():
