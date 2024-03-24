@@ -1108,16 +1108,18 @@ def updateDataAsAdmin(userID, form):
                         }
                     )
         oldUserRole = cursor.fetchone()[0]
-        if(oldUserRole == 'Insegnante' and role == 'Studente'):
+        #Admin/Teacher to student conversion
+        if(oldUserRole in ('Insegnante', 'Admin') and role == 'Studente'):
             #Removing teacher from all lessons in which the userID is mentioned
-            cursor.execute('update Lezione\
-                            set idInsegnante = NULL\
-                            where idInsegnante = %(teacherID)s',
-                            {
-                                'teacherID': userID
-                            }
-                        )
-            connection.commit()
+            if(oldUserRole == 'Insegnante'):
+                cursor.execute('update Lezione\
+                                set idInsegnante = NULL\
+                                where idInsegnante = %(teacherID)s',
+                                {
+                                    'teacherID': userID
+                                }
+                            )
+                connection.commit()
             #Getting all scheduled lessons for that user and inserting them all in the "Partecipazione" table with an initial "Presenza" value of `0`
             scheduledLessons = getLessonsList(uid = userID)[0]
             for lesson in scheduledLessons:
