@@ -21,8 +21,9 @@ Lista utenti
                     </td>
                     <td>
                         <form action = "{{url_for('select_user')}}" method = "post">
+                            <input type = "hidden" name = "csrf_token" value = "{{ csrf_token() }}">
                             <input type = "text" name = "userID" readonly hidden value = "{{user['userID']}}">
-                            <button class = "button dark-blue" type = "submit" name = "submitButton" value = "Edit">Modifica</button>
+                            <button class = "button dark-blue" type = "submit" name = "action" value = "Edit">Modifica</button>
                             <button class = "button orange" type = "button" onclick = "document.getElementById('removeUserModal{{user.userID}}').showModal();">Elimina</button>
                             
                             <dialog id = "removeUserModal{{user['userID']}}">
@@ -33,7 +34,7 @@ Lista utenti
                                 </div>
                                 <form method = "dialog">
                                     <button class = "button dark-blue" type = "button" onclick = "this.parentNode.close();">No, torna indietro</button>
-                                    <button class = "button orange" type = "submit" name = "submitButton" value = "Remove">Sì, sono sicuro/a</button>
+                                    <button class = "button orange" type = "submit" name = "action" value = "Remove">Sì, sono sicuro/a</button>
                                 </form>
                             </dialog>
                         </form>
