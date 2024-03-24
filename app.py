@@ -777,7 +777,7 @@ def select_user():
                 form.fname.data = selectedUser['Nome']
                 form.lname.data = selectedUser['Cognome']
                 form.email.data = selectedUser['Email']
-                #FIXME: Add user role data in form field
+                form.role.data = selectedUser['Tipologia']
                 return render_template('userInfo.html',
                                         uid = uid,
                                         form = form,
