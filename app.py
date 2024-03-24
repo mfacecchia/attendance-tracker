@@ -742,15 +742,6 @@ def create_course():
         flash(commonErrorMessage, 'Errore')
         return redirect(url_for('userScreening'))
 
-#TODO: Remove this
-@app.route('/user/info')
-def updateUserInfo():
-    if(session.get('name')):
-        return render_template('userInfo.html')
-    else:
-        flash('Devi prima fare il login.', 'Errore')
-        return redirect(url_for('login'))
-
 @app.route('/user/list', methods = ['GET'])
 def usersList():
     if(session.get('role') == 'Admin'):
@@ -893,18 +884,25 @@ def getValuesFromQuery(cursor):
             responseDict[-1].setdefault(cursor.description[colCounter][0], col)
     return responseDict
 
-#TODO: Improve commentation
 def updateLastLoginTime():
-    '''Programmatically updates user's last login time on database'''
+    '''Programmatically updates user's last login time on database.\n
+    Value update is based on `session['uid']` value'''
     connection = connectToDB()
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
-    cursor.execute("update Utente set ultimoLogin = %(timeNow)s where userID = %(uid)s", {'timeNow': datetime.now().strftime('%d/%m/%Y %H:%M'), 'uid': session['uid']})
+    cursor.execute("update Utente set ultimoLogin = %(timeNow)s\
+                    where userID = %(uid)s",
+                    {
+                        'timeNow': datetime.now().strftime('%d/%m/%Y %H:%M'),
+                        'uid': session['uid']
+                    }
+                )
     connection.commit()
     cursor.close()
     connection.close()
-    return str(date.today().strftime('%d/%m/%Y')).replace(' ', ' alle ')
+    #Returning formatted date to be used for a better value output
+    return date.today().strftime('%d/%m/%Y').replace(' ', ' alle ')
 
 def checkUserGithubConnection():
     '''Checks if the user has a linked Github account'''
