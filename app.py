@@ -777,6 +777,7 @@ def select_user():
                 form.fname.data = selectedUser['Nome']
                 form.lname.data = selectedUser['Cognome']
                 form.email.data = selectedUser['Email']
+                #FIXME: Add user role data in form field
                 return render_template('userInfo.html',
                                         uid = uid,
                                         form = form,
@@ -1027,6 +1028,7 @@ def getUsersList(limit = None, page = 1):
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
+    #TODO: Order per user role & fix query with `left join`
     cursor.execute("select Utente.userID, Nome, Cognome, Tipologia, nomeCorso, annoCorso\
                     from Utente\
                     inner join Registrazione on Utente.userID = Registrazione.userID\
@@ -1071,7 +1073,7 @@ def updateDataAsAdmin(userID, form):
     role = form.role.data
     chosenCourses = request.form.getlist('course')
     
-    userEnrolledCourses = getUserEnrolledCourses(session['uid'])
+    userEnrolledCourses = getUserEnrolledCourses(userID)
     coursesNames = []
     coursesYears = []
     for course in chosenCourses:
@@ -1111,8 +1113,61 @@ def updateDataAsAdmin(userID, form):
                 cursor.execute(*query)
                 connection.commit()
             for x in range(len(coursesNames)):
-                #TODO: Add values to `Partecipazione` if a new course is added and remove if a course is removed
-                cursor.execute('insert into Registrazione(userID, idCorso) values(%(uid)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'uid': userID, 'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
+                #Adding the user to all the upcoming lessons of the new course (only if it's a "Studente")
+                cursor.execute('select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s', {'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
+                courseID = cursor.fetchone()[0]
+                #TODO: Add error flash message if user tries to update role from "Insegnante" to "Studente"
+                #Making all attendanced manipulation operation only if the user role is "Studente"
+                if(role == 'Studente'):
+                    if(chosenCourses[x] not in userEnrolledCourses):
+                        #Getting course id starting from course name and year (unique fields) and storing it in the `courseID` variable 
+                        #Getting all upcoming lessons of the course
+                        cursor.execute('select idLezione from Lezione\
+                                        where dataLezione >= %(today)s\
+                                        and idCorso = %(courseID)s', {'today': date.today(), 'courseID': courseID})
+                        upcomingLessons = getValuesFromQuery(cursor)
+                        #Adding the default attendance value for each one in the list
+                        for lesson in upcomingLessons:
+                            cursor.execute('insert into partecipazione(userID, idLezione)\
+                                            values(%(uid)s, %(lessonID)s)',
+                                            {
+                                                'uid': userID,
+                                                'lessonID': lesson['idLezione']
+                                            }
+                                        )
+                            connection.commit()
+                    try:
+                        #Checking if an attended course was removed from the user
+                        #If so, all the scheduled lessons will be removed from the user attendance
+                        if(userEnrolledCourses[x] not in chosenCourses):
+                            #Getting the enrolled course id which will be used for attendances removal in the "delete" query
+                            cursor.execute('select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s', {'courseName': userEnrolledCourses[x].split('a ')[1], 'courseYear': userEnrolledCourses[x].split('a ')[0]})
+                            enrolledCourseID = cursor.fetchone()[0]
+                            #NOTE: Removing only the upcoming lessons in order to keep user lessons attendances history
+                            cursor.execute('delete Partecipazione\
+                                            from Partecipazione\
+                                            inner join Lezione on Lezione.idLezione = Partecipazione.idLezione\
+                                            where userID = %(userID)s\
+                                            and idCorso = %(courseID)s\
+                                            and dataLezione >= %(today)s',
+                                            {
+                                                'userID': userID,
+                                                'courseID': enrolledCourseID,
+                                                'today': date.today()
+                                            }
+                                        )
+                            connection.commit()
+                    #Managing `IndexError` error because the user enrolled courses list may be shorter than the chosen courses list (which is the subject of iteration)
+                    except IndexError:
+                        pass
+                #Adding back all chosen courses to the "Registrazione" table
+                cursor.execute('insert into Registrazione(userID, idCorso)\
+                                values(%(uid)s, %(courseID)s)',
+                                {
+                                    'uid': userID,
+                                    'courseID': courseID
+                                }
+                            )
                 connection.commit()
             flash('Dati aggiornati con successo.', 'Successo')
         else:
