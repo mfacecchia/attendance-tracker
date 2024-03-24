@@ -1108,10 +1108,27 @@ def updateDataAsAdmin(userID, form):
                         }
                     )
         oldUserRole = cursor.fetchone()[0]
-        #TODO: Enable user role update
         if(oldUserRole == 'Insegnante' and role == 'Studente'):
-            flash('Impossibile modificare la tipologia di account da Insegnante a Studente.', 'Errore')
-            return userID
+            #Removing teacher from all lessons in which the userID is mentioned
+            cursor.execute('update Lezione\
+                            set idInsegnante = NULL\
+                            where idInsegnante = %(teacherID)s',
+                            {
+                                'teacherID': userID
+                            }
+                        )
+            connection.commit()
+            #Getting all scheduled lessons for that user and inserting them all in the "Partecipazione" table with an initial "Presenza" value of `0`
+            scheduledLessons = getLessonsList(uid = userID)[0]
+            for lesson in scheduledLessons:
+                cursor.execute('insert into Partecipazione(userID, idLezione)\
+                                values(%(userID)s, %(lessonID)s)',
+                                {
+                                    'userID': userID,
+                                    'lessonID': lesson['idLezione']
+                                }
+                            )
+                connection.commit()
         #Checking if the Email/UID combination returns no users (count result = 0) to prevent possible primary key duplicates error
         cursor.execute('select count(*)\
                         from Credenziali\
@@ -1291,7 +1308,7 @@ def deleteUser(uid):
     connection.close()
 
 def getLessonsList(limit = None, page = 1, uid = None, isTeacher = False):
-    '''Executes a query and returns all the upcoming lessons based on user type and enrolled courses filters\n
+    '''Executes a query and returns all the upcoming lessons based on user type and enrolled courses filters and the total number of lessons\n
     Takes as parameters a `limit` variable used to limit the number of results and a `page` variable used to get the next `limit`ed results.\n
     Also allows to get the upcoming lessons of a determined user by passing the `uid` and `isTeacher` parameters which respectively represent the userID to get the values to and if the user is a Teacher, the `isTeacher` value must be set to `True`'''
     connection = connectToDB()
