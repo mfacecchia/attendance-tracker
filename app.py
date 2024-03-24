@@ -1028,12 +1028,16 @@ def getUsersList(limit = None, page = 1):
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
-    #TODO: Order per user role & fix query with `left join`
     cursor.execute("select Utente.userID, Nome, Cognome, Tipologia, nomeCorso, annoCorso\
                     from Utente\
-                    inner join Registrazione on Utente.userID = Registrazione.userID\
-                    inner join Corso on Registrazione.idCorso = Corso.idCorso\
-                    group by(userID)")
+                    left join Registrazione on Utente.userID = Registrazione.userID\
+                    left join Corso on Registrazione.idCorso = Corso.idCorso\
+                    group by(userID)\
+                    order by case\
+                        when Tipologia = 'Admin' then 1\
+                        when Tipologia = 'Insegnante' then 2\
+                        when Tipologia = 'Studente' then 3\
+                    end")
     usersList = getValuesFromQuery(cursor)
     totalUsers = len(usersList)
     connection.close()
@@ -1052,14 +1056,19 @@ def getUserData(uid):
 
     cursor.execute('select Utente.userID, Nome, Cognome, Tipologia, Email, nomeCorso, annoCorso\
                     from Utente\
-                    inner join Credenziali on Utente.userID = Credenziali.userID\
-                    inner join Registrazione on Registrazione.userID = Utente.userID\
-                    inner join Corso on Corso.idCorso = Registrazione.idCorso\
+                    left join Credenziali on Utente.userID = Credenziali.userID\
+                    left join Registrazione on Registrazione.userID = Utente.userID\
+                    left join Corso on Corso.idCorso = Registrazione.idCorso\
                     where Utente.userID = %(uid)s', {'uid': int(uid)})
     response = getValuesFromQuery(cursor)
     
-    response[0]['nomeCorso'] = getUserCourses(response)
-    response[0].pop('annoCorso')
+    #Trying to format course name
+    #If the `IndexError` gets triggered, the user has no enrolled courses so the return course name will be empty
+    try:
+        response[0]['nomeCorso'] = getUserCourses(response)
+        response[0].pop('annoCorso')
+    except IndexError:
+        pass
     connection.close()
     return response[0]
 
@@ -1252,6 +1261,8 @@ def getCustomMessage():
         
 def getUserCourses(response):
     '''Getting all courses from the query and creating a single list with all the obtained ones'''
+    if not response:
+        return response
     response[0]['nomeCorso'] = [f"{response[0]['annoCorso']}a {response[0]['nomeCorso']}"]
     for course in response[1:]:
         response[0]['nomeCorso'].append(f"{course['annoCorso']}a {course['nomeCorso']}")
