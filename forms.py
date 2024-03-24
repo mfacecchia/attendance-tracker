@@ -60,3 +60,8 @@ class LessonUpdateForm_Admin(LessonCreationForm_Admin):
 class ResetPasswordForm(FlaskForm):
     email = EmailField(name = 'email', validators = [InputRequired(), Email()], render_kw = {'placeholder': 'Email', 'class': defaultFormsClass, 'autofocus': True})
     submitForm = SubmitField('Recupera la password', render_kw  = {'class': defaultSubmitButtonClasses})
+
+class UpdateResetPasswordForm(FlaskForm):
+    password = PasswordField(name = 'newPassword', validators = [InputRequired(), Length(min = 10)], render_kw = {'placeholder': 'Nuova password', 'autofocus': True, 'class': defaultFormsClass})
+    password_verify = PasswordField(name = 'passwordVerify', validators = [InputRequired(), Length(min = 10), EqualTo('password')], render_kw = {'placeholder': 'Reinserisci password', 'autofocus': True, 'class': defaultFormsClass})
+    submitForm = SubmitField('Recupera la password', render_kw  = {'class': defaultSubmitButtonClasses})

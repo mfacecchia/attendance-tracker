@@ -125,6 +125,7 @@ def login():
                 return redirect(url_for('userScreening'))
         finally:
             connection.close()
+    #TODO: Set session to `None`
     return(render_template('login.html', form = form))
 
 @app.route('/forgot-password', methods = ['GET', 'POST'])
@@ -155,36 +156,89 @@ def forgotPassword():
         return render_template('reset-password-form.html',
                                 form = form)
 
-@app.route('/user/updatepassword', methods = ['GET'])
+@app.route('/user/updatepassword', methods = ['GET', 'POST'])
 def updatePassword():
     '''Lets the user update his freshly created account's password'''
+    form = forms.UpdateResetPasswordForm()
+    #Getting the needed values from the URL (params passed as GET values)
     userEmail = request.args.get('mail')
     userID = request.args.get('uid')
-    if(userEmail and userID):
+    #Processing form data and updating user password
+    if(form.validate_on_submit()):
+        newPassword = form.password.data
+        connection = connectToDB()
+        if(not connection):
+            return redirect(url_for('index'))
+        cursor = connection.cursor()
+        #Getting the current password from the user
+        cursor.execute('select PW from Credenziali\
+                        where userID = %(uid)s',
+                        {
+                            'uid': session['uid']
+                        }
+                    )
+        response = getValuesFromQuery(cursor)
+        pHasher = PasswordHasher()
+        try:
+            pHasher.verify(str(response[0]['PW']), newPassword)
+        #New and old passwords must be different, so the error must be triggered when `verifyMismatchError` is not raised
+        except exceptions.VerifyMismatchError:
+            pass
+        else:
+            flash("La password non può essere uguale a quella precedente. Per favore, riprova", 'Errore')
+            return render_template('updatePassword.html',
+                                    form = form)
+        #Encoding the form obtained password and udpating the database
+        hashedPW = pHasher.hash(newPassword.encode())
+        cursor.execute("update Credenziali set PW = %(newPW)s\
+                        where userID = %(uid)s",
+                        {
+                            'newPW': hashedPW,
+                            'uid': session['uid']
+                        }
+                    )
+        connection.commit()
+        connection.close()
+        session['lastLogin'] = updateLastLoginTime()
+        flash('Password aggiornata con successo.', 'Successo')
+        return redirect(url_for('login'))
+    #Printing error message in case the form was submitted but the values were not valid
+    elif(form.errors):
+        flash('I campi inseriti non sono validi. Per favore, riprova', 'Errore')
+        return render_template('updatePassword.html',
+                                form = form)
+    #Checking if the two needed parameters contain a value, otherwise redirecting to login page with an error message
+    elif(userEmail and userID):
+        #Decoding the URL obtained values from `Base64` to `String`
         userEmail = b64_encode_decode(userEmail, False)
         userID = b64_encode_decode(userID, False)
         #Managing conversion error with redirect to login page if `b64_encode_decode` function returns `False`
         if(not userEmail or not userID):
             flash(commonErrorMessage, 'Errore')
             return redirect(url_for('login'))
-        #Query `count` result = 1 means account found so redirecting to update password
+        #Query `count` result = 1 means account found so redirecting to update password form
         if(verifyUserExistence(userEmail, userID)['result'] == 1):
             session['uid'] = userID
-            return render_template('updatePassword.html')
+            return render_template('updatePassword.html',
+                                    form = form)
         else:
             flash('Questo utente non esiste.', 'Errore')
             return redirect(url_for('login'))
+    #Rendering update password form if it's the first time logging in
     elif(session.get('name')):
-        return render_template('updatePassword.html')
-    else:
-        return redirect(url_for('login'))
+        return render_template('updatePassword.html',
+                                form = form)
+    #Redirecting to login page with a generic error message if none of the conditions above are satisfied
+    flash(commonErrorMessage, 'Errore')
+    return redirect(url_for('login'))
 
+#TODO: Remove this
 @app.route('/user/updatepassword/verify', methods = ['GET', 'POST'])
 def verify_updated_password():
     newPassword = request.form.get('newPassword')
     if(newPassword != None and len(newPassword) >= 10):
         #Checking if form's passwords match, otherwise redirecting back to correct it
-        if(newPassword == request.form.get('passwordVerify')):
+        if(newPassword == request.form.get('password_verify')):
             connection = connectToDB()
             if(not connection):
                 return redirect(url_for('index'))
@@ -192,7 +246,11 @@ def verify_updated_password():
             pHasher = PasswordHasher()
             #Getting the current password from the user
             cursor.execute('select PW from Credenziali\
-                        where userID = %(uid)s', {'uid': session['uid']})
+                            where userID = %(uid)s',
+                            {
+                                'uid': session['uid']
+                            }
+                        )
             response = getValuesFromQuery(cursor)
             try:
                 pHasher.verify(str(response[0]['PW']), newPassword)
@@ -204,7 +262,12 @@ def verify_updated_password():
                 return redirect(url_for('updatePassword'))
             hashedPW = pHasher.hash(newPassword.encode())
             cursor.execute("update Credenziali set PW = %(newPW)s\
-                        where userID = %(uid)s", {'newPW': hashedPW, 'uid': session['uid']})
+                            where userID = %(uid)s",
+                            {
+                                'newPW': hashedPW,
+                                'uid': session['uid']
+                            }
+                        )
             connection.commit()
             session['lastLogin'] = updateLastLoginTime()
             connection.close()
@@ -855,6 +918,7 @@ def getValuesFromQuery(cursor):
             responseDict[-1].setdefault(cursor.description[colCounter][0], col)
     return responseDict
 
+#TODO: Improve commentation
 def updateLastLoginTime():
     '''Programmatically updates user's last login time on database'''
     connection = connectToDB()
