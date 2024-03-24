@@ -638,95 +638,6 @@ def manageLesson():
     else:
         return redirect(url_for('userScreening'))
 
-def update_lesson_data(form):
-    '''Updates lesson's data based on form submitted and validated values\n
-    Returns `True` if the process succeeds, otherwise `False` with a flashed message if the process catches an error'''
-    if(session.get('role') in ['Admin', 'Insegnante']):
-        #Obtaining all form's fields' values
-        lessonID = form.submitForm.data
-        subject = form.subject.data
-        description = form.description.data
-        lessonDate = form.lessonDate.data
-        lessonRoom = form.room.data
-        assignedTeacher = form.assignedTeacher.data if session['role'] == 'Admin' else session['uid']
-        lessonType = form.lessonType.data
-        chosenCourseYear, chosenCourseName = form.course.data.split('a ')
-        #Validating course selection with additional filter for enrolled courses (based on selected assigned teacher userID)
-        if(validateCoursesSelection([chosenCourseName], [chosenCourseYear], assignedTeacher)):
-            #Checking if the textboxes contain a valid value and the date to be higher or equal than today (cannot create a lesson on dates before current date)
-            connection = connectToDB()
-            if not connection:
-                return False
-            cursor = connection.cursor()
-            #Checking if the chosen leson still exists in the database (possible deletion in the meantime)
-            cursor.execute('select count(*) from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
-            if(not cursor.fetchone()[0]):
-                flash('Nessuna lezione trovata.', 'Errore')
-                return False
-            lessonInfo = getLessonInfo(lessonID)
-            #Checking if the chosen lesson's assigned teacher and/or chosen course is different than the previously defined one
-            teacherChanged = int(assignedTeacher) != lessonInfo['idInsegnante']
-            courseChanged = form.course.data != lessonInfo['nomeCorso']
-            #Updating all lesson's data
-            cursor.execute('update Lezione\
-                            set Materia = %(subject)s,\
-                            Descrizione = %(description)s,\
-                            dataLezione = %(lessonDate)s,\
-                            aula = %(room)s,\
-                            idInsegnante = %(teacherID)s,\
-                            Tipologia = %(lessonType)s,\
-                            idCorso = (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s)\
-                            where idLezione = %(lessonID)s', {'subject': subject, 'description': description, 'lessonDate': lessonDate, 'room': lessonRoom, 'teacherID': assignedTeacher, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear, 'lessonID': lessonID})
-            connection.commit()
-            #Updating the lesson's attendance field in the `Partecipazione` DB table if the `teacherChanged` value is `True`
-            if(teacherChanged):
-                #Removing the previous teacher's attendance value at first
-                cursor.execute('delete Partecipazione\
-                                from Partecipazione\
-                                inner join Utente on Utente.userID = Partecipazione.userID\
-                                where idLezione = %(lessonID)s\
-                                and Tipologia = "Insegnante"',
-                                {
-                                    'lessonID': lessonID
-                                }
-                            )
-                connection.commit()
-                #Then inserting the newest row in the table
-                cursor.execute('insert into Partecipazione(userID, idLezione) values(%(teacherID)s, %(lessonID)s)', {'teacherID': assignedTeacher, 'lessonID': lessonID})
-                connection.commit()
-            #Updating students' attendance field in the `Partecipazione` DB table if the lesson's course has changed
-            if(courseChanged):
-                cursor.execute('delete Partecipazione\
-                                from Partecipazione\
-                                inner join Utente on Utente.userID = Partecipazione.userID\
-                                where idLezione = %(lessonID)s\
-                                and Tipologia = "Studente"',
-                                {
-                                    'lessonID': lessonID
-                                }
-                            )
-                connection.commit()
-                studentsList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
-                for student in studentsList:
-                    #Filtering for students user role only
-                    if(student['Tipologia'] == 'Studente'):
-                        cursor.execute('insert into Partecipazione(userID, idLezione)\
-                                        values(%(studentID)s, %(lessonID)s)',
-                                        {
-                                            'studentID': student['userID'],
-                                            'lessonID': lessonID
-                                        }
-                                    )
-                        connection.commit()
-            flash('Lezione modificata con successo.', 'Successo')
-        #NOTE: Error message in case the form's input values are not in the expexted array of possible values
-        else:
-            flash('Devi selezionare una tipologia di lezione e un corso valido.', 'Errore')
-            return False
-        connection.close()
-        return True
-    return False
-
 @app.route('/lesson/register-attendance', methods = ['GET', 'POST'])
 def registerAttendances():
     if(session.get('role') in ['Admin', 'Insegnante']):
@@ -1471,6 +1382,95 @@ def getLessonInfo(lessonID):
     response[0].pop('annoCorso')
     connection.close()
     return response[0]
+
+def update_lesson_data(form):
+    '''Updates lesson's data based on form submitted and validated values\n
+    Returns `True` if the process succeeds, otherwise `False` with a flashed message if the process catches an error'''
+    if(session.get('role') in ['Admin', 'Insegnante']):
+        #Obtaining all form's fields' values
+        lessonID = form.submitForm.data
+        subject = form.subject.data
+        description = form.description.data
+        lessonDate = form.lessonDate.data
+        lessonRoom = form.room.data
+        assignedTeacher = form.assignedTeacher.data if session['role'] == 'Admin' else session['uid']
+        lessonType = form.lessonType.data
+        chosenCourseYear, chosenCourseName = form.course.data.split('a ')
+        #Validating course selection with additional filter for enrolled courses (based on selected assigned teacher userID)
+        if(validateCoursesSelection([chosenCourseName], [chosenCourseYear], assignedTeacher)):
+            #Checking if the textboxes contain a valid value and the date to be higher or equal than today (cannot create a lesson on dates before current date)
+            connection = connectToDB()
+            if not connection:
+                return False
+            cursor = connection.cursor()
+            #Checking if the chosen leson still exists in the database (possible deletion in the meantime)
+            cursor.execute('select count(*) from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
+            if(not cursor.fetchone()[0]):
+                flash('Nessuna lezione trovata.', 'Errore')
+                return False
+            lessonInfo = getLessonInfo(lessonID)
+            #Checking if the chosen lesson's assigned teacher and/or chosen course is different than the previously defined one
+            teacherChanged = int(assignedTeacher) != lessonInfo['idInsegnante']
+            courseChanged = form.course.data != lessonInfo['nomeCorso']
+            #Updating all lesson's data
+            cursor.execute('update Lezione\
+                            set Materia = %(subject)s,\
+                            Descrizione = %(description)s,\
+                            dataLezione = %(lessonDate)s,\
+                            aula = %(room)s,\
+                            idInsegnante = %(teacherID)s,\
+                            Tipologia = %(lessonType)s,\
+                            idCorso = (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s)\
+                            where idLezione = %(lessonID)s', {'subject': subject, 'description': description, 'lessonDate': lessonDate, 'room': lessonRoom, 'teacherID': assignedTeacher, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear, 'lessonID': lessonID})
+            connection.commit()
+            #Updating the lesson's attendance field in the `Partecipazione` DB table if the `teacherChanged` value is `True`
+            if(teacherChanged):
+                #Removing the previous teacher's attendance value at first
+                cursor.execute('delete Partecipazione\
+                                from Partecipazione\
+                                inner join Utente on Utente.userID = Partecipazione.userID\
+                                where idLezione = %(lessonID)s\
+                                and Tipologia = "Insegnante"',
+                                {
+                                    'lessonID': lessonID
+                                }
+                            )
+                connection.commit()
+                #Then inserting the newest row in the table
+                cursor.execute('insert into Partecipazione(userID, idLezione) values(%(teacherID)s, %(lessonID)s)', {'teacherID': assignedTeacher, 'lessonID': lessonID})
+                connection.commit()
+            #Updating students' attendance field in the `Partecipazione` DB table if the lesson's course has changed
+            if(courseChanged):
+                cursor.execute('delete Partecipazione\
+                                from Partecipazione\
+                                inner join Utente on Utente.userID = Partecipazione.userID\
+                                where idLezione = %(lessonID)s\
+                                and Tipologia = "Studente"',
+                                {
+                                    'lessonID': lessonID
+                                }
+                            )
+                connection.commit()
+                studentsList = selectUsersFromCourse(chosenCourseName, chosenCourseYear)
+                for student in studentsList:
+                    #Filtering for students user role only
+                    if(student['Tipologia'] == 'Studente'):
+                        cursor.execute('insert into Partecipazione(userID, idLezione)\
+                                        values(%(studentID)s, %(lessonID)s)',
+                                        {
+                                            'studentID': student['userID'],
+                                            'lessonID': lessonID
+                                        }
+                                    )
+                        connection.commit()
+            flash('Lezione modificata con successo.', 'Successo')
+        #NOTE: Error message in case the form's input values are not in the expexted array of possible values
+        else:
+            flash('Devi selezionare una tipologia di lezione e un corso valido.', 'Errore')
+            return False
+        connection.close()
+        return True
+    return False
 
 if __name__ == "__main__":
     app.run(debug = True)
