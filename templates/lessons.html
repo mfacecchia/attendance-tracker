@@ -26,11 +26,13 @@ Lezioni programmate
                     <td><p>{{lesson['Descrizione']}}</p></td>
                     {% if session['role'] in ['Admin', 'Insegnante'] %}
                         <form action = "{{url_for('manageLesson')}}" method = "post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" >
                             <input type = "text" name = "id" readonly hidden value = "{{lesson['idLezione']}}">
                             <td>
                                 {% if lesson['dataLezione'] == today %}
                                     <button class = "button dark-blue" type = "submit" name = "submitButton" value = "Manage">Apri lezione</button>
                                 {% endif %}
+                                <button class = "button slate" type = "submit" name = "submitButton" value = "Edit">Modifica</button>
                                 <button class = "button orange" type = "button" onclick = "document.getElementById('removeLessonModal{{lesson.idLezione}}').showModal();">Elimina</button>
                             </td>
 
