@@ -760,7 +760,7 @@ def usersList():
                                 page = page,
                                 totalPages = totalPages
                             )
-    #FIXME: Add redirect to user screening if role is not `Admin`
+    return redirect(url_for('userScreening'))
 
 @app.route('/user/select', methods = ['GET', 'POST'])
 def select_user():
