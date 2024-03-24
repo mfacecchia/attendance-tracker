@@ -1021,13 +1021,6 @@ def loginWithGoogle(googleID):
     connection.close()
     return accountFound
 
-def validateFormInput(*args):
-    '''Validates form user input by checking if the input data is not an empty string'''
-    for inputValue in args:
-        if(inputValue.replace(' ', '') == ''):
-            return False
-    return True
-
 def getUsersList(limit = None, page = 1):
     '''Obtains all users from the database and returns a matrix'''
     connection = connectToDB()
