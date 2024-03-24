@@ -483,6 +483,8 @@ def createLesson():
             subject = form.subject.data
             description = form.description.data
             lessonDate = form.lessonDate.data
+            lessonStartTime = form.lessonStartTime.data
+            lessonEndTime = form.lessonEndTime.data
             lessonRoom = form.room.data
             assignedTeacher = form.assignedTeacher.data if session['role'] == 'Admin' else session['uid']
             lessonType = request.form.get('lessonType')
@@ -493,12 +495,14 @@ def createLesson():
                 connection = connectToDB()
                 cursor = connection.cursor()
                 try:
-                    cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, Aula, Tipologia, idCorso, idInsegnante) values\
-                                    (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s), %(teacherID)s)',
+                    cursor.execute('insert into Lezione(Materia, Descrizione, dataLezione, oraInizio, oraFine, Aula, Tipologia, idCorso, idInsegnante)\
+                                    values (%(subjectName)s, %(description)s, %(lessonDate)s, %(lessonStartTime)s, %(lessonEndTime)s, %(lessonRoom)s, %(lessonType)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s), %(teacherID)s)',
                                     {
                                         'subjectName': subject.strip().capitalize(),
                                         'description': description.strip(),
                                         'lessonDate': lessonDate,
+                                        'lessonStartTime': lessonStartTime,
+                                        'lessonEndTime': lessonEndTime,
                                         'lessonRoom': lessonRoom.upper(),
                                         'lessonType': lessonType,
                                         'courseName': chosenCourseName,
@@ -1332,6 +1336,7 @@ def getLessonsList(limit = None, page = 1, uid = None, isTeacher = False):
     if(not connection):
         return False
     cursor = connection.cursor()
+    #TODO: Get also lesson start and end time
     #Default query for all user types
     preparedQuery = [
         'select Lezione.idLezione, Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso, annoCorso, Presenza\
@@ -1512,6 +1517,7 @@ def getLessonInfo(lessonID):
     if not connection:
         return False
     cursor = connection.cursor()
+    #TODO: Get also lesson start and end time
     cursor.execute('select Lezione.idLezione, Materia, Descrizione, dataLezione, aula, Lezione.Tipologia, idInsegnante, Nome, Cognome, nomeCorso, annoCorso\
                     from Lezione\
                     inner join Partecipazione on Partecipazione.idLezione = Lezione.idLezione\

@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, EmailField, PasswordField, BooleanField, SelectField, SubmitField, TextAreaField, DateField, ValidationError, HiddenField
+from wtforms import StringField, EmailField, PasswordField, BooleanField, SelectField, SubmitField, TextAreaField, DateField, ValidationError, HiddenField, TimeField
 from wtforms.validators import InputRequired, Length, Regexp, DataRequired, EqualTo, Email, Optional
-from datetime import date
+from datetime import date, datetime
 
 defaultFormsClass = 'formInputBox'
 defaultButtonClass = 'button'
@@ -23,6 +23,8 @@ class LessonCreationForm_Teacher(FlaskForm):
     subject = StringField(name = 'subject', validators = [InputRequired(), Length(max = 30)], render_kw = {'placeholder': 'Materia', 'class': defaultFormsClass})
     description = TextAreaField(name = 'description', validators = [Length(max = 1000)], render_kw = {'placeholder': 'Descrizione (opzionale)', 'class': defaultFormsClass})
     lessonDate = DateField(name = 'lessonDate', default = date.today(), validators = [InputRequired()], render_kw = {'class': defaultFormsClass})
+    lessonStartTime = TimeField(name = 'lessonStartTime', validators = [InputRequired()], render_kw = {'class': defaultFormsClass}, default = datetime.strptime('09:00', '%H:%M'))
+    lessonEndTime = TimeField(name = 'lessonEndTime', validators = [InputRequired()], render_kw = {'class': defaultFormsClass}, default = datetime.strptime('13:00', '%H:%M'))
     room = StringField(name = 'room', validators = [InputRequired(), Regexp('[a-zA-Z][0-9]+'), Length(min = 4, max = 4)], render_kw = {'placeholder': 'Aula (Es. A001)', 'class': defaultFormsClass})
     lessonType = SelectField(name = 'lessonType', validators = [InputRequired()], choices = [('', '-- Seleziona una tipologia --'), ('Lezione', 'Lezione'), ('Seminario', 'Seminario'), ('Laboratorio', 'Laboratorio')], render_kw = {'class': defaultFormsClass})
     #NOTE: Disabling validation in order to validate it later after the teacher is chosen from the form
@@ -33,6 +35,10 @@ class LessonCreationForm_Teacher(FlaskForm):
         '''Raises `ValidationError` if input date is behind today'''
         if lessonDate.data < date.today():
             raise ValidationError('Date cannot be lower than today')
+    
+    def validate_lessonEndTime(form, lessonEndTime):
+        if(lessonEndTime.data < form.lessonStartTime.data):
+            raise ValidationError('Lesson end time cannot be lower than lesson start time')
 
 #Adding the assigned teacher field from the administrator (inherited class from the teacher's one)
 class LessonCreationForm_Admin(LessonCreationForm_Teacher):
