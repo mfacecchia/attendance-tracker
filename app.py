@@ -1131,6 +1131,20 @@ def updateDataAsAdmin(userID, form):
                                 }
                             )
                 connection.commit()
+        #Student to Admin/Teacher conversion
+        elif(oldUserRole == 'Studente' and role in ('Insegnante', 'Admin')):
+            #Removing all scheduled lessons for dates above the current date
+            cursor.execute('delete Partecipazione\
+                            from Partecipazione\
+                            inner join Lezione on Lezione.idLezione = Partecipazione.idLezione\
+                            where dataLezione >= %(today)s\
+                            and userID = %(userID)s',
+                            {
+                                'today': date.today(),
+                                'userID': userID
+                            }
+                        )
+            connection.commit()
         #Checking if the Email/UID combination returns no users (count result = 0) to prevent possible primary key duplicates error
         cursor.execute('select count(*)\
                         from Credenziali\
