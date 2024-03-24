@@ -1174,7 +1174,6 @@ def updateDataAsAdmin(userID, form):
                 #Adding the user to all the upcoming lessons of the new course (only if it's a "Studente")
                 cursor.execute('select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s', {'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
                 courseID = cursor.fetchone()[0]
-                #TODO: Add error flash message if user tries to update role from "Insegnante" to "Studente"
                 #Making all attendanced manipulation operation only if the user role is "Studente"
                 if(role == 'Studente'):
                     if(chosenCourses[x] not in userEnrolledCourses):
