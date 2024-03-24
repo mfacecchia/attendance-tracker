@@ -763,8 +763,9 @@ def usersList():
 
 @app.route('/user/select', methods = ['GET', 'POST'])
 def select_user():
-    if(session.get('role') == 'Admin'):
-        uid = request.values.get('userID')
+    uid = request.values.get('userID')
+    #Loading update user data as administrator
+    if(session.get('role') == 'Admin' and uid):
         if(request.form.get('action') == 'Edit'):
             if(uid):
                 form = forms.UserUpdateForm()
@@ -787,12 +788,13 @@ def select_user():
             deleteUser(uid)
             flash('Utente rimosso con successo.', 'Successo')
             return redirect(url_for('usersList'))
-    elif(session.get('role') in ('Studente', 'Insegnante')):
+    #Loading update self email & password information
+    elif(session.get('name')):
         form = forms.UserUpdateForm_Standard()
         selectedUser = getUserData(session['uid'])['Email']
         if(form.validate()):
             update_user_data(form)
-        #TODO: Trigger error for any error type
+        #Outputting possible password field input errors
         elif(form.password_verify.errors):
             flash('I campi inseriti non sono validi. Per favore, riprova', 'Errore')
             return render_template('userInfo.html',
