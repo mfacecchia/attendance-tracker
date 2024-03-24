@@ -1078,6 +1078,7 @@ def updateDataAsAdmin(userID, form):
     role = form.role.data
     chosenCourses = request.form.getlist('course')
     
+    userEnrolledCourses = getUserEnrolledCourses(session['uid'])
     coursesNames = []
     coursesYears = []
     for course in chosenCourses:
@@ -1216,9 +1217,10 @@ def deleteUser(uid):
     connection.commit()
     connection.close()
 
-def getLessonsList(limit = None, page = 1):
+def getLessonsList(limit = None, page = 1, uid = None, isTeacher = False):
     '''Executes a query and returns all the upcoming lessons based on user type and enrolled courses filters\n
-    Takes as parameters a `limit` variable used to limit the number of results and a `page` variable used to get the next `limit`ed results'''
+    Takes as parameters a `limit` variable used to limit the number of results and a `page` variable used to get the next `limit`ed results.\n
+    Also allows to get the upcoming lessons of a determined user by passing the `uid` and `isTeacher` parameters which respectively represent the userID to get the values to and if the user is a Teacher, the `isTeacher` value must be set to `True`'''
     connection = connectToDB()
     if(not connection):
         return False
@@ -1232,18 +1234,18 @@ def getLessonsList(limit = None, page = 1):
         where dataLezione >= %(today)s', {'today': date.today()}
     ]
     #Adding course filter for students and teachers
-    if(session.get('role') in ['Studente', 'Insegnante']):
+    if(session.get('role') in ['Studente', 'Insegnante'] or uid):
         preparedQuery[0] += ' and Lezione.idCorso in (\
                                 select idCorso\
                                 from Registrazione\
                                 inner join Utente on Utente.userID = Registrazione.userID\
                                 where Utente.userID = %(userID)s\
                             )'
-        preparedQuery[1].setdefault('userID', session['uid'])
+        preparedQuery[1].setdefault('userID', uid if uid else session['uid'])
     #Adding assigned lessons filter for teachers
-    if(session.get('role') == 'Insegnante'):
+    if(session.get('role') == 'Insegnante' or isTeacher):
         preparedQuery[0] += ' and idInsegnante = %(teacherID)s'
-        preparedQuery[1].setdefault('teacherID', session['uid'])
+        preparedQuery[1].setdefault('teacherID', uid if isTeacher else session['uid'])
     #Adding the last SQL directives
     preparedQuery[0] += ' group by Lezione.idLezione\
                         order by dataLezione, Materia asc'
