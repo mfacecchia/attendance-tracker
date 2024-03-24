@@ -20,10 +20,7 @@ oauth = OAuth(app)
 #CSRF key for pages without WTForms
 csrf = CSRFProtect(app)
 
-#TODO: Manage Error 400
-
 app.config['SECRET_KEY'] = environ['FLASK_SECRET']
-
 app.config['MAIL_SERVER'] = environ['MAIL_SERVER']
 app.config['MAIL_PORT'] = environ['MAIL_PORT']
 app.config['MAIL_USERNAME'] = environ['MAIL_USERNAME']
@@ -49,12 +46,14 @@ oauth.register(
     client_kwargs = {'scope': 'user:email'}
 )
 
-#List of roles available for the registration
-roleOptions = ['Studente', 'Insegnante', 'Admin']
 #Creating a variable used to store all available courses from the database and pass them to the HTML template
 courses = []
-lessonTypes = ['Lezione', 'Seminario', 'Laboratorio']
 commonErrorMessage = 'Si è verificato un errore imprevisto. Per favore, riprova più tardi.'
+
+@app.errorhandler(flaskExceptions.BadRequest)
+def Error400(error):
+    flash('Si è verificato un errore imprevisto durante la validazione del form. Per favore, riprova', 'Errore')
+    return redirect(url_for('login'))
 
 #Handler for `Error 404 Not Found`
 @app.errorhandler(flaskExceptions.NotFound)
