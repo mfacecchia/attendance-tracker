@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, PasswordField, BooleanField, SelectField, SubmitField, TextAreaField, DateField, ValidationError, HiddenField
-from wtforms.validators import InputRequired, Length, Regexp, DataRequired, EqualTo
+from wtforms.validators import InputRequired, Length, Regexp, DataRequired, EqualTo, Email
 from datetime import date
 
 defaultFormsClass = 'formInputBox'
@@ -9,7 +9,7 @@ defaultSubmitButtonClasses = 'button dark-blue'
 
 #TODO: Add custom messages to output as flash messages
 class LoginForm(FlaskForm):
-    email = EmailField(name = 'Email', validators = [InputRequired()], render_kw = {'placeholder': 'Email', 'class': defaultFormsClass, 'autofocus': True})
+    email = EmailField(name = 'Email', validators = [InputRequired(), Email()], render_kw = {'placeholder': 'Email', 'class': defaultFormsClass, 'autofocus': True})
     password = PasswordField(name = 'password', validators = [InputRequired()], render_kw = {'placeholder': 'Password', 'class': defaultFormsClass})
     remember = BooleanField(name = 'remember', label = 'Ricordami')
     submitForm = SubmitField('Login', render_kw = {'class': defaultSubmitButtonClasses})
@@ -41,7 +41,7 @@ class LessonCreationForm_Admin(LessonCreationForm_Teacher):
 class UserCreationForm(FlaskForm):
     fname = StringField(name = 'fname', validators = [InputRequired(), Length(max = 20)], render_kw = {'placeholder': 'Nome', 'class': defaultFormsClass})
     lname = StringField(name = 'lname', validators = [InputRequired(), Length(max = 20)], render_kw = {'placeholder': 'Cognome', 'class': defaultFormsClass})
-    email = EmailField(name = 'email', validators = [InputRequired(), Length(max = 40)], render_kw = {'placeholder': 'Email', 'class': defaultFormsClass})
+    email = EmailField(name = 'email', validators = [InputRequired(), Length(max = 40), Email()], render_kw = {'placeholder': 'Email', 'class': defaultFormsClass})
     password = PasswordField(name = 'password', validators = [InputRequired(), Length(min = 10)], render_kw = {'placeholder': 'Password', 'class': defaultFormsClass})
     password_verify = PasswordField(name = 'password_verify', validators = [InputRequired(), Length(min = 10), EqualTo('password')], render_kw = {'placeholder': 'Password', 'class': defaultFormsClass})
     role = SelectField(name = 'role', choices = [('Studente', 'Studente'), ('Insegnante', 'Insegnante'), ('Admin', 'Admin')], render_kw = {'class': defaultFormsClass, 'onchange': 'adminRoleChosen()'})
@@ -56,3 +56,7 @@ class LessonUpdateForm_Teacher(LessonCreationForm_Teacher):
 class LessonUpdateForm_Admin(LessonCreationForm_Admin):
     lessonID = HiddenField(name = 'id')
     submitForm = SubmitField('Modifica lezione', name = 'id', render_kw = {'class': defaultSubmitButtonClasses})
+
+class ResetPasswordForm(FlaskForm):
+    email = EmailField(name = 'email', validators = [InputRequired(), Email()], render_kw = {'placeholder': 'Email', 'class': defaultFormsClass, 'autofocus': True})
+    submitForm = SubmitField('Recupera la password', render_kw  = {'class': defaultSubmitButtonClasses})

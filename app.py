@@ -130,9 +130,10 @@ def login():
 @app.route('/forgot-password', methods = ['GET', 'POST'])
 def forgotPassword():
     #TODO: Add db field in `Credenziali` called = `passwordDimenticata` with `False` as default value
-    email = request.form.get('email')
+    form = forms.ResetPasswordForm()
     #If the form has not been submitted, the first redirect will be to the form for inputting the user's email, otherwise proceeding with user verification
-    if(email):
+    if(form.validate_on_submit()):
+        email = form.email.data
         #Checking if the user exist by getting its relative userID from the database
         uid = verifyUserExistence(email)
         flash('Riceverai a breve un\'Email all\'indirizzo fornito se è registrato.', 'Successo')
@@ -151,7 +152,8 @@ def forgotPassword():
                 flash('Si è verificato un errore durante l\'invio dell\'Email. Per favore più tardi', 'Errore')
         return redirect(url_for('login'))
     else:
-        return render_template('reset-password-form.html')
+        return render_template('reset-password-form.html',
+                                form = form)
 
 @app.route('/user/updatepassword', methods = ['GET'])
 def updatePassword():
