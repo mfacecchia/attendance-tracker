@@ -19,7 +19,7 @@ Gestione account
                             sm:bottom-[8px]
                             md:bottom-2
                             xl:bottom-[9px]
-                            2xl:px-5 2xl:bottom-[10px]" href = "{{url_for('updateUserInfo')}}">Modifica account</a>
+                            2xl:px-5 2xl:bottom-[10px]" href = "{{url_for('select_user')}}">Modifica account</a>
             </div>
             <div class = "next-lesson">
                 {% if session['role'] in ['Admin', 'Insegnante'] %}
