@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, PasswordField, BooleanField, SelectField, SubmitField, TextAreaField, DateField, ValidationError, HiddenField
-from wtforms.validators import InputRequired, Length, Regexp, DataRequired, EqualTo, Email
+from wtforms.validators import InputRequired, Length, Regexp, DataRequired, EqualTo, Email, Optional
 from datetime import date
 
 defaultFormsClass = 'formInputBox'
@@ -43,7 +43,7 @@ class UserCreationForm(FlaskForm):
     lname = StringField(name = 'lname', validators = [InputRequired(), Length(max = 20)], render_kw = {'placeholder': 'Cognome', 'class': defaultFormsClass})
     email = EmailField(name = 'email', validators = [InputRequired(), Length(max = 40), Email()], render_kw = {'placeholder': 'Email', 'class': defaultFormsClass})
     password = PasswordField(name = 'password', validators = [InputRequired(), Length(min = 10)], render_kw = {'placeholder': 'Password', 'class': defaultFormsClass})
-    password_verify = PasswordField(name = 'password_verify', validators = [InputRequired(), Length(min = 10), EqualTo('password')], render_kw = {'placeholder': 'Password', 'class': defaultFormsClass})
+    password_verify = PasswordField(name = 'password_verify', validators = [InputRequired(), Length(min = 10), EqualTo('password')], render_kw = {'placeholder': 'Reinserisci password', 'class': defaultFormsClass})
     role = SelectField(name = 'role', choices = [('Studente', 'Studente'), ('Insegnante', 'Insegnante'), ('Admin', 'Admin')], render_kw = {'class': defaultFormsClass, 'onchange': 'adminRoleChosen()'})
     adminVerification = BooleanField('Sei sicuro di voler creare un utente di tipo ADMIN?', validators = [DataRequired()], name = 'adminVerificationCheckbox', default = True)
     submitForm = SubmitField('Crea account', render_kw  = {'class': defaultSubmitButtonClasses})
@@ -65,3 +65,14 @@ class UpdateResetPasswordForm(FlaskForm):
     password = PasswordField(name = 'newPassword', validators = [InputRequired(), Length(min = 10)], render_kw = {'placeholder': 'Nuova password', 'autofocus': True, 'class': defaultFormsClass})
     password_verify = PasswordField(name = 'passwordVerify', validators = [InputRequired(), Length(min = 10), EqualTo('password')], render_kw = {'placeholder': 'Reinserisci password', 'autofocus': True, 'class': defaultFormsClass})
     submitForm = SubmitField('Recupera la password', render_kw  = {'class': defaultSubmitButtonClasses})
+
+class UserUpdateForm(UserCreationForm):
+    password = PasswordField(name = 'password', validators = [Optional(), Length(min = 10)], render_kw = {'placeholder': 'Password', 'class': defaultFormsClass})
+    password_verify = PasswordField(name = 'password_verify', validators = [Optional(), Length(min = 10), EqualTo('password')], render_kw = {'placeholder': 'Reinserisci password', 'class': defaultFormsClass})
+    submitForm = SubmitField('Modifica utente', render_kw  = {'class': defaultSubmitButtonClasses})
+
+class UserUpdateForm_Standard(FlaskForm):
+    email = EmailField(name = 'email', validators = [InputRequired(), Length(max = 40), Email()], render_kw = {'placeholder': 'Email', 'class': defaultFormsClass})
+    password = PasswordField(name = 'password', validators = [Optional(), Length(min = 10)], render_kw = {'placeholder': 'Password', 'class': defaultFormsClass})
+    password_verify = PasswordField(name = 'password_verify', validators = [Optional(), Length(min = 10), EqualTo('password')], render_kw = {'placeholder': 'Reinserisci password', 'class': defaultFormsClass})
+    submitForm = SubmitField('Modifica utente', render_kw  = {'class': defaultSubmitButtonClasses})

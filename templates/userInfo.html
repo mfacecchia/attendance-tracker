@@ -4,43 +4,44 @@
 Modifica utente
 {% endblock %}
 
-{% block formAction %} {{url_for('update_user_data')}} {% endblock %}
+{% if uid is defined %}
+    {% block bodyProperties %}onload = "adminRoleChosen()"{% endblock %}
+{% endif %}
+{% block formAction %} {{url_for('select_user')}} {% endblock %}
 {% block formImageSource %} {{url_for('static', filename = 'assets/user.svg')}} {% endblock %}
 {% block formTitle %} Modifica dati utente {% endblock %}
 {% block formSubtitle %} Inserisci i dati che desideri modificare nei campi sottostanti {% endblock %}
 {% block inputFields %}
-    {% if userData is defined %}
-        <input class = "formInputBox" type = "text" name = "fname" value = "{{userData['Nome']}}" placeholder = "Nome" required maxlength = '20'>
-        <input class = "formInputBox" type = "text" name = "lname" value = "{{userData['Cognome']}}" placeholder = "Cognome" required maxlength = "20">
-        <input class = "formInputBox" type = "email" name = "email" value = "{{userData['Email']}}" placeholder = "Email" required maxlength = "40">
-        <input class = "formInputBox" type = "password" name = "password" placeholder = "Password" minlength = "10">
-        <input class = "formInputBox" type = "password" name = "password_verify" placeholder = "Verifica password" minlength = "10">
-        <select class = "formInputBox" name = "role">
-            <option value = "{{userData['Tipologia']}}">{{userData['Tipologia']}}</option>
-            {% for role in roles %}
-                {% if role != userData['Tipologia'] %}
-                    <option value = "{{role}}">{{role}}</option>
-                {% endif %}
-            {% endfor %}
-        </select>
+    {% if uid is defined %}
+        {{ form.fname }}
+        {{ form.lname }}
+        {{ form.email }}
+        {{ form.password }}
+        {{ form.password_verify }}
+        {{ form.role }}
+        <label class = "mb-5" id = "adminVerification" style = "display: none">
+            {{ form.adminVerification }}
+            {{ form.adminVerification.label }}
+        </label>
         <p>Seleziona almeno un corso tra i seguenti</p>
         {% for course in courses %}
             <label class = "formInputBox">
-                {% if course in userData['nomeCorso'] %}
-                    <input type = "checkbox" name = "course" value = "{{course}}" checked>
-                {% else %}
-                    <input type = "checkbox" name = "course" value = "{{course}}">
-                {% endif %}
+                <input type = "checkbox" name = "course" value = "{{course}}" {% if course in enrolledCourses %}checked{% endif %}>
                 {{course}}
             </label>
         {% endfor %}
+
+        <input type = "hidden" name = "action" value = "Edit">
+        <input type = "hidden" name = "userID" value = "{{uid}}">
     {% else %}
-        <input class = "formInputBox" type = "email" name = "email" placeholder = "Email">
-        <input class = "formInputBox" type = "password" name = "newPassword" minlength = "10" placeholder = "Nuova password">
-        <input class = "formInputBox" type = "password" name = "passwordVerify" placeholder = "Reinserisci password">
+        {{ form.email }}
+        {{ form.password }}
+        {{ form.password_verify }}
     {% endif %}
 {% endblock %}
 
-{% block buttonName %}uid{% endblock %}
-{% block buttonValue %}{{userData['userID'] if userData is defined}}{% endblock %}
-{% block submit %} Modifica {% endblock %}
+{% if uid is defined %}
+    {% block script %}
+        <script src = "{{url_for('static', filename = 'script/formsManagement.js')}}"></script>
+    {% endblock %}
+{% endif %}

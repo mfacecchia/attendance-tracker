@@ -742,6 +742,7 @@ def create_course():
         flash(commonErrorMessage, 'Errore')
         return redirect(url_for('userScreening'))
 
+#TODO: Remove this
 @app.route('/user/info')
 def updateUserInfo():
     if(session.get('name')):
@@ -768,41 +769,64 @@ def usersList():
                                 page = page,
                                 totalPages = totalPages
                             )
+    #FIXME: Add redirect to user screening if role is not `Admin`
 
 @app.route('/user/select', methods = ['GET', 'POST'])
 def select_user():
     if(session.get('role') == 'Admin'):
         uid = request.values.get('userID')
-        if(request.form.get('submitButton') == 'Edit'):
+        if(request.form.get('action') == 'Edit'):
             if(uid):
+                form = forms.UserUpdateForm()
+                if(form.validate()):
+                    update_user_data(form, uid)
+                    return redirect(url_for('usersList'))
                 selectedUser = getUserData(uid)
                 getCourses()
-                return render_template('userInfo.html', userData = selectedUser, courses = courses, roles = roleOptions)
-        elif(request.form.get('submitButton') == 'Remove'):
+                enrolledCourses = getUserEnrolledCourses(uid)
+                form.fname.data = selectedUser['Nome']
+                form.lname.data = selectedUser['Cognome']
+                form.email.data = selectedUser['Email']
+                return render_template('userInfo.html',
+                                        uid = uid,
+                                        form = form,
+                                        courses = courses,
+                                        enrolledCourses = enrolledCourses)
+        elif(request.form.get('action') == 'Remove'):
             deleteUser(uid)
             flash('Utente rimosso con successo.', 'Successo')
             return redirect(url_for('usersList'))
-        elif(uid):
-            selectedUser = getUserData(uid)
-            getCourses()
-            return render_template('userInfo.html', userData = selectedUser, courses = courses, roles = roleOptions)
+    elif(session.get('role') in ('Studente', 'Insegnante')):
+        form = forms.UserUpdateForm_Standard()
+        selectedUser = getUserData(session['uid'])['Email']
+        if(form.validate()):
+            update_user_data(form)
+        #TODO: Trigger error for any error type
+        elif(form.password_verify.errors):
+            flash('I campi inseriti non sono validi. Per favore, riprova', 'Errore')
+            return render_template('userInfo.html',
+                                    form = form)
+        else:
+            form.email.data = selectedUser
+            return render_template('userInfo.html',
+                                    form = form)
     return redirect(url_for('userScreening'))
 
-@app.route('/user/update', methods = ['GET', 'POST'])
-def update_user_data():
+# @app.route('/user/update', methods = ['GET', 'POST'])
+def update_user_data(form, uid = None):
     #`not request.form.get('uid')` means that the administrator wants to update his own data
     #NOTE: (`uid` is a special field in `userInfo.html` form which links the selected user id to the button value with name `uid`)
-    if(session.get('role') in ['Studente', 'Insegnante'] or not request.form.get('uid')):
-        if(updateDataAsUser()):
+    if(session.get('role') in ['Studente', 'Insegnante'] or not uid):
+        if(updateDataAsUser(form)):
             flash('Utente modificato con successo.', 'Successo')
+            return True
         else:
-            return redirect(url_for('updateUserInfo'))
+            return False
     elif(session.get('role') == 'Admin'):
-        userID = updateDataAsAdmin()
-        return redirect(url_for('select_user', userID = userID))
+        return updateDataAsAdmin(uid, form)
     else:
         flash(commonErrorMessage, 'Errore')
-    return(redirect(url_for('userScreening')))
+        return False
 
 @app.route('/user/courses', methods = ['GET'])
 def userEnrolledCourses():
@@ -1047,75 +1071,70 @@ def getUserData(uid):
     connection.close()
     return response[0]
 
-def updateDataAsAdmin():
+def updateDataAsAdmin(userID, form):
     '''Shorthand function to update any user data as administrator'''
-    userID = request.form.get('uid')
-    if(request.form.get('role') in roleOptions and len(request.form.getlist('course')) > 0):
-        fname = request.form.get('fname').strip().capitalize()
-        lname = request.form.get('lname').strip().capitalize()
-        email = request.form.get('email').strip().lower()
-        pw = request.form.get('password')
-        pwVerify = request.form.get('password_verify')
-        hashedPW = ''
-        role = request.form.get('role')
-        chosenCourses = request.form.getlist('course')
-        
-        coursesNames = []
-        coursesYears = []
-        for course in chosenCourses:
-            coursesYears.append(course.split("a ")[0])
-            coursesNames.append(course.split("a ")[1])
-        if(validateCoursesSelection(coursesNames, coursesYears)):
-            #Checking if all the form fields input are not empty
-            if(validateFormInput(fname, lname, email)):
-                if(pw):
-                    if(len(pw) >= 10 and pw == pwVerify):
-                        phasher = PasswordHasher()
-                        hashedPW = phasher.hash(pw.encode())
-                    else:
-                        flash('Le password inserite non combaciano o contengono meno di 10 caratteri. Per favore, riprova.', 'Errore')
-                        return userID
-                connection = connectToDB()
-                if(not connection):
-                    return redirect(url_for('index'))
-                #Creating a cursor reponsible for query executions
-                cursor = connection.cursor()
-                cursor.execute('select count(*)\
-                            from Credenziali\
-                            where Email = %(newEmail)s and userID != %(userID)s', {'newEmail': email, 'userID': userID})
-                response = cursor.fetchone()
-                if(response[0] == 0):
-                    queries = [
-                                ['update Utente set Nome = %(name)s, Cognome = %(surname)s, Tipologia = %(role)s where userID = %(uid)s', {'name': fname, 'surname': lname, 'role': role, 'uid': userID}],
-                                ['delete from Registrazione where userID = %(uid)s', {'uid': userID}],
-                                ['update Credenziali set Email = %(email)s where userID = %(uid)s', {'email': email, 'uid': userID}]
-                            ]
-                    #Update password only if it has been hashed (valid password input)
-                    if(hashedPW):
-                        queries.append(['update Credenziali set PW = %(pw)s where userID = %(uid)s', {'pw': hashedPW, 'uid': userID}])
-                    for query in queries:
-                        cursor.execute(query[0], query[1])
-                        connection.commit()
-                    for x in range(len(coursesNames)):
-                        cursor.execute('insert into Registrazione(userID, idCorso) values(%(uid)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'uid': userID, 'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
-                        connection.commit()
-                    flash('Dati aggiornati con successo.', 'Successo')
-                else:
-                    flash('Questo indirizzo Email è già associato a un altro account. Per favore, riprova.', 'Errore')
-                #Closing connection
-                connection.close()
-            else:
-                flash(commonErrorMessage, 'Errore')
+    fname = form.fname.data.strip().capitalize()
+    lname = form.lname.data.strip().capitalize()
+    email = form.email.data.strip().lower()
+    pw = form.password.data
+    hashedPW = ''
+    role = form.role.data
+    chosenCourses = request.form.getlist('course')
+    
+    coursesNames = []
+    coursesYears = []
+    for course in chosenCourses:
+        coursesYears.append(course.split("a ")[0])
+        coursesNames.append(course.split("a ")[1])
+    if(validateCoursesSelection(coursesNames, coursesYears)):
+        #Checking if all the form fields input are not empty
+        if(pw):
+            phasher = PasswordHasher()
+            hashedPW = phasher.hash(pw.encode())
+        connection = connectToDB()
+        if(not connection):
+            return redirect(url_for('index'))
+        #Creating a cursor reponsible for query executions
+        cursor = connection.cursor()
+        #Checking if the Email/UID combination returns no users (count result = 0) to prevent possible primary key duplicates error
+        cursor.execute('select count(*)\
+                        from Credenziali\
+                        where Email = %(newEmail)s\
+                        and userID != %(userID)s',
+                        {
+                            'newEmail': email,
+                            'userID': userID
+                        }
+                    )
+        response = cursor.fetchone()
+        if(response[0] == 0):
+            queries = [
+                        ['update Utente set Nome = %(name)s, Cognome = %(surname)s, Tipologia = %(role)s where userID = %(uid)s', {'name': fname, 'surname': lname, 'role': role, 'uid': userID}],
+                        ['delete from Registrazione where userID = %(uid)s', {'uid': userID}],
+                        ['update Credenziali set Email = %(email)s where userID = %(uid)s', {'email': email, 'uid': userID}]
+                    ]
+            #Update password only if it has been hashed (valid password input)
+            if(hashedPW):
+                queries.append(['update Credenziali set PW = %(pw)s where userID = %(uid)s', {'pw': hashedPW, 'uid': userID}])
+            for query in queries:
+                cursor.execute(*query)
+                connection.commit()
+            for x in range(len(coursesNames)):
+                #TODO: Add values to `Partecipazione` if a new course is added and remove if a course is removed
+                cursor.execute('insert into Registrazione(userID, idCorso) values(%(uid)s, (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s))', {'uid': userID, 'courseName': coursesNames[x], 'courseYear': coursesYears[x]})
+                connection.commit()
+            flash('Dati aggiornati con successo.', 'Successo')
         else:
-            flash('Devi selezionare una tipologia valida dal menu e almeno un corso dalla lista.', 'Errore')
+            flash('Questo indirizzo Email è già associato a un altro account. Per favore, riprova.', 'Errore')
+        #Closing connection
+        connection.close()
     else:
         flash('Devi selezionare una tipologia valida dal menu e almeno un corso dalla lista.', 'Errore')
     return userID
 
-def updateDataAsUser():
-    email = request.form.get('email').strip().lower()
-    pw = request.form.get('newPassword')
-    pwVerify = request.form.get('passwordVerify')
+def updateDataAsUser(form):
+    email = form.email.data.strip().lower()
+    pw = form.password.data
     hashedPW = ''
     queries = []
     
@@ -1123,23 +1142,25 @@ def updateDataAsUser():
     if(not connection):
         return redirect(url_for('index'))
     cursor = connection.cursor()
-    if(validateFormInput(email) and len(email) <= 40):
-        cursor.execute('select count(*)\
+    #Checking if the Email/UID combination returns no users (count result = 0) to prevent possible primary key duplicates error
+    cursor.execute('select count(*)\
                     from Credenziali\
-                    where Email = %(newEmail)s', {'newEmail': email})
-        response = cursor.fetchone()
-        if(response[0] > 0):
-            flash('Questo indirizzo Email è già associato a un altro account. Per favore, riprova.', 'Errore')
-            return False
-        queries.append(['update Credenziali set Email = %(newEmail)s where userID = %(uid)s', {'newEmail': email, 'uid': session['uid']}])
+                    where Email = %(newEmail)s\
+                    and userID != %(uid)s',
+                    {
+                        'newEmail': email,
+                        'uid': session['uid']
+                    }
+                )
+    response = cursor.fetchone()
+    if(response[0] == 1):
+        flash('Questo indirizzo Email è già associato a un altro account. Per favore, riprova.', 'Errore')
+        return False
+    queries.append(['update Credenziali set Email = %(newEmail)s where userID = %(uid)s', {'newEmail': email, 'uid': session['uid']}])
     if(pw):
-        if(len(pw) >= 10 and pw == pwVerify):
-            phasher = PasswordHasher()
-            hashedPW = phasher.hash(pw.encode())
-            queries.append(['update Credenziali set PW = %(updatedHashedPW)s where userID = %(userID)s', {'updatedHashedPW': hashedPW, 'userID': session['uid']}])
-        else:
-            flash('Le password inserite non combaciano o contengono meno di 10 caratteri. Per favore, riprova.', 'Errore')
-            return False
+        phasher = PasswordHasher()
+        hashedPW = phasher.hash(pw.encode())
+        queries.append(['update Credenziali set PW = %(updatedHashedPW)s where userID = %(userID)s', {'updatedHashedPW': hashedPW, 'userID': session['uid']}])
     if(not queries):
         flash('Nessun dato fornito per la modifica. Per favore, riprova', 'Errore')
         return False
