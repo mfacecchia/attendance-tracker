@@ -1098,6 +1098,20 @@ def updateDataAsAdmin(userID, form):
             return redirect(url_for('index'))
         #Creating a cursor reponsible for query executions
         cursor = connection.cursor()
+        #Checking the user old role before modification in order to execute some additional role validation
+        #e.g. Cannot update from "Insegnante" to "Studente"
+        cursor.execute('select Tipologia\
+                        from Utente\
+                        where userID = %(uid)s',
+                        {
+                            'uid': userID
+                        }
+                    )
+        oldUserRole = cursor.fetchone()[0]
+        #TODO: Enable user role update
+        if(oldUserRole == 'Insegnante' and role == 'Studente'):
+            flash('Impossibile modificare la tipologia di account da Insegnante a Studente.', 'Errore')
+            return userID
         #Checking if the Email/UID combination returns no users (count result = 0) to prevent possible primary key duplicates error
         cursor.execute('select count(*)\
                         from Credenziali\
