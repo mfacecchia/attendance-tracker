@@ -125,7 +125,6 @@ def login():
                 return redirect(url_for('userScreening'))
         finally:
             connection.close()
-    #TODO: Set session to `None`
     return(render_template('login.html', form = form))
 
 @app.route('/forgot-password', methods = ['GET', 'POST'])
@@ -231,54 +230,6 @@ def updatePassword():
     #Redirecting to login page with a generic error message if none of the conditions above are satisfied
     flash(commonErrorMessage, 'Errore')
     return redirect(url_for('login'))
-
-#TODO: Remove this
-@app.route('/user/updatepassword/verify', methods = ['GET', 'POST'])
-def verify_updated_password():
-    newPassword = request.form.get('newPassword')
-    if(newPassword != None and len(newPassword) >= 10):
-        #Checking if form's passwords match, otherwise redirecting back to correct it
-        if(newPassword == request.form.get('password_verify')):
-            connection = connectToDB()
-            if(not connection):
-                return redirect(url_for('index'))
-            cursor = connection.cursor()
-            pHasher = PasswordHasher()
-            #Getting the current password from the user
-            cursor.execute('select PW from Credenziali\
-                            where userID = %(uid)s',
-                            {
-                                'uid': session['uid']
-                            }
-                        )
-            response = getValuesFromQuery(cursor)
-            try:
-                pHasher.verify(str(response[0]['PW']), newPassword)
-            #New and old passwords must be different, so the error must be triggered when `verifyMismatchError` is not raised
-            except exceptions.VerifyMismatchError:
-                pass
-            else:
-                flash("La password non può essere uguale a quella precedente. Per favore, riprova", 'Errore')
-                return redirect(url_for('updatePassword'))
-            hashedPW = pHasher.hash(newPassword.encode())
-            cursor.execute("update Credenziali set PW = %(newPW)s\
-                            where userID = %(uid)s",
-                            {
-                                'newPW': hashedPW,
-                                'uid': session['uid']
-                            }
-                        )
-            connection.commit()
-            session['lastLogin'] = updateLastLoginTime()
-            connection.close()
-            flash('Password aggiornata con successo.', 'Successo')
-            return redirect(url_for('login'))
-        else:
-            flash('Le password inserite non combaciano. Per favore, riprova', 'Errore')
-        return redirect(url_for('updatePassword'))
-    else:
-        flash(commonErrorMessage, 'Errore')
-        return redirect(url_for('updatePassword'))
 
 @app.route('/auth/github')
 def githubAuth():
