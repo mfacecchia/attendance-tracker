@@ -1,9 +1,0 @@
-{% macro formField(type, name = None, value = None, placeholder = None, isRequired = False, maxLength = None, minLength = None, regex = None) %}
-    {% if type == 'textarea' %}
-    <textarea class = "formInputBox" name = "{{name}}" {% if placeholder %}placeholder = "{{placeholder}}"{% endif %} {% if isRequired %}required{% endif %} {% if maxLength %}maxlength = "{{maxLength}}"{% endif %} {% if minLength %}minlength = "{{minLength}}"{% endif %} {% if regex %}pattern = "{{regex}}"{% endif %}>{{value}}</textarea>
-    {% elif type == 'option' %}
-        <option value = "{{value}}">{{placeholder}}</option>
-    {% else %}
-        <input class = "formInputBox" type = "{{type}}" name = "{{name}}" {% if value %}value = "{{value}}"{% endif %} {% if placeholder %}placeholder = "{{placeholder}}"{% endif %} {% if isRequired %}required{% endif %} {% if maxLength %}maxlength = "{{maxLength}}"{% endif %} {% if minLength %}minlength = "{{minLength}}"{% endif %} {% if regex %}pattern = "{{regex}}"{% endif %}>
-    {% endif %}
-{% endmacro %}
