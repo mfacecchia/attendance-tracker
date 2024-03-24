@@ -4,6 +4,7 @@
 {% block content %}
     <h1 class = "text-center mb-5">👨‍🏫 Lezione di {{lessonInfo[0]['Materia']}} del {{lessonInfo[0]['dataLezione']}} 📚</h1>
     <form class = "tableContainer flex flex-col items-center" action = "{{url_for('registerAttendances')}}" method = "post">
+        <input type = "hidden" name = "csrf_token" value = "{{ csrf_token() }}">
         <div class = "tableContainer">
             <table>
                 <tr>
