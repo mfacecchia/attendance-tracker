@@ -1,52 +1,34 @@
 {% extends "formTemplate.html" %}
-{% from "macros.html" import formField %}
 
 {% block title %}
 Modifica lezione
 {% endblock %}
 
-{% block formAction %} {{url_for('update_lesson_data')}} {% endblock %}
+{% block formAction %} {{url_for('manageLesson')}} {% endblock %}
 {% block formImageSource %} {{url_for('static', filename = 'assets/teacher.svg')}} {% endblock %}
 {% block formTitle %} Modifica dati lezione {% endblock %}
 {% block formSubtitle %} Inserisci i dati che desideri modificare nei campi sottostanti {% endblock %}
 {% block inputFields %}
-    {{formField('text', 'subject', lesson["Materia"], 'Materia', True, 20)}}
-    {{formField('textarea', 'description', lesson["Descrizione"], 'Descrizione (opzionale)', 1000)}}
-    {{formField('date', 'lessonDate', lesson["dataLezione"], isRequired = True)}}
-    {{formField('text', 'room', lesson["aula"], 'Aula (Es. A001)', True, 4, 4, "[a-zA-Z][0-9]+")}}
-    <select class = "formInputBox" name = "lessonType">
-        {{formField('option', value = lesson['Tipologia'], placeholder = lesson['Tipologia'])}}
-        {% for lessonType in lessonTypes %}
-            {% if lessonType != lesson['Tipologia'] %}
-                {{formField('option', value = lessonType, placeholder = lessonType)}}
-            {% endif %}
-        {% endfor %}
-    </select>
-    {% if session['role'] == 'Admin' %}
-        <select class = "formInputBox" name = "assignedTeacher" onchange = "getTeacherCourses()">
-            {{formField('option', value = lesson['idInsegnante'], placeholder = lesson['Nome'])}}
-            {% for teacher in teachersList %}
-                {% if lesson['idInsegnante'] != teacher['id'] %}
-                    {{formField('option', value = teacher['id'], placeholder = teacher['Nome'])}}
-                {% endif %}
-            {% endfor %}
-        </select>
+    {{ form.subject }}
+    {{ form.description }}
+    {{ form.lessonDate }}
+    {{ form.room }}
+    {{ form.lessonType }}
+    {% if session.role == 'Admin' %}
+        {{ form.assignedTeacher }}
     {% endif %}
-        <select class = "formInputBox" name = "course">
-            {{formField('option', value = lesson['nomeCorso'], placeholder = lesson['nomeCorso'])}}
-            {% for course in courses %}
-                {% if course != lesson['nomeCorso'] %}
-                    {{formField('option', value = course, placeholder = course)}}
-                {% endif %}
-            {% endfor %}
-        </select>
+    {{ form.course }}
+
+    <!-- Action to execute (does not represent in any way the button) -->
+    <input type = "hidden" name = 'submitButton' value = 'Edit'>
+    {{ form.lessonID }}
 {% endblock %}
 
-{% block buttonName %}id{% endblock %}
-{% block buttonValue %}{{lesson['idLezione']}}{% endblock %}
-{% block submit %} Modifica {% endblock %}
+{% block backButtonURL %}{{ url_for('lessonsList') }}{% endblock %}
 
-{% block script %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src = "../static/script/formsManagement.js"></script>
-{% endblock %}
+{% if session.role == 'Admin' %}
+    {% block script %}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src = "../static/script/formsManagement.js"></script>
+    {% endblock %}
+{% endif %}

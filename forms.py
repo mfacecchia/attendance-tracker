@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, EmailField, PasswordField, BooleanField, SelectField, SubmitField, TextAreaField, DateField, ValidationError, SelectMultipleField
+from wtforms import StringField, EmailField, PasswordField, BooleanField, SelectField, SubmitField, TextAreaField, DateField, ValidationError, HiddenField
 from wtforms.validators import InputRequired, Length, Regexp, DataRequired, EqualTo
 from datetime import date
 
@@ -47,3 +47,12 @@ class UserCreationForm(FlaskForm):
     role = SelectField(name = 'role', choices = [('Studente', 'Studente'), ('Insegnante', 'Insegnante'), ('Admin', 'Admin')], render_kw = {'class': defaultFormsClass, 'onchange': 'adminRoleChosen()'})
     adminVerification = BooleanField('Sei sicuro di voler creare un utente di tipo ADMIN?', validators = [DataRequired()], name = 'adminVerificationCheckbox', default = True)
     submitForm = SubmitField('Crea account', render_kw  = {'class': defaultSubmitButtonClasses})
+
+#Inherited class from `LessonCreationForm_Admin`
+class LessonUpdateForm_Teacher(LessonCreationForm_Teacher):
+    lessonID = HiddenField(name = 'id')
+    submitForm = SubmitField('Modifica lezione', render_kw = {'class': defaultSubmitButtonClasses})
+
+class LessonUpdateForm_Admin(LessonCreationForm_Admin):
+    lessonID = HiddenField(name = 'id')
+    submitForm = SubmitField('Modifica lezione', name = 'id', render_kw = {'class': defaultSubmitButtonClasses})
