@@ -25,7 +25,8 @@ module.exports = {
         '1.5': '1.5px'
       },
       screens: {
-        'md2': '900px'
+        'md2': '900px',
+        '3xl': '1920px'
       }
     },
   },

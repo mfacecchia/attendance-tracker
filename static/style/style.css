@@ -604,7 +604,19 @@ video {
   white-space: nowrap;
 }
     #attendancePercentageStatistics {
-  max-width: 800px;
+  max-width: 500px;
+}
+    @media (min-width: 1024px) {
+
+  #attendancePercentageStatistics {
+    max-width: 700px;
+  }
+}
+    @media (min-width: 1920px) {
+
+  #attendancePercentageStatistics {
+    max-width: 1000px;
+  }
 }
     dialog > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
@@ -760,6 +772,12 @@ video {
 
   .container {
     max-width: 1536px;
+  }
+}
+@media (min-width: 1920px) {
+
+  .container {
+    max-width: 1920px;
   }
 }
 body {

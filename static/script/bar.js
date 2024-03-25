@@ -78,7 +78,7 @@ function resizeChart(){
     //`breakpoints.every()` stops whenever the executed function returns `false`, in order to not overwhelm the user CPU
     breakpoints.every((breakpoint, index) => {
         //Iterating through each breakpoint and comparing those values with the client's brower size
-        if(window.screen.width >= breakpoint[0] && window.screen.width < breakpoints[index + 1][0]){
+        if(window.innerWidth >= breakpoint[0] && window.innerWidth < breakpoints[index + 1][0]){
             //Applying the object defined value and updating the chartm then quitting the loop
             barChart.options.plugins.legend.labels.font.size = breakpoint[1]
             return false
