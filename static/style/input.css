@@ -204,6 +204,7 @@
     .landingSlogan{
         @apply h-[450px] w-full flex items-center overflow-hidden;
         @apply sm:h-[700px];
+        @apply lg2:justify-end;
         @apply xl:justify-end
     }
     .landingSlogan div{

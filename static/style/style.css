@@ -762,6 +762,12 @@ video {
     max-width: 1024px;
   }
 }
+@media (min-width: 1190px) {
+
+  .container {
+    max-width: 1190px;
+  }
+}
 @media (min-width: 1280px) {
 
   .container {
@@ -1182,6 +1188,12 @@ input, select, textarea {
 
   .landingSlogan {
     height: 700px;
+  }
+}
+@media (min-width: 1190px) {
+
+  .landingSlogan {
+    justify-content: flex-end;
   }
 }
 @media (min-width: 1280px) {
