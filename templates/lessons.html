@@ -20,6 +20,7 @@ Lezioni programmate
                     <td>
                         <b>{{lesson['nomeCorso']}}</b>
                         <p>{{lesson['dataLezione']}}</p>
+                        <p>{{lesson['oraInizio']}} - {{lesson['oraFine']}}</p>
                         <p>{{lesson['Materia']}}</p>
                         <p>Aula {{lesson['aula']}}</p>
                     </td>
@@ -33,20 +34,24 @@ Lezioni programmate
                                     <button class = "button dark-blue" type = "submit" name = "submitButton" value = "Manage">Apri lezione</button>
                                 {% endif %}
                                 <button class = "button slate" type = "submit" name = "submitButton" value = "Edit">Modifica</button>
-                                <button class = "button orange" type = "button" onclick = "document.getElementById('removeLessonModal{{lesson.idLezione}}').showModal();">Elimina</button>
+                                {% if session.role == 'Admin' %}
+                                    <button class = "button orange" type = "button" onclick = "document.getElementById('removeLessonModal{{lesson.idLezione}}').showModal();">Elimina</button>
+                                {% endif %}
                             </td>
 
-                            <dialog id = "removeLessonModal{{lesson['idLezione']}}">
-                                <h1>Attenzione</h1>
-                                <div>
-                                    <p>Stai per eliminare la lezione di {{ lesson['Materia'] }} del {{ lesson['dataLezione'] }}.</p>
-                                    <p>Sei sicuro/a?</p>
-                                </div>
-                                <form method = "dialog">
-                                    <button class = "button dark-blue" type = "button" onclick = "this.parentNode.close();">No, torna indietro</button>
-                                    <button class = "button orange" type = "submit" name = "submitButton" value = "Remove">Sì, sono sicuro/a</button>
-                                </form>
-                            </dialog>
+                            {% if session.role == 'Admin' %}
+                                <dialog id = "removeLessonModal{{lesson['idLezione']}}">
+                                    <h1>Attenzione</h1>
+                                    <div>
+                                        <p>Stai per eliminare la lezione di {{ lesson['Materia'] }} del {{ lesson['dataLezione'] }}.</p>
+                                        <p>Sei sicuro/a?</p>
+                                    </div>
+                                    <form method = "dialog">
+                                        <button class = "button dark-blue" type = "button" onclick = "this.parentNode.close();">No, torna indietro</button>
+                                        <button class = "button orange" type = "submit" name = "submitButton" value = "Remove">Sì, sono sicuro/a</button>
+                                    </form>
+                                </dialog>
+                            {% endif %}
                         </form>
                     {% endif %}
                 </td>
