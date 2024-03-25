@@ -70,7 +70,7 @@ class ResetPasswordForm(FlaskForm):
 class UpdateResetPasswordForm(FlaskForm):
     password = PasswordField(name = 'newPassword', validators = [InputRequired(), Length(min = 10)], render_kw = {'placeholder': 'Nuova password', 'autofocus': True, 'class': defaultFormsClass})
     password_verify = PasswordField(name = 'passwordVerify', validators = [InputRequired(), Length(min = 10), EqualTo('password')], render_kw = {'placeholder': 'Reinserisci password', 'autofocus': True, 'class': defaultFormsClass})
-    submitForm = SubmitField('Recupera la password', render_kw  = {'class': defaultSubmitButtonClasses})
+    submitForm = SubmitField('Aggiorna la password', render_kw  = {'class': defaultSubmitButtonClasses})
 
 class UserUpdateForm(UserCreationForm):
     password = PasswordField(name = 'password', validators = [Optional(), Length(min = 10)], render_kw = {'placeholder': 'Password', 'class': defaultFormsClass})
