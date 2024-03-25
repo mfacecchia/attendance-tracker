@@ -152,7 +152,7 @@
     <td>/lesson/create</td>
     <td>Lesson creation form and data insertion in the database (ADMIN and TEACHER user roles only). For more information about form validation, the <a href = "https://wtforms.readthedocs.io/en/2.3.x/validators/?highlight=validators#module-wtforms.validators">official flask-wtf documentation</a> will better explain how the whole validation process works.</td>
   </tr>
-  <tr>
+  <tr id = "lessons-list">
     <td>/lesson/list</td>
     <td>Shows a list of all the upcoming lessons with a button to manage the lesson's attendances (if the lesson's date is the same as the current date) (ADMIN and TEACHER user roles only), a button to update all lesson's parameters such as subject, description, time and date, and more (ADMIN and TEACHER user roles only), and a button to delete the lesson. The page shows 10 lessons per page, ordered per lesson date. The list varies based on the user role accessing the page; if the role is STUDENT or TEACHER, the list will show only the upcoming lessons for their specific enrolled courses.</td>
   </tr>
@@ -176,7 +176,7 @@
     <td>/course/create</td>
     <td>Course creation form and data insertion in the database (ADMIN user role only). For more information about form validation, the <a href = "https://wtforms.readthedocs.io/en/2.3.x/validators/?highlight=validators#module-wtforms.validators">official flask-wtf documentation</a> will better explain how the whole validation process works.</td>
   </tr>
-  <tr>
+  <tr id = "users-list">
     <td>/user/list</td>
     <td>Shows a list of all users registered in the platform with a button to update each user's parameters such as name, surname, enrolled courses, and more (ADMIN user role only), and a button to delete the user from the Database (ADMIN user role only). The page shows 10 students per page, ordered per role (Admin, then Teachers, and then Students).</td>
   </tr>
@@ -479,3 +479,136 @@ Returns its relative `userID` if the query returns a value, otherwise `False`</p
   }
 ]
 ```
+
+<h3>reformatResponse()</h3>
+<p>Gets a list and converts each obtained course from the <a href = "#get-lessons-attendances-count">`getLessonsAttendancesCount` function</a> to the desired format. Returns a list of dictionaries like this one:</p>
+
+```
+[
+  {
+    "nomeCorso": "1a Cybersecurity"
+    "dataLezione": "20/03/2024",
+    "conteggioPresenze": 5,
+  },
+  {
+    "nomeCorso": "1a Cybersecurity"
+    "dataLezione": "20/03/2024",
+    "conteggioPresenze": 14,
+  },
+  {
+    "nomeCorso": "1a Cybersecurity"
+    "dataLezione": "20/03/2024",
+    "conteggioPresenze": 11,
+  },
+  {
+    "nomeCorso": "1a Sviluppo software"
+    "dataLezione": "20/03/2024",
+    "conteggioPresenze": 8,
+  },
+  {
+    "conteggioPresenze": 9,
+    "dataLezione": "20/03/2024",
+    "nomeCorso": "2a Sviluppo software"
+  },
+  {
+    "nomeCorso": "3a Sviluppo software"
+    "dataLezione": "20/03/2024",
+    "conteggioPresenze": 1,
+  },
+  {
+    "nomeCorso": "1a Sviluppo web"
+    "dataLezione": "20/03/2024",
+    "conteggioPresenze": 6,
+  },
+  {
+    "nomeCorso": "2a Sviluppo web"
+    "dataLezione": "20/03/2024",
+    "conteggioPresenze": 3,
+  },
+  {
+    "nomeCorso": "1a Sviluppo web"
+    "dataLezione": "21/03/2024",
+    "conteggioPresenze": 7,
+  },
+  {
+    "nomeCorso": "1a Cybersecurity"
+    "dataLezione": "24/03/2024",
+    "conteggioPresenze": 2,
+  }
+]
+```
+
+<h3>getUserEnrolledCourses()</h3>
+<p>Executes a query and gets all courses' names and years based on function parameter `uid`. If the `uid` parameter is not passed, the default value will be the user's session value `uid`. Returns a list if the query returns valid values, else `False` if the connection to the database fails.</p>
+<p>An example of a possible returning list can be:</p>
+
+```
+[
+  {
+    'userID': 1,
+    'Tipologia': 'Insegnante'
+  },
+  {
+    'userID': 2,
+    'Tipologia': 'Studente'
+  },
+  {
+    'userID': 3,
+    'Tipologia': 'Studente'
+  },
+  {
+    'userID': 4,
+    'Tipologia': 'Studente'
+  }
+]
+```
+
+<h3>getTeachersList()</h3>
+<p>Executes a query and returns a list of all teachers' IDs, names, and surnames if the query returns valid values, otherwise `False` if the connection to the Database fails.</p>
+<p>This function will return a list similar to the following</p>
+
+```
+[
+  {
+    'id': 10,
+    'Nome': 'Francesco Verdi',
+  },
+  {
+    'id': 11,
+    'Nome': 'Mario Grigi',
+  },
+  {
+    'id': 12,
+    'Nome': 'Paolo Bianchi',
+  }
+]
+```
+
+<h3>isPageNumberValid()</h3>
+<p>Gets the `page` parameter from the URL and validates it based on some basic controls. Used in <a href = "#lessons-list">/lesson/list</a> and <a href = "#users-list">/user/list</a> routes. Returns the `page` value if it's valid, otherwise `False` if not.</p>
+
+<h3>getLessonInfo()</h3>
+<p>Executes a query and obtains all the information related to the lesson's `lessonID` function parameter. Returns a dictionary with all useful lesson information such as Subject, description, date and time, and all assigned teacher-related information.</p>
+<p>The returned dictionary will be:</p>
+
+```
+{
+  idLezione: 1,
+  'Materia': 'Python',
+  'Descrizione': 'Sviluppo app in Flask',
+  'dataLezione': '2024-03-27',
+  'oraInizio': '09:00',
+  'oraFine': '12:00',
+  'aula': 'A001',
+  'Tipologia': 'Laboratorio',
+  'idInsegnante': 1,
+  'Nome': 'Mario Rossi',
+  'nomeCorso': '1a Sviluppo software'
+}
+```
+
+<h3>update_lesson_data()</h3>
+<p>Updates lesson's data based on form submitted and validated values. Used in <a href = "#update-lesson">/lesson route</a>. Returns `True` if the process succeeds, otherwise `False` with a flashed message if the process catches an error.</p>
+
+<h3>timedeltaConverter()</h3>
+<p>Converts a given `timedelta` type to datetime. Takes as parameters the actual `timedelta` `time` and its relative format to correctly convert the value. Returns the converted time.</p>
