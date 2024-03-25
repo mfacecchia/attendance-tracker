@@ -580,8 +580,8 @@ def manageLesson():
         cursor = connection.cursor()
         buttonAction = request.form.get('submitButton')
         #Checking the user required action and removing the selected lesson from the database if the submit button's value is `Remove`
-        #TODO: Check for user role before removing (must me "Admin")
-        if(buttonAction == 'Remove'):
+        #NOTE: The only user who has removal functionality is the "Admin"
+        if(buttonAction == 'Remove' and session.get('role') == 'Admin'):
             cursor.execute('delete from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
             connection.commit()
             flash('Lezione eliminata con successo.', 'Successo')
