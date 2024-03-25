@@ -9,6 +9,7 @@ Modifica utente
 {% endif %}
 {% block formAction %} {{url_for('select_user')}} {% endblock %}
 {% block formImageSource %} {{url_for('static', filename = 'assets/user.svg')}} {% endblock %}
+{% block altDescription %} Icona utente {% endblock %}
 {% block formTitle %} Modifica dati utente {% endblock %}
 {% block formSubtitle %} Inserisci i dati che desideri modificare nei campi sottostanti {% endblock %}
 {% block inputFields %}

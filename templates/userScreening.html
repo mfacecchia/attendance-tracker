@@ -24,12 +24,12 @@ Gestione account
             <div class = "next-lesson">
                 {% if session['role'] in ['Admin', 'Insegnante'] %}
                     <a class = "top-box" href = "{{url_for('manageLesson', id = scheduledLessons['idLezione'] if scheduledLessons else 0)}}">
-                        <img src = "{{url_for('static', filename = 'assets/attendance.svg')}}">
+                        <img src = "{{url_for('static', filename = 'assets/attendance.svg')}}" alt = "Icona presenza">
                         <p class = "button orange">Registra presenze</p>
                     </a>
                     {% else %}
                     <div class = "top-box no-anim">
-                        <img src = "{{url_for('static', filename = 'assets/attendance.svg')}}">
+                        <img src = "{{url_for('static', filename = 'assets/attendance.svg')}}" alt = "Icona presenza">
                         {% if scheduledLessons %}
                             {% if scheduledLessons['Presenza'] %}
                                 <p class = "button dark-blue">Presente</p>
@@ -57,44 +57,44 @@ Gestione account
         </div>
         {% if session['role'] == 'Admin' %}
             <a class = "action" href = "{{url_for('createUser')}}">
-                <img src = "{{url_for('static', filename = 'assets/user.svg')}}">
+                <img src = "{{url_for('static', filename = 'assets/user.svg')}}" alt = "Crea utente">
                 <p class = "button orange">Crea utente</p>
             </a>
             <a class = "action" href = "{{url_for('create_course')}}">
-                <img src = "{{url_for('static', filename = 'assets/course.svg')}}">
+                <img src = "{{url_for('static', filename = 'assets/course.svg')}}" alt = "Crea corso">
                 <p class = "button orange">Crea corso</p>
             </a>
             <div class = "hidden md2:block break"></div>
             <a class = "action" href = "{{url_for('usersList', page = 1)}}">
-                <img src = "{{url_for('static', filename = 'assets/users.svg')}}">
+                <img src = "{{url_for('static', filename = 'assets/users.svg')}}" alt = "Gestisci utenti">
                 <p class = "button orange">Lista utenti</p>
             </a>
             {% endif %}
             {% if session['role'] in ['Insegnante', 'Admin'] %}
                 <a class = "action" href = "{{url_for('createLesson')}}">
-                    <img src = "{{url_for('static', filename = 'assets/teacher.svg')}}">
+                    <img src = "{{url_for('static', filename = 'assets/teacher.svg')}}" alt = "Crea lezione">
                     <p class = "button orange">Crea lezione</p>
                 </a>
             {% endif %}
             {% if not session['githubConnected'] %}
                 <a class = "action" href = "{{url_for('githubAuth')}}">
-                    <img src = "{{url_for('static', filename = 'assets/github.svg')}}">
+                    <img src = "{{url_for('static', filename = 'assets/github.svg')}}" alt = "Connetti Github">
                     <p class = "button orange">Connetti GitHub</p>
                 </a>
             {% else %}
                     <a class = "action" href = "{{url_for('unlinkGithubAccount')}}">
-                        <img src = "{{url_for('static', filename = 'assets/github.svg')}}">
+                        <img src = "{{url_for('static', filename = 'assets/github.svg')}}" alt = "Disconnetti Github">
                         <p class = "button orange">Disconnetti GitHub</p>
                     </a>
             {% endif %}
             {% if not session['googleConnected'] %}
                 <a class = "action" href = "{{url_for('googleAuth')}}">
-                    <img src = "{{url_for('static', filename = 'assets/google.svg')}}">
+                    <img src = "{{url_for('static', filename = 'assets/google.svg')}}" alt = "Connetti Google">
                     <p class = "button orange">Connetti Google</p>
                 </a>
             {% else %}
                     <a class = "action" href = "{{url_for('unlinkGoogleAccount')}}">
-                        <img src = "{{url_for('static', filename = 'assets/google.svg')}}">
+                        <img src = "{{url_for('static', filename = 'assets/google.svg')}}" alt = "Disconnetti Google">
                         <p class = "button orange">Disconnetti Google</p>
                     </a>
             {% endif %}

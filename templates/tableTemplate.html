@@ -5,17 +5,17 @@
     {% block pages %}
         <form class = "tablePagesForm" action = "{{url_for(url)}}" method = 'get'>
             <a href = "{{url_for(url, page = 1)}}">
-                <img class = "rotate-180" src = "{{url_for('static', filename = 'assets/double-arrow.svg')}}">
+                <img class = "rotate-180" src = "{{url_for('static', filename = 'assets/double-arrow.svg')}}" alt = "Prima pagina" title = "Vai alla prima pagina">
             </a>
             <a href = "{{url_for(url, page = page - 1 if page - 1 > 0 else totalPages)}}">
-                <img class = "rotate-180" src = "{{url_for('static', filename = 'assets/arrow.svg')}}">
+                <img class = "rotate-180" src = "{{url_for('static', filename = 'assets/arrow.svg')}}" alt = "Pagina precedente" title = "Vai alla pagina precedente">
             </a>
             <input class = "formInputBox w-11 text-center" type = "text" name = "page" value = "{{page}}" pattern = "[0-9]+">
             <a href = "{{url_for(url, page = page + 1 if page + 1 <= totalPages else 1)}}">
-                <img src = "{{url_for('static', filename = 'assets/arrow.svg')}}">
+                <img src = "{{url_for('static', filename = 'assets/arrow.svg')}}" alt = "Pagina successiva" title = "Vai alla pagina successiva">
             </a>
             <a href = "{{url_for(url, page = totalPages)}}">
-                <img src = "{{url_for('static', filename = 'assets/double-arrow.svg')}}">
+                <img src = "{{url_for('static', filename = 'assets/double-arrow.svg')}}" alt = "Ultima pagina" title = "Vai all'ultima pagina">
             </a>
         </form>
     {% endblock %}

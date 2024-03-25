@@ -9,6 +9,7 @@ Crea lezione
 {% endif %}
 {% block formAction %} {{url_for('createLesson')}} {% endblock %}
 {% block formImageSource %} {{url_for('static', filename = 'assets/teacher.svg')}} {% endblock %}
+{% block altDescription %} Icona lezione {% endblock %}
 {% block formTitle %} Crea lezione {% endblock %}
 {% block formSubtitle %} Inserisci tutti i dati richiesti per creare la lezione {% endblock %}
 {% block inputFields %}

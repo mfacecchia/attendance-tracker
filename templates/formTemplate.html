@@ -6,7 +6,7 @@
 
         <div class = "flex flex-col justify-center text-center">
             {% block formImage %}
-                <img class = "h-24 mb-4" src = "{% block formImageSource %} {{url_for('static', filename = 'assets/update-password.svg')}} {% endblock %}">
+                <img class = "h-24 mb-4" src = "{% block formImageSource %} {{url_for('static', filename = 'assets/update-password.svg')}} {% endblock %}" alt = "{% block altDescription %} Icona aggiorna password {% endblock %}">
             {% endblock %}
             <h1 class = "font-semibold">{% block formTitle %} Form title {% endblock %}</h1>
             <p>{% block formSubtitle %} Form subtitle {% endblock %}</p>

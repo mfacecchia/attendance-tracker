@@ -7,6 +7,7 @@ Crea utente
 {% block bodyProperties %}onload = "adminRoleChosen()"{% endblock %}
 {% block formAction %} {{url_for('createUser')}} {% endblock %}
 {% block formImageSource %} {{url_for('static', filename = 'assets/user.svg')}} {% endblock %}
+{% block altDescription %} Icona utente {% endblock %}
 {% block formTitle %} Crea utente {% endblock %}
 {% block formSubtitle %} Inserisci tutti i dati richiesti per creare l'utente {% endblock %}
 {% block inputFields %}
