@@ -136,7 +136,7 @@
     <td>/auth/google/callback</td>
     <td>Google OAuth App callback page, used to manage Google OAuth API return values. For more information about Google's OAuth App Authorization process, please visit <a href = "https://developers.google.com/identity/protocols/oauth2">the official documentation</a>.</td>
   </tr>
-  <tr>
+  <tr id = "google-oauth-callback">
     <td>/auth/google/disconnect</td>
     <td>Removes Google Account user ID from the database</td>
   </tr>
@@ -207,19 +207,32 @@
 </table>
 
 <h2 id = "hashing-methods">Hashing methods</h2>
-<p>All user related sensitive data such as passwords are securely hashed and stored in the database using <a href = "https://en.wikipedia.org/wiki/Argon2">Argon2id algorithm</a>. To manage and verify such data, <a href = "https://argon2-cffi.readthedocs.io/en/stable/">Argon2-cffi</a> Python module is being used, in particular the `PasswordHasher` class and its relative methods <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.verify">verify</a> for login and reset password verification functionalities and <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.hash">hash</a> for user creation and reset password functionalities. Non matching passwords after the <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.verify">verify</a> function is called are managed with Argon2 module built-in <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.exceptions.VerifyMismatchError">VerifyMismatchError exception</a>.</p>
+<p>All user-related sensitive data such as passwords are securely hashed and stored in the database using <a href = "https://en.wikipedia.org/wiki/Argon2">Argon2id algorithm</a>. To manage and verify such data, <a href = "https://argon2-cffi.readthedocs.io/en/stable/">Argon2-cffi</a> Python module is being used, in particular the `PasswordHasher` class and its relative methods <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.verify">verify</a> for login and reset password verification functionalities and <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.hash">hash</a> for user creation and reset password functionalities. Non-matching passwords after the <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.verify">verify</a> function is called are managed with Argon2 module built-in <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.exceptions.VerifyMismatchError">VerifyMismatchError exception</a>.</p>
 
 <h2 id = "functions">Functions</h2>
 <h3>connectToDB()</h3>
-<p>Starts a connection to the database with the given data through <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlconnection-connect.html">MySQLConnector.connect() function</a>. Connection not established is managed with <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-errors-error.html">MySQLConnector.Error</a> error.</p>
+<p>Starts a connection to the database with the given data through <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlconnection-connect.html">MySQLConnector.connect() function</a>. Connection not established error is managed with <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-errors-error.html">MySQLConnector.Error</a> error.</p>
 <p>Returns <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-example-connecting.html">MySQLConnection object</a> or `False` if the connection to Database fails for some reason.</p>
 
 <h3>getCourses()</h3>
-<p>Executes a simple `select` query on the database and returns all courses names and years.</p>
-<p>Returns the formatted output of <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html">cursor.execute()</a>. For more information about query to list conversion, <a href = "#get-values-from-query">this section</a> will better explain the process.</p>
+<p>Executes a simple `select` query on the database and returns all courses's names and years.</p>
+<p>Returns the formatted output of <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html">cursor.execute()</a>.
+<p>An example of output from this function will be:</p>
+
+```
+[
+  '1a Sviluppo software',
+  '2a Cybersecurity',
+  '1a Sviluppo web'
+]
+```
+<p>For more information about query to list conversion, <a href = "#get-values-from-query">this section</a> will better explain the process.</p>
+
+<h3>update_user_data()</h3>
+<p>Manages the function to call based on the session's user's role and the given uid passed as a parameter. The function takes as parameters the form to be processed in the to-be-called function and the uid as optional which will represent the selected user ID if the ADMIN is requesting to update some chosen user. This function calls the <a href = "update-data-as-user">updateDataAsUser function</a> if the session's user role is STUDENT or TEACHER or the `uid` parameter is not given (means that the ADMIN wants to update his information), otherwise the <a href = "#update-data-as-admin">updateDataAdAdmin function</a> with the passed `uid` and `form` as function parameters. Returns `True` if the callback function returns `True` as well, otherwise `False`.</p>
 
 <h3 id = "get-values-from-query">getValuesFromQuery()</h3>
-<p>Gets a <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlconnection-cursor.html">MySQLConnector cursor</a> as parameter and returns a list with dictionaries as items with cursor columns names as keys and obtained values as dictionary values. Briefly, this function will iterate though the entire cursor and create a dictionary for each query returned column. If the cursor is empty this function will return an empty list.</p>
+<p>Gets a <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlconnection-cursor.html">MySQLConnector cursor</a> as a parameter and returns a list with dictionaries as list's items with cursor columns names as keys and obtained values as dictionary values. Briefly, this function will iterate through the entire cursor and create a dictionary for each query returned column. If the cursor is empty this function will return an empty list.</p>
 <p>This function will return a list like the following</p>
 
 ```
@@ -236,33 +249,84 @@
 ```
 
 <h3>updateLastLoginTime()</h3>
-<p>Programmatically updates user's last login time on database by executing an `update` SQL query on the database. The user is defined by session's userID value and the current time is obtained from <a href = "https://docs.python.org/3/library/datetime.html#datetime.date.today">date.today()</a> function.</p>
+<p>Programmatically updates the user's last login time on the database by executing an `update` SQL query on the database. The user is defined by the session's userID value and the current time is obtained from <a href = "https://docs.python.org/3/library/datetime.html#datetime.date.today">date.today()</a> function.</p>
 <p>Returns the formatted current date in `%d/%m/%Y` format by using <a href = "https://docs.python.org/3/library/datetime.html#datetime.date.strftime">date.strftime()</a> function.</p>
 
 <h3>checkUserGithubConnection()</h3>
-<p>Checks if the user has a linked Github account. The user is defined by session's userID value</p>
+<p>Checks if the user has a linked Github account. The user is defined by the session's userID value</p>
 <p>Returns a boolean value corresponding `True` if the defined user has a linked Github Account or `False` if the Database's "githubID" field is empty</p>
 
 <h3>linkGithubAccount()</h3>
-<p>Updates user's "githubID" database column with the GitHub account id passed as function parameter from <a href = "#github-oauth-callback">GitHub OAuth API return values</a>. Before updating the column, a verifications is done; a <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlconnection-cursor.html">cursor</a> gets instantiated and checks if the obtained GitHub user id is already linked to an account with a simple `select` query. If the cursor's result contains no rows, then it is possible to update the user's `githubID` column and the session's related `githubConnected` value is set to `True`.</p>
+<p>Updates user's "githubID" database column with the GitHub account id passed as function parameter from <a href = "#github-oauth-callback">GitHub OAuth API return values</a>. Before updating the column, a verification is done; a <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlconnection-cursor.html">cursor</a> gets instantiated and checks if the obtained GitHub user id is already linked to an account with a simple `select` query. If the cursor's result contains no rows (which means that no users have linked that specific GitHub account to their attendance tracker account), then it is possible to update the user's `githubID` column and the session's related `githubConnected` value is set to `True`.</p>
 <p>Returns `True` if the column is updated, otherwise `False` in all other cases.</p>
 
 <h3>loginWithGithub()</h3>
-<p>Looks for github user id obtained from the GitHub account id from <a href = "#github-oauth-callback">GitHub OAuth API return values</a> and executes a `select` query to obtain the relative user id from the database. If the user is found, a session gets created.</p>
-<p>Returns `True` if the GitHub user id was found, otherwise `False`.</p>
+<p>Looks for GitHub user ID obtained from the GitHub account ID from <a href = "#github-oauth-callback">GitHub OAuth API return values</a> and executes a `select` query to obtain the relative user ID from the database. If the user is found, a session with all needed user information gets created.</p>
+<p>Returns `True` if the GitHub user ID was found in the database, otherwise `False`.</p>
+
+<h3>checkUserGoogleConnection()</h3>
+<p>Checks if the user has a linked Google account. The user is defined by the session's userID value</p>
+<p>Returns a boolean value corresponding `True` if the defined user has a linked Google Account or `False` if the Database's "googleID" field is empty</p>
+
+<h3>linkGoogleAccount()</h3>
+<p>Updates user's "googleID" database column with the Google account ID passed as function parameter from <a href = "#google-oauth-callback">Google OAuth API return values</a>. Before updating the column, a verification is done; a <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlconnection-cursor.html">cursor</a> gets instantiated and checks if the obtained Google user id is already linked to an account with a simple `select` query. If the cursor's result contains no rows (which means that no users have linked that specific Google account to their attendance tracker account), then it is possible to update the user's `googleID` column and the session's related `googleConnected` value is set to `True`.</p>
+<p>Returns `True` if the column is updated, otherwise `False` in all other cases.</p>
+
+<h3>loginWithGoogle()</h3>
+<p>Looks for Google user ID obtained from the Google account ID from <a href = "#google-oauth-callback">Google's OAuth API return values</a> and executes a `select` query to obtain the relative user ID from the database. If the user is found, a session with all needed user information gets created.</p>
+<p>Returns `True` if the Google user ID was found in the database, otherwise `False`.</p>
 
 <h3>validateFormInput()</h3>
 <p>Validates form user input by checking if the input data is not an empty string.</p>
 <p>Returns `True` if the passed string is empty, otherwise `False`</p>
 
 <h3>getUsersList()</h3>
-<p>Obtains all users from the database by executng a `select` query.</p>
-<p>Returns the formatted output of <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html">cursor.execute()</a>. For more information about query to list conversion, <a href = "#get-values-from-query">this section</a> will better explain the process.</p>
+<p>Obtains all users from the database by executing a `select` query.</p>
+<p>Returns the formatted output of <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html">cursor.execute()</a>.</p>
+<p>The returning list of this function will look something like this:</p>
+
+```
+[
+  {
+    'userID': 1,
+    'Nome': 'Mario',
+    'Cognome': 'Rossi',
+    'Tipologia': 'Studente',
+    'nomeCorso': 'Sviluppo software',
+    'annoCorso': 1
+  },
+  {
+    'userID': 2,
+    'Nome': 'Luigi',
+    'Cognome': 'Verdi',
+    'Tipologia': 'Insegnante',
+    'nomeCorso': 'Cybersecurity',
+    'annoCorso': 2
+  }
+]
+```
+<p>For more information about query to list conversion, <a href = "#get-values-from-query">this section</a> will better explain the process.</p>
 
 <h3>getUserData()</h3>
-<p>Gets all user related data by executing a `select` query. The user is defined by function parameter `uid`.</p>
-<p>Returns the formatted output of <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html">cursor.execute()</a>. For more information about query to list conversion, <a href = "#get-values-from-query">this section</a> will better explain the process.</p>
+<p>Gets all user's related data by executing a `select` query. The user is defined by the passed function's parameter `uid`.</p>
+<p>Returns the formatted output of <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html">cursor.execute()</a> in form of dictionary.</p>
+<p>An example output of this function is:</p>
 
-<h3>updateDataAsAdmin()</h3>
-<p>Updates all selected user data (ADMIN user only). Before updating user's data, all the input fields such as first name, last name, Email, password, role and enrolled courses, will be validated through a series of statements in order to avoid wrong values in database.</p>
-<p>For more information about password hashing, <a href = "#hashing-methods">this section</a> will better explain the process.</p>
+```
+{
+  'userID': 1,
+  'Nome': 'Mario'
+  'Cognome': 'Rossi',
+  'Tipologia': 'Studente',
+  'Email': 'mariorossi@mr.com',
+  'nomeCorso': 'Sviluppo software',
+  'annoCorso': 1
+}
+```
+<p>For more information about query to dictionary conversion, <a href = "#get-values-from-query">this section</a> will better explain the process.</p>
+
+<h3 id = "update-data-as-admin">updateDataAsAdmin()</h3>
+<p>Updates all selected user's data (ADMIN user only). Takes as parameters the selected user ID and the form that will be used to get the data from and to be used to update the database. For more information about password hashing, <a href = "#hashing-methods">this section</a> will better explain the process.</p>
+
+<h3 id = "update-data-as-admin">updateDataAsUser()</h3>
+<p>Updates all selected user's data. Takes as parameters the form that will be used to get the data from and to be used to update the database. For more information about password hashing, <a href = "#hashing-methods">this section</a> will better explain the process.</p>
