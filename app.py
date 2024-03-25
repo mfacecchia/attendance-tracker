@@ -615,8 +615,8 @@ def manageLesson():
                 form.subject.data = lessonInfo['Materia']
                 form.description.data = lessonInfo['Descrizione']
                 form.lessonDate.data = lessonInfo['dataLezione']
-                form.lessonStartTime.data = datetime.strptime(str(lessonInfo['oraInizio']), '%H:%M:%S')
-                form.lessonEndTime.data = datetime.strptime(str(lessonInfo['oraFine']), '%H:%M:%S')
+                form.lessonStartTime.data = timedeltaConverter(lessonInfo['oraInizio'], '%H:%M:%S')
+                form.lessonEndTime.data = timedeltaConverter(lessonInfo['oraFine'], '%H:%M:%S')
                 form.room.data = lessonInfo['aula']
                 form.lessonType.data = lessonInfo['Tipologia']
                 form.course.process_data(lessonInfo['nomeCorso'])
@@ -1376,9 +1376,8 @@ def getLessonsList(limit = None, page = 1, uid = None, isTeacher = False):
     #Converting all gotten dates to a more user friendly format
     for lesson in response:
         lesson['dataLezione'] = lesson['dataLezione'].strftime('%d/%m/%Y')
-        #TODO: Create time converter timedelta => datetime
-        lesson['oraInizio'] = datetime.strptime(str(lesson['oraInizio']), '%H:%M:%S').strftime('%H:%M')
-        lesson['oraFine'] = datetime.strptime(str(lesson['oraFine']), '%H:%M:%S').strftime('%H:%M')
+        lesson['oraInizio'] = timedeltaConverter(lesson['oraInizio'], '%H:%M:%S').strftime('%H:%M')
+        lesson['oraFine'] = timedeltaConverter(lesson['oraFine'], '%H:%M:%S').strftime('%H:%M')
         #Updating course name with course year and name combination and removing course year key from dict
         lesson['nomeCorso'] = f"{lesson['annoCorso']}a {lesson['nomeCorso']}"
         lesson.pop('annoCorso')
@@ -1645,6 +1644,11 @@ def update_lesson_data(form):
         connection.close()
         return True
     return False
+
+def timedeltaConverter(time, timeFormat):
+    '''Converts a given `timedelta` type to datetime\n
+    Takes as parameters the actual `time` and the format in order to correctly convert the value'''
+    return datetime.strptime(str(time), timeFormat)
 
 if __name__ == "__main__":
     app.run(debug = True)
