@@ -580,6 +580,7 @@ def manageLesson():
         cursor = connection.cursor()
         buttonAction = request.form.get('submitButton')
         #Checking the user required action and removing the selected lesson from the database if the submit button's value is `Remove`
+        #TODO: Check for user role before removing (must me "Admin")
         if(buttonAction == 'Remove'):
             cursor.execute('delete from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
             connection.commit()
@@ -614,6 +615,8 @@ def manageLesson():
                 form.subject.data = lessonInfo['Materia']
                 form.description.data = lessonInfo['Descrizione']
                 form.lessonDate.data = lessonInfo['dataLezione']
+                form.lessonStartTime.data = datetime.strptime(str(lessonInfo['oraInizio']), '%H:%M:%S')
+                form.lessonEndTime.data = datetime.strptime(str(lessonInfo['oraFine']), '%H:%M:%S')
                 form.room.data = lessonInfo['aula']
                 form.lessonType.data = lessonInfo['Tipologia']
                 form.course.process_data(lessonInfo['nomeCorso'])
@@ -1373,6 +1376,7 @@ def getLessonsList(limit = None, page = 1, uid = None, isTeacher = False):
     #Converting all gotten dates to a more user friendly format
     for lesson in response:
         lesson['dataLezione'] = lesson['dataLezione'].strftime('%d/%m/%Y')
+        #TODO: Create time converter timedelta => datetime
         lesson['oraInizio'] = datetime.strptime(str(lesson['oraInizio']), '%H:%M:%S').strftime('%H:%M')
         lesson['oraFine'] = datetime.strptime(str(lesson['oraFine']), '%H:%M:%S').strftime('%H:%M')
         #Updating course name with course year and name combination and removing course year key from dict
@@ -1540,11 +1544,12 @@ def update_lesson_data(form):
     Returns `True` if the process succeeds, otherwise `False` with a flashed message if the process catches an error'''
     if(session.get('role') in ['Admin', 'Insegnante']):
         #Obtaining all form's fields' values
-        lessonID = form.submitForm.data
+        lessonID = form.lessonID.data
         subject = form.subject.data
         description = form.description.data
         lessonDate = form.lessonDate.data
-        #TODO: Update lesson start/end time as well
+        lessonStartTime = form.lessonStartTime.data
+        lessonEndTime = form.lessonEndTime.data
         lessonRoom = form.room.data
         assignedTeacher = form.assignedTeacher.data if session['role'] == 'Admin' else session['uid']
         lessonType = form.lessonType.data
@@ -1570,11 +1575,27 @@ def update_lesson_data(form):
                             set Materia = %(subject)s,\
                             Descrizione = %(description)s,\
                             dataLezione = %(lessonDate)s,\
+                            oraInizio = %(lessonStartTime)s,\
+                            oraFine = %(lessonEndTime)s,\
                             aula = %(room)s,\
                             idInsegnante = %(teacherID)s,\
                             Tipologia = %(lessonType)s,\
                             idCorso = (select idCorso from Corso where nomeCorso = %(courseName)s and annoCorso = %(courseYear)s)\
-                            where idLezione = %(lessonID)s', {'subject': subject, 'description': description, 'lessonDate': lessonDate, 'room': lessonRoom, 'teacherID': assignedTeacher, 'lessonType': lessonType, 'courseName': chosenCourseName, 'courseYear': chosenCourseYear, 'lessonID': lessonID})
+                            where idLezione = %(lessonID)s',
+                            {
+                                'subject': subject.strip().capitalize(),
+                                'description': description.strip().capitalize(),
+                                'lessonDate': lessonDate,
+                                'lessonStartTime': lessonStartTime,
+                                'lessonEndTime': lessonEndTime,
+                                'room': lessonRoom.upper(),
+                                'teacherID': assignedTeacher,
+                                'lessonType': lessonType,
+                                'courseName': chosenCourseName, 
+                                'courseYear': chosenCourseYear,
+                                'lessonID': lessonID
+                            }
+                        )
             connection.commit()
             #Updating the lesson's attendance field in the `Partecipazione` DB table if the `teacherChanged` value is `True`
             if(teacherChanged):
