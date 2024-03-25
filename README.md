@@ -113,7 +113,7 @@
     <td>/forgot-password</td>
     <td>Outputs the form with Email input and sends an email to that address with a reset password link. Accessible via the `/login` page. For more information about Email sending function and reset password link GET parameters, <a href = "#password-reset">this section</a> will better explain the process.</td>
   </tr>
-  <tr>
+  <tr id = "update-password">
     <td>/user/updatepassword</td>
     <td>Ouptuts the form with Password and Verify Password. Accessible via Email reset password link and after the first login on the application. Input is then validated and the user's password gets updated on the database. For more information about password verification and hashing, <a href = "#hashing-methods">this section</a> will better explain the process.</td>
   </tr>
@@ -208,6 +208,7 @@
 
 <h2 id = "hashing-methods">Hashing methods</h2>
 <p>All user-related sensitive data such as passwords are securely hashed and stored in the database using <a href = "https://en.wikipedia.org/wiki/Argon2">Argon2id algorithm</a>. To manage and verify such data, <a href = "https://argon2-cffi.readthedocs.io/en/stable/">Argon2-cffi</a> Python module is being used, in particular the `PasswordHasher` class and its relative methods <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.verify">verify</a> for login and reset password verification functionalities and <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.hash">hash</a> for user creation and reset password functionalities. Non-matching passwords after the <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.PasswordHasher.verify">verify</a> function is called are managed with Argon2 module built-in <a href = "https://argon2-cffi.readthedocs.io/en/stable/api.html#argon2.exceptions.VerifyMismatchError">VerifyMismatchError exception</a>.</p>
+<p>Instead, the <a href = "#update-password">password reset route</a> uses an authenticity request method that requires the GET parameters `mail` and `uid` to be hashed with base64 algorithm in order to lower the possibility for an attacker to guess a user email and user ID combination and so reset his password.</p>
 
 <h2 id = "functions">Functions</h2>
 <h3>connectToDB()</h3>
