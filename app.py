@@ -1336,10 +1336,9 @@ def getLessonsList(limit = None, page = 1, uid = None, isTeacher = False):
     if(not connection):
         return False
     cursor = connection.cursor()
-    #TODO: Get also lesson start and end time
     #Default query for all user types
     preparedQuery = [
-        'select Lezione.idLezione, Materia, Descrizione, dataLezione, aula, Tipologia, nomeCorso, annoCorso, Presenza\
+        'select Lezione.idLezione, Materia, Descrizione, dataLezione, oraInizio, oraFine, aula, Tipologia, nomeCorso, annoCorso, Presenza\
         from Lezione\
         inner join Corso on Corso.idCorso = Lezione.idCorso\
         inner join Partecipazione on Partecipazione.idLezione = Lezione.idLezione\
@@ -1374,6 +1373,8 @@ def getLessonsList(limit = None, page = 1, uid = None, isTeacher = False):
     #Converting all gotten dates to a more user friendly format
     for lesson in response:
         lesson['dataLezione'] = lesson['dataLezione'].strftime('%d/%m/%Y')
+        lesson['oraInizio'] = datetime.strptime(str(lesson['oraInizio']), '%H:%M:%S').strftime('%H:%M')
+        lesson['oraFine'] = datetime.strptime(str(lesson['oraFine']), '%H:%M:%S').strftime('%H:%M')
         #Updating course name with course year and name combination and removing course year key from dict
         lesson['nomeCorso'] = f"{lesson['annoCorso']}a {lesson['nomeCorso']}"
         lesson.pop('annoCorso')
@@ -1517,14 +1518,15 @@ def getLessonInfo(lessonID):
     if not connection:
         return False
     cursor = connection.cursor()
-    #TODO: Get also lesson start and end time
-    cursor.execute('select Lezione.idLezione, Materia, Descrizione, dataLezione, aula, Lezione.Tipologia, idInsegnante, Nome, Cognome, nomeCorso, annoCorso\
+    cursor.execute('select Lezione.idLezione, Materia, Descrizione, dataLezione, oraInizio, oraFine, aula, Lezione.Tipologia, idInsegnante, Nome, Cognome, nomeCorso, annoCorso\
                     from Lezione\
-                    inner join Partecipazione on Partecipazione.idLezione = Lezione.idLezione\
-                    inner join Utente on Utente.userID = Partecipazione.userID\
+                    inner join Utente on Utente.userID = Lezione.idInsegnante\
                     inner join Corso on Corso.idCorso = Lezione.idCorso\
-                    where Lezione.idLezione = %(lessonID)s\
-                    and Utente.Tipologia = "Insegnante"', {'lessonID': lessonID})
+                    where Lezione.idLezione = %(lessonID)s',
+                    {
+                        'lessonID': lessonID
+                    }
+                )
     response = getValuesFromQuery(cursor)
     response[0]['Nome'] = f"{response[0]['Nome']} {response[0]['Cognome']}"
     response[0].pop('Cognome')
@@ -1542,6 +1544,7 @@ def update_lesson_data(form):
         subject = form.subject.data
         description = form.description.data
         lessonDate = form.lessonDate.data
+        #TODO: Update lesson start/end time as well
         lessonRoom = form.room.data
         assignedTeacher = form.assignedTeacher.data if session['role'] == 'Admin' else session['uid']
         lessonType = form.lessonType.data
