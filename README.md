@@ -109,7 +109,7 @@
     <td>/login</td>
     <td>Login form. Outputs the form with Email and password input and validates the input passed through a POST request. If already logged in, the user will be automatically redirected to the screening page. For more information about hashed password verification, <a href = "#hashing-methods">this section</a> will better explain the process.</td>
   </tr>
-  <tr>
+  <tr id = "forgot-password">
     <td>/forgot-password</td>
     <td>Outputs the form with Email input and sends an email to that address with a reset password link. Accessible via the `/login` page. For more information about Email sending function and reset password link GET parameters, <a href = "#password-reset">this section</a> will better explain the process.</td>
   </tr>
@@ -144,11 +144,11 @@
     <td>/user</td>
     <td>User screening. Outputs all the user's related information such as name, role, and last login time as well as a list of all upcoming lessons, a user creation form (ADMIN user role only), a lesson creation form (ADMIN and TEACHER user roles only), a course creation form (ADMIN user role only), a pie chart of attended/not attended lessons percentage (STUDENT and TEACHER user roles only) or a bar chart of the total number of attendances subdivided per lesson date and course name in a chosen range of 7 days, 14 days or 30 days (TEACHER and ADMIN user roles only). For more information about Chart generation, <a href = "#chart-generation">this section</a> will better explain the process. Accessible only if a <a href = "https://flask.palletsprojects.com/en/3.0.x/api/#sessions">valid session</a> is open, otherwise redirects to the login page with an error message.</td>
   </tr>
-  <tr>
+  <tr id = "create-user">
     <td>/user/create</td>
     <td>User creation form and data insertion in the database (ADMIN user role only). For more information about form validation, the <a href = "https://wtforms.readthedocs.io/en/2.3.x/validators/?highlight=validators#module-wtforms.validators">official flask-wtf documentation</a> will better explain how the whole validation process works.</td>
   </tr>
-  <tr>
+  <tr id = "create-lesson">
     <td>/lesson/create</td>
     <td>Lesson creation form and data insertion in the database (ADMIN and TEACHER user roles only). For more information about form validation, the <a href = "https://wtforms.readthedocs.io/en/2.3.x/validators/?highlight=validators#module-wtforms.validators">official flask-wtf documentation</a> will better explain how the whole validation process works.</td>
   </tr>
@@ -156,13 +156,13 @@
     <td>/lesson/list</td>
     <td>Shows a list of all the upcoming lessons with a button to manage the lesson's attendances (if the lesson's date is the same as the current date) (ADMIN and TEACHER user roles only), a button to update all lesson's parameters such as subject, description, time and date, and more (ADMIN and TEACHER user roles only), and a button to delete the lesson. The page shows 10 lessons per page, ordered per lesson date. The list varies based on the user role accessing the page; if the role is STUDENT or TEACHER, the list will show only the upcoming lessons for their specific enrolled courses.</td>
   </tr>
-  <tr>
+  <tr id = "update-lesson">
     <td>/lesson</td>
-    <td>Lesson screening. Outputs the selected lesson name as well as a list of all enrolled students and a checkbox to record students' attendances (ADMIN and TEACHER user roles only).</td>
+    <td>Lesson screening. Outputs a form with all lesson's information and a button to submit the modifications and update the database (ADMIN and TEACHER user roles only).</td>
   </tr>
   <tr>
     <td>/lesson/register-attendance</td>
-    <td>Attendances registration function (ADMIN and TEACHER user roles only).</td>
+    <td>Lesson screening. Outputs the selected lesson name as well as a list of all enrolled students and a checkbox to record students' attendances (ADMIN and TEACHER user roles only).</td>
   </tr>
   <tr>
     <td>/lesson/attendances</td>
@@ -172,7 +172,7 @@
     <td>/lessons/attendances/percentage</td>
     <td>Custom API that returns a JSON file about all lessons attendances/non-attendances percentage rate in a defined range. For more information about this API, <a href = "#lessons-attendances-rate-api">this section</a> will better explain the process.</td>
   </tr>
-  <tr>
+  <tr id = "create-course">
     <td>/course/create</td>
     <td>Course creation form and data insertion in the database (ADMIN user role only). For more information about form validation, the <a href = "https://wtforms.readthedocs.io/en/2.3.x/validators/?highlight=validators#module-wtforms.validators">official flask-wtf documentation</a> will better explain how the whole validation process works.</td>
   </tr>
@@ -180,7 +180,7 @@
     <td>/user/list</td>
     <td>Shows a list of all users registered in the platform with a button to update each user's parameters such as name, surname, enrolled courses, and more (ADMIN user role only), and a button to delete the user from the Database (ADMIN user role only). The page shows 10 students per page, ordered per role (Admin, then Teachers, and then Students).</td>
   </tr>
-  <tr>
+  <tr id = "update-user">
     <td>/user/select</td>
     <td>Outputs a form to update chosen user's parameters such as name, surname, enrolled courses, and more (ADMIN user role only). The inputted data is then processed based on the session user role who is making the request; if the user role is ADMIN, then the selected user data will be related to all selected user's information, otherwise, the parameters to update will be just Email and Password if the session user role is STUDENT or TEACHER (in this case, the update request will be processed based on self user's data because only the ADMIN can update other user's parameters). For more information about form validation, the <a href = "https://wtforms.readthedocs.io/en/2.3.x/validators/?highlight=validators#module-wtforms.validators">official flask-wtf documentation</a> will better explain how the whole validation process works.</td>
   </tr>
@@ -215,7 +215,7 @@
 <p>Returns <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-example-connecting.html">MySQLConnection object</a> or `False` if the connection to Database fails for some reason.</p>
 
 <h3>getCourses()</h3>
-<p>Executes a simple `select` query on the database and returns all courses's names and years.</p>
+<p>Executes a simple `select` query on the database and updates the global list `courses` with all the formatted courses's names and years.</p>
 <p>Returns the formatted output of <a href = "https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-execute.html">cursor.execute()</a>.
 <p>An example of output from this function will be:</p>
 
@@ -330,3 +330,152 @@
 
 <h3 id = "update-data-as-admin">updateDataAsUser()</h3>
 <p>Updates all selected user's data. Takes as parameters the form that will be used to get the data from and to be used to update the database. For more information about password hashing, <a href = "#hashing-methods">this section</a> will better explain the process.</p>
+
+<h3>validateCoursesSelection()</h3>
+<p>Gets all courses' names and the relative years as parameters (MUST be type list()) and executes a query for each item to check if the actual selection exists. Used in user <a href = "#create-user">creation</a> and <a href = "#update-user">update</a> and lesson <a href = "#create-lesson">creation</a> and <a href = "#update-lesson">update</a>. Also allows a filter for the validation based on the chosen userID to be checked (preference passed in the `userFilter` function parameter). Returns `False` if the DB response returns `None`, else `True` if all requests return a value</p>
+
+<h3>getCustomMessage()</h3>
+<p>Returns a custom message based on the system clock time and a matrix with the default messages and the time ranges which will be selected to be printed out on the user screening page.</p>
+
+<h3>getUserCourses()</h3>
+<p>Getting all courses from the query and creating a single formatted list with all the obtained ones</p>
+<p>An example of list output will be:</p>
+
+```
+[
+  '1a Sviluppo software',
+  '2a Cybersecurity'
+]
+```
+
+<h3>deleteUser()</h3>
+<p>Removes a defined user from the database based on the passed parameter `uid`.</p>
+
+<h3>getLessonsList()</h3>
+<p>Executes a query and returns all the upcoming lessons based on user type and enrolled courses filters, and the total number of lessons.
+Takes as parameters a `limit` variable used to limit the number of results and a `page` variable used to get the next `limit`ed results.
+Also allows to get the upcoming lessons of a determined user by passing the `uid` and `isTeacher` parameters which respectively represent the userID to get the lessons of and, if the user is a Teacher, the `isTeacher` value must be set to `True`</p>
+<p>Returns a list with a dictionary for each list index and the total number of obtained lessons</p>
+
+```
+[
+  [
+    {
+      'idLezione': 1,
+      'Materia': 'Python',
+      'Descrizione': 'Sviluppo app in Flask',
+      'dataLezione': '2024-03-27',
+      'oraInizio': '09:00',
+      'oraFine': '13:00',
+      'aula': 'A001',
+      'Tipologia': 'Laboratorio',
+      'nomeCorso': '1a Sviluppo software',
+      'Presenza': 1
+    },
+    {
+      'idLezione': 2,
+      'Materia': 'Sviluppo siti web',
+      'Descrizione': 'TailwindCSS e JS',
+      'dataLezione': '2024-03-28',
+      'oraInizio': '09:30',
+      'oraFine': '13:30',
+      'aula': 'A003',
+      'Tipologia': 'Lezione',
+      'nomeCorso': '1a Sviluppo web',
+      'Presenza': 0
+    }
+  ], 2
+]
+```
+With a filter on the lesson's course if the request is being made from a STUDENT or TEACHER user role.
+
+<h3>verifyUserExistence()</h3>
+<p>Verifies if the user exists before sending the recover password email. Used in <a href = "#forgot-password">user password recovery function</a>.
+Returns its relative `userID` if the query returns a value, otherwise `False`</p>
+
+<h3>b64_encode_decode()</h3>
+<p>Takes a string as input parameter and returns its relative base64 encoded/decoded value. If `encode` parameter is `True`, the string will be encoded, if it's `False` it will be decoded. For more information about encoding and decoding with base64, <a href = "#hashing-methods">this section</a> will better explain the process.</p>
+
+<h3>selectUsersFromCourse()</h3>
+<p>Executes a query and returns a list of all the users attending a defined course. Course is chosen based on the function parameters `courseName` and `courseYear`.</p>
+<p>An example output of this function will be:</p>
+
+```
+[
+  {
+    'userID': 1,
+    'Tipologia': 'Insegnante'
+  },
+  {
+    'userID': 2,
+    'Tipologia': 'Studente'
+  },
+  {
+    'userID': 3,
+    'Tipologia': 'Studente'
+  },
+  {
+    'userID': 4,
+    'Tipologia': 'Studente'
+  }
+]
+```
+
+<h3 id = "get-lessons-attendances-count">getLessonsAttendancesCount()</h3>
+<p>Executes a query and returns in the form of JSON the count of attendances subdivided per lesson date and course ID. Takes as parameters a `range` which will be used to get all the lessons starting from the current date (obtained from <a href = "https://docs.python.org/3/library/datetime.html#datetime.date.today">datetime's date.today</a> class' function) to `range` days before.</p>
+<p>The output of this API will be:</p>
+
+```
+[
+  {
+    "conteggioPresenze": 5,
+    "dataLezione": "20/03/2024",
+    "nomeCorso": "1a Cybersecurity"
+  },
+  {
+    "conteggioPresenze": 14,
+    "dataLezione": "20/03/2024",
+    "nomeCorso": "1a Cybersecurity"
+  },
+  {
+    "conteggioPresenze": 11,
+    "dataLezione": "20/03/2024",
+    "nomeCorso": "1a Cybersecurity"
+  },
+  {
+    "conteggioPresenze": 8,
+    "dataLezione": "20/03/2024",
+    "nomeCorso": "1a Sviluppo software"
+  },
+  {
+    "conteggioPresenze": 9,
+    "dataLezione": "20/03/2024",
+    "nomeCorso": "2a Sviluppo software"
+  },
+  {
+    "conteggioPresenze": 1,
+    "dataLezione": "20/03/2024",
+    "nomeCorso": "3a Sviluppo software"
+  },
+  {
+    "conteggioPresenze": 6,
+    "dataLezione": "20/03/2024",
+    "nomeCorso": "1a Sviluppo web"
+  },
+  {
+    "conteggioPresenze": 3,
+    "dataLezione": "20/03/2024",
+    "nomeCorso": "2a Sviluppo web"
+  },
+  {
+    "conteggioPresenze": 7,
+    "dataLezione": "21/03/2024",
+    "nomeCorso": "1a Sviluppo web"
+  },
+  {
+    "conteggioPresenze": 2,
+    "dataLezione": "24/03/2024",
+    "nomeCorso": "1a Cybersecurity"
+  }
+]
+```
