@@ -338,17 +338,6 @@ def userScreening():
             return redirect(url_for('updatePassword'))
         response = []
         scheduledLessons = []
-        #Getting teacher's courses to display in the lesson creation section
-        if(session.get('role') == 'Insegnante'):
-            connection = connectToDB()
-            cursor = connection.cursor()
-            cursor.execute('select nomeCorso, annoCorso\
-                            from Corso\
-                            inner join Registrazione on Corso.idCorso = Registrazione.idCorso\
-                            inner join Utente on Registrazione.userID = Utente.userID\
-                            where Utente.userID = %(uid)s', {'uid': session['uid']})
-            response = getValuesFromQuery(cursor)
-            connection.close()
         #Managing indexError (returning valuef rom `getLessonsList` is a list, so that would be impossible to obtain the `0` index value if it's empty)
         try:
             #Getting the first lesson data only
@@ -823,7 +812,9 @@ def userEnrolledCourses():
 def logout():
     #Checking if session exists before clearing it
     if(session.get('name')):
-        updateLastLoginTime()
+        #Updating last login time only if the user has logged in at least once in order to redirect it to the update password page next time he logs in
+        if(session['lastLogin'] != 'Mai'):
+            updateLastLoginTime()
         session.clear()
         flash("Logout effettuato con successo.", 'Successo')
     return redirect(url_for('login'))
