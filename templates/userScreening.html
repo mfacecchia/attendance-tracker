@@ -187,7 +187,7 @@ Gestione account
         window.addEventListener('resize', cloneFirstChild)
 
         function cloneFirstChild(){
-            if(window.screen.width >= 768){
+            if(window.innerWidth >= 768){
                 //Manipulating the `mainDashboardSection` node in order to move the first action block before the `container` class
                 firstChild.parentNode.insertBefore(firstChild, document.querySelector('.container'));
             }
