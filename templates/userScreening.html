@@ -116,12 +116,14 @@ Gestione account
     {% if session.get('role') in ['Studente', 'Insegnante'] %}
         <h1 class = "text-center" id = "percChartTitle">👨‍🏫 Percentuale presenze negli ultimi 7 giorni 👨‍🎓</h1>
         <canvas id = "attendancePercentageStatistics" width = "400" height = "100" aria-label = "Grafico presenze" role = "img">Il tuo browser non permette la visualizzazione di questo grafico. Per favore prova a usare un browser differente.</canvas>
+        <div class = "container my-5 text-center" id = "no-data-pieChart">
+            <p>Nessun dato disponibile per questo grafico</p>
+        </div>
         <div class = "flex flex-wrap gap-2 justify-center items-center">
             <button class = "button percUpdateRange" value = '7'>7 Giorni</button>
             <button class = "button percUpdateRange" value = '14'>14 Giorni</button>
             <button class = "button percUpdateRange" value = '30'>1 Mese</button>
         </div>
-        <!-- TODO: Show error message if no data is obtained from the API -->
     {% endif %}
 
     <!-- NOTE: Script declaration -->

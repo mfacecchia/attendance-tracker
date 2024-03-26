@@ -26,25 +26,34 @@ function updatePieChart(apiData){
     var percentages = [Math.round((apiData[0].attended_lessons / apiData[0].total_lessons) * 100)];
     percentages[1] = 100 - percentages[0];
 
-    pieChart.data = {
-        labels: [`Presenze (${percentages[0]}%)`, `Assenze (${percentages[1]}%)`],    
-
-        datasets: [{
-            backgroundColor: [
-                'rgba(50, 205, 50, 0.5)',
-                'rgba(255, 99, 132, 0.5)',
-            ],
-            borderColor: [
-                'rgb(50, 205, 50)',
-                'rgb(255, 99, 132)',
-            ],
-            data: [
-                apiData[0].attended_lessons,
-                apiData[0].not_attended_lessons,
-            ],
-        }]
+    //Displaying a custom message if the lessons count API returns no values
+    if(!apiData[0]['total_lessons']){
+        document.querySelector('#no-data-pieChart').style.display = 'block';
+        document.querySelector('#attendancePercentageStatistics').style.display = 'none';
     }
-    pieChart.update();
+    else{
+        document.querySelector('#no-data-pieChart').style.display = 'none';
+        document.querySelector('#attendancePercentageStatistics').style.display = 'block';
+        pieChart.data = {
+            labels: [`Presenze (${percentages[0]}%)`, `Assenze (${percentages[1]}%)`],    
+    
+            datasets: [{
+                backgroundColor: [
+                    'rgba(50, 205, 50, 0.5)',
+                    'rgba(255, 99, 132, 0.5)',
+                ],
+                borderColor: [
+                    'rgb(50, 205, 50)',
+                    'rgb(255, 99, 132)',
+                ],
+                data: [
+                    apiData[0].attended_lessons,
+                    apiData[0].not_attended_lessons,
+                ],
+            }]
+        }
+        pieChart.update();
+    }
 }
 
 //Resiezes the pie chart based on the some set breakponts
