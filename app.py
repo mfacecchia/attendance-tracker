@@ -546,7 +546,7 @@ def createLesson():
 @app.route('/lesson/list', methods = ['GET'])
 def lessonsList():
     if(session.get('name')):
-        page = validatePageInput()
+        page = isPageNumberValid()
         if not page:
             return redirect(url_for('lessonsList', page = 1))
         #Showing 10 elements per page
@@ -752,7 +752,7 @@ def create_course():
 def usersList():
     if(session.get('role') == 'Admin'):
         #Validating the page value passed as GET parameter and redirecting with the correct page value if needed
-        page = validatePageInput()
+        page = isPageNumberValid()
         if not page:
             return redirect(url_for('usersList', page = 1))
         #Calculating the total number of pages based on the total number of lessons
@@ -812,22 +812,6 @@ def select_user():
                                     form = form)
     return redirect(url_for('userScreening'))
 
-# @app.route('/user/update', methods = ['GET', 'POST'])
-def update_user_data(form, uid = None):
-    #`not request.form.get('uid')` means that the administrator wants to update his own data
-    #NOTE: (`uid` is a special field in `userInfo.html` form which links the selected user id to the button value with name `uid`)
-    if(session.get('role') in ['Studente', 'Insegnante'] or not uid):
-        if(updateDataAsUser(form)):
-            flash('Utente modificato con successo.', 'Successo')
-            return True
-        else:
-            return False
-    elif(session.get('role') == 'Admin'):
-        return updateDataAsAdmin(uid, form)
-    else:
-        flash(commonErrorMessage, 'Errore')
-        return False
-
 @app.route('/user/courses', methods = ['GET'])
 def userEnrolledCourses():
     '''API returning a list of all selected teacher's enrolled courses\n
@@ -880,7 +864,21 @@ def getCourses():
     for course in response:
         courses.append(f"{course['annoCorso']}a {course['nomeCorso']}")
 
-
+def update_user_data(form, uid = None):
+    '''Takes as parameters the form that needs to be processed and the selected userID (if admin is trying to update some user's information)'''
+    #`not request.form.get('uid')` means that the administrator wants to update his own data
+    #NOTE: (`uid` is a special field in `userInfo.html` form which links the selected user id to the button value with name `uid`)
+    if(session.get('role') in ['Studente', 'Insegnante'] or not uid):
+        if(updateDataAsUser(form)):
+            flash('Utente modificato con successo.', 'Successo')
+            return True
+        else:
+            return False
+    elif(session.get('role') == 'Admin'):
+        return updateDataAsAdmin(uid, form)
+    else:
+        flash(commonErrorMessage, 'Errore')
+        return False
 
 def getValuesFromQuery(cursor):
     '''Returns the DB response in form of list of dictionaries\n
@@ -1400,7 +1398,7 @@ def verifyUserExistence(userEmail, userID = None):
     return response[0]
 
 def b64_encode_decode(string:str, encode = True):
-    '''Takes a string as input parameter and returns its relative base64 encoded/decoded value\
+    '''Takes a string as input parameter and returns its relative base64 encoded/decoded value\n
         If `encode` parameter is `True`, the string will be encoded, if it's `False` it will be decoded'''
     if encode:
         return urlsafe_b64encode(string.encode())
@@ -1462,7 +1460,7 @@ def getLessonsAttendancesCount(range = 7):
     return jsonify(jsonResponse)
 
 def reformatResponse(response):
-    '''Gets a list and converts each date to the desired format\
+    '''Gets a list and converts each course to the desired format\n
     Returns a list of dictionaries'''
     orderedResponse = []
     for col in response:
@@ -1503,7 +1501,7 @@ def getTeachersList():
         responseList.append({'id': user['userID'], 'Nome': f"{user['Nome']} {user['Cognome']}"})
     return responseList
 
-def validatePageInput():
+def isPageNumberValid():
     '''Gets from the URL the `page` parameter and validates it based on some basic controls\n
     Returns `page` if the value is correct, otherwise `False` if it's not valid'''
     try:
