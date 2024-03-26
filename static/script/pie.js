@@ -59,7 +59,7 @@ function updatePieChart(apiData){
 //Resiezes the pie chart based on the some set breakponts
 function resizeChart(){
     //Matrix containing every breakpoint to check for and the relative scale to apply to the chart
-    let breakpoints = [[0, 1.3, 12], [640, 1.6, 16], [768, 1.8, 17], [1024, 1.6, 20], [1280, 2, 20], [1536, 2.4, 20], [1920, 2, 20], [3840, 5, 30], [9999]];
+    let breakpoints = [[0, 1.3, 12], [640, 1.6, 16], [768, 1.8, 17], [1024, 1.8, 20], [1280, 2, 20], [1536, 2.4, 20], [1920, 2, 20], [3840, 5, 30], [9999]];
     //`breakpoints.every()` stops whenever the executed function returns `false`, in order to not overwhelm the user CPU
     breakpoints.every((breakpoint, index) => {
         //Iterating through each breakpoint and comparing those values with the client's brower size

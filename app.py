@@ -615,7 +615,13 @@ def manageLesson():
         #Proceeding with entering the lesson management page if the user clicked on the `Manage` button
         else:
             #Validating lesson (can only select same date lessons)
-            cursor.execute('select dataLezione from Lezione where idLezione = %(lessonID)s', {'lessonID': lessonID})
+            cursor.execute('select dataLezione\
+                            from Lezione\
+                            where idLezione = %(lessonID)s',
+                            {
+                                'lessonID': lessonID
+                            }
+                        )
             #Managing possible `NoneType` if the lesson gets suddenly removed
             try:
                 response = cursor.fetchone()[0]
