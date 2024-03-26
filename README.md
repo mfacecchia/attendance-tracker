@@ -29,7 +29,8 @@
 <a href = "https://docs.python.org/3/library/os.html">OS</a> |
 <a href = "https://docs.python.org/3/library/datetime.html">Datetime</a> |
 <a href = "https://tailwindcss.com/docs/installation">Tailwind CSS</a> |
-<a href = "https://docs.python.org/3/library/math.html">Math</a>
+<a href = "https://www.chartjs.org">ChartJS</a> |
+<a href = "https://api.jquery.com">JQuery</a>
 <h4>Hashing & security</h4>
 <a href = "https://argon2-cffi.readthedocs.io/en/stable/">Argon2</a> |
 <a href = "https://docs.python.org/3/library/base64.html">Base64</a> |
