@@ -254,11 +254,11 @@ def authorize():
         #Checking if user has already linked a github account, otherwise the account linking function will be called
         if(not checkUserGithubConnection()):
             if(linkGithubAccount(profile['id'])):
-                flash('Account linked successfully', 'success')
+                flash('Account GitHub collegato con successo.', 'Successo')
             else:
-                flash('This github account is already linked to a different user... Please try using a different one.', 'error')
+                flash('Questo account GitHub è già utilizzato da un altro utente.', 'Errore')
         else:
-            flash('Account already linked', 'error')
+            flash('Account GitHub già collegato', 'Errore')
         return redirect(url_for('userScreening'))
     #Requested login with github account
     else:
