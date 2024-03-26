@@ -10,16 +10,15 @@ Gestione account
     
     <section id = "mainDashboardSection" {% if session['role'] == 'Studente' %} class = "lg:!flex-nowrap" {% endif %}>
         <div class = "container blue mt-3">
-            <div class = "w-1/2 text-center h-52 relative flex flex-col justify-center
+            <div class = "w-1/2 text-center h-64 relative flex flex-col justify-center
                         sm:w-3/4
-                        2xl:h-64">
+                        2xl:h-72">
                 <b>{{ session['role'] }}</b>
                 <p class = "mt-1 mb-2">Ultima volta online: {{session['lastLogin']}}</p>
-                <a class = "button dark-blue p-1 text-xs w-full absolute bottom-[9px]
-                            sm:bottom-[8px]
-                            md:bottom-2
-                            xl:bottom-[9px]
-                            2xl:px-5 2xl:bottom-[10px]" href = "{{url_for('select_user')}}">Modifica account</a>
+                <a class = "button dark-blue p-1 text-xs w-full absolute bottom-[10px]
+                            sm:bottom-3
+                            xl:bottom-[11px]
+                            2xl:px-5" href = "{{url_for('select_user')}}">Modifica account</a>
             </div>
             <div class = "next-lesson">
                 {% if session['role'] in ['Admin', 'Insegnante'] %}
@@ -44,9 +43,8 @@ Gestione account
                 <div class = "lesson-description">
                     <b class = "text-sm">Prossima lezione:</b>
                     {% if scheduledLessons %}
-                        <!-- TODO: Add lesson time -->
-                        <!-- NOTE: Make container bigger -->
-                    <p class = "text-sm">{{scheduledLessons['Materia']}}</p>
+                        <p class = "text-sm">{{scheduledLessons['Materia']}}</p>
+                        <p class = "text-sm">{{scheduledLessons['oraInizio']}} - {{scheduledLessons['oraFine']}}</p>
                         <p class = "text-sm">Aula {{scheduledLessons['aula']}}</p>
                         <a class = "button dark-blue mt-2 2xl:mt-auto" href = "{{url_for('lessonsList', page = 1)}}">Vedi tutte</a>
                     {% else %}

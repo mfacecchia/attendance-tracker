@@ -150,8 +150,8 @@
         @apply bg-attendance-orange text-white;
     }
     .next-lesson{
-        @apply w-1/2 h-52 rounded-md overflow-hidden bg-white/30;
-        @apply 2xl:h-64;
+        @apply w-1/2 h-64 rounded-md overflow-hidden bg-white/30;
+        @apply 2xl:h-72;
     }
     .next-lesson .button{
         @apply p-1 text-xs;

@@ -1042,7 +1042,7 @@ input, select, textarea {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 .next-lesson {
-  height: 13rem;
+  height: 16rem;
   width: 50%;
   overflow: hidden;
   border-radius: 0.375rem;
@@ -1051,7 +1051,7 @@ input, select, textarea {
 @media (min-width: 1536px) {
 
   .next-lesson {
-    height: 16rem;
+    height: 18rem;
   }
 }
 .next-lesson .button {
@@ -1296,8 +1296,8 @@ input, select, textarea {
 .relative {
   position: relative;
 }
-.bottom-\[9px\] {
-  bottom: 9px;
+.bottom-\[10px\] {
+  bottom: 10px;
 }
 .isolate {
   isolation: isolate;
@@ -1376,8 +1376,8 @@ input, select, textarea {
 .h-24 {
   height: 6rem;
 }
-.h-52 {
-  height: 13rem;
+.h-64 {
+  height: 16rem;
 }
 .w-1\/2 {
   width: 50%;
@@ -1472,10 +1472,11 @@ input, select, textarea {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
+
 @media (min-width: 640px) {
 
-  .sm\:bottom-\[8px\] {
-    bottom: 8px;
+  .sm\:bottom-3 {
+    bottom: 0.75rem;
   }
 
   .sm\:w-3\/4 {
@@ -1487,22 +1488,21 @@ input, select, textarea {
          column-gap: 0.5rem;
   }
 }
-@media (min-width: 768px) {
 
-  .md\:bottom-2 {
-    bottom: 0.5rem;
-  }
+@media (min-width: 768px) {
 
   .md\:w-1\/4 {
     width: 25%;
   }
 }
+
 @media (min-width: 900px) {
 
   .md2\:block {
     display: block;
   }
 }
+
 @media (min-width: 1024px) {
 
   .lg\:\!block {
@@ -1521,10 +1521,11 @@ input, select, textarea {
     flex-wrap: nowrap !important;
   }
 }
+
 @media (min-width: 1280px) {
 
-  .xl\:bottom-\[9px\] {
-    bottom: 9px;
+  .xl\:bottom-\[11px\] {
+    bottom: 11px;
   }
 
   .xl\:w-1\/5 {
@@ -1541,18 +1542,15 @@ input, select, textarea {
     line-height: 1.25rem;
   }
 }
-@media (min-width: 1536px) {
 
-  .\32xl\:bottom-\[10px\] {
-    bottom: 10px;
-  }
+@media (min-width: 1536px) {
 
   .\32xl\:mt-auto {
     margin-top: auto;
   }
 
-  .\32xl\:h-64 {
-    height: 16rem;
+  .\32xl\:h-72 {
+    height: 18rem;
   }
 
   .\32xl\:px-5 {

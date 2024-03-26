@@ -128,7 +128,6 @@ def login():
 
 @app.route('/forgot-password', methods = ['GET', 'POST'])
 def forgotPassword():
-    #TODO: Add db field in `Credenziali` called = `passwordDimenticata` with `False` as default value
     form = forms.ResetPasswordForm()
     #If the form has not been submitted, the first redirect will be to the form for inputting the user's email, otherwise proceeding with user verification
     if(form.validate_on_submit()):
