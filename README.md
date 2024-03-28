@@ -105,8 +105,8 @@ pip3 install -r requirements.txt
 <b>NOTE:</b> For this project the database is locally hosted so the environmental values of DB_USERNAME, DB_PWORD, DB_HOSTNAME, DB_NAME will be `root`, `""`, `localhost` (port 3306), `Attendance_Tracker`
 
 <h2 id = "db-er">Database Entity Relationship model</h2>
-<img alt="Database Entiti Retionship image" src="https://github.com/mfacecchia/attendance-tracker/assets/86726458/996a813f-a497-4f65-855a-59aa687edd81">
-
+<img alt="Database Entity Relationship image" src="https://github.com/mfacecchia/attendance-tracker/assets/86726458/996a813f-a497-4f65-855a-59aa687edd81">
+<p>If you want to test this project on your own device you can import the <a href = "https://github.com/mfacecchia/attendance-tracker/blob/main/Attendance_Tracker_dump.sql">database tables dump</a> as well.</p>
 
 <h2 id = "app-routes">App Routes</h2>
 <table>
