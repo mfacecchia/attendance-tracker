@@ -50,7 +50,7 @@ pip3 install -r requirements.txt
 and you'll be good to go.
 
 <h2 id = "environmental-variables">Environmental Variables</h2>
-<p>All the application's related variables such as the secret key, the <a href = "https://pythonhosted.org/Flask-Mail/">Flask Mail's configuration data</a> and <a href = "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow">GitHub's OAuth URLs & app's secrets</a> are securely stored in the virtual environment (not included in this repository for security purposes since personal data are used).</p>
+<p>All the application's related variables such as the secret key, the <a href = "https://pythonhosted.org/Flask-Mail/">Flask Mail's configuration data</a>, <a href = "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow">GitHub's OAuth URLs & app's secrets</a> and <a href = "https://googleapis.github.io/google-api-python-client/">Google's</a> are securely stored in the virtual environment (not included in this repository for security purposes since personal data is used).</p>
 <p>Below a list and explanation of all the used virtual environment's variables.</p>
 <table>
   <tr>
