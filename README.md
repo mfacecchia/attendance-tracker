@@ -4,6 +4,8 @@
 
 <h2>Table of Contents</h2>
 <a href = "#built-in">Built in - Technologies</a><br>
+<a href = "#modules-references">Modules References</a><br>
+<a href = "#importing-modules">Importing modules</a><br>
 <a href = "#environmental-variables">Environmental Variables</a><br>
 <a href = "#db-er">Database Entity Relationship model</a><br>
 <a href = "#app-routes">App Routes</a><br>
@@ -20,7 +22,7 @@
 <img src = "https://img.shields.io/badge/chart.js-F5788D.svg?style=for-the-badge&logo=chart.js&logoColor=white">
 <img src = "https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white">
 
-<h2>Modules References</h2>
+<h2 id = "modules-references">Modules References</h2>
 <h4>Core Functionalities</h4>
 <a href = "https://flask.palletsprojects.com/en/3.0.x/">Flask app</a> |
 <a href = "https://pythonhosted.org/Flask-Mail/">Flask Mail</a> |
@@ -38,6 +40,14 @@
 <h4>Login Methods</h4>
 <a href = "https://docs.authlib.org/en/latest/">Authlib's OAuth</a> |
 <a href = "https://googleapis.github.io/google-api-python-client/docs/oauth.html#flow">Google's OAuth Flow</a>
+
+<h2 id = "importing-modules">Importing modules</h2>
+<p>To quickly import all modules used in this project, a requirements file has been provided so simply execute the following command</p>
+
+```
+pip3 install -r requirements.txt
+```
+and you'll be good to go.
 
 <h2 id = "environmental-variables">Environmental Variables</h2>
 <p>All the application's related variables such as the secret key, the <a href = "https://pythonhosted.org/Flask-Mail/">Flask Mail's configuration data</a> and <a href = "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow">GitHub's OAuth URLs & app's secrets</a> are securely stored in the virtual environment (not included in this repository for security purposes since personal data are used).</p>
