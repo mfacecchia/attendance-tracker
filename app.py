@@ -806,13 +806,6 @@ def select_user():
                                     form = form)
     return redirect(url_for('userScreening'))
 
-@app.route('/user/courses', methods = ['GET'])
-def userEnrolledCourses():
-    '''API returning a list of all selected teacher's enrolled courses\n
-    Takes as parameter the teacher's user id'''
-    selectedUserID = request.args.get('uid')
-    return jsonify(getUserEnrolledCourses(selectedUserID))
-
 @app.route('/user/logout')
 def logout():
     #Checking if session exists before clearing it

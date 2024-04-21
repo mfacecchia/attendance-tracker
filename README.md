@@ -198,10 +198,6 @@ pip3 install -r requirements.txt
     <td>Outputs a form to update chosen user's parameters such as name, surname, enrolled courses, and more (ADMIN user role only). The inputted data is then processed based on the session user role who is making the request; if the user role is ADMIN, then the selected user data will be related to all selected user's information, otherwise, the parameters to update will be just Email and Password if the session user role is STUDENT or TEACHER (in this case, the update request will be processed based on self user's data because only the ADMIN can update other user's parameters). For more information about form validation, the <a href = "https://wtforms.readthedocs.io/en/2.3.x/validators/?highlight=validators#module-wtforms.validators">official flask-wtf documentation</a> will better explain how the whole validation process works.</td>
   </tr>
   <tr>
-    <td>/user/courses</td>
-    <td>Custom API that returns a JSON file about all selected user's enrolled courses. For more information about this API, <a href = "#user-enrolled-courses">this section</a> will better explain the process.</td>
-  </tr>
-  <tr>
     <td>/user/logout</td>
     <td>Clears the user <a href = "https://flask.palletsprojects.com/en/3.0.x/api/#sessions">session</a> and logs the user out of the application.</td>
   </tr>
